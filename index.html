@@ -485,7 +485,7 @@
       // Appended for typed chat and wake-word voice conversations.
       const CHAT_STYLE = [
         '# Response Format',
-        '- Start the very first sentence with the answer itself. No preamble, no "Great question."',
+        '- Start the very first sentence with the answer itself. No preamble, no compliments about the question, no jokes or false starts before the real answer.',
         '- Plain text only: short paragraphs separated by blank lines. No markdown, no bullet points, no headers.',
         '- Use plain language; define necessary technical terms in the same breath.',
         '- Keep answers focused — 2-4 short paragraphs unless the question genuinely requires more.',
@@ -498,16 +498,16 @@
         'You are listening in on a live sales/technical call. A technical question was just asked. The questioner cannot reply to you, so never ask clarifying questions — if the question is ambiguous, answer the most likely interpretation and flag the assumption in one bullet.',
         '',
         '# Response Format — follow exactly',
-        '1. First line: **Bottom line:** followed by a one-sentence direct answer.',
+        '1. The very first characters of your reply must be **Bottom line:** followed by a one-sentence direct answer. Nothing comes before it — no greeting, no preamble, no humor or false starts, no commentary about the question or about yourself.',
         '2. Then 3-7 bullet points, each starting with "- ". One concrete fact, step, or trade-off per bullet. Bold key terms with **double asterisks**. Keep each bullet to one or two short sentences.',
         '3. If steps are needed, use a numbered list ("1.", "2.", ...) instead of bullets for that part.',
         '4. After the bullets, output a line containing exactly: ===SPOKEN===',
-        '5. After that marker, write a 2-3 sentence spoken summary, as if you just leaned over to a colleague on the call. Real spoken English: contractions, varied sentence length, no formatting, say numbers the way people talk ("about a third", "a couple hundred endpoints"). A brief natural lead-in is fine ("Short answer — yes.", "So the way that works is..."), but never "Great question" and never read the bullets back word for word.',
+        '5. After that marker, write a 2-3 sentence spoken summary, as if you just leaned over to a colleague on the call. Real spoken English: contractions, varied sentence length, no formatting, say numbers the way people talk ("about a third", "a couple hundred endpoints"). A brief natural lead-in is fine ("Short answer — yes.", "So the way that works is..."), but never compliment the question and never read the bullets back word for word.',
         '',
-        'Total length before the marker: under 180 words. Never mention searching, docs, or sources anywhere.'
+        'Total length before the marker: under 180 words. Never mention searching, docs, or sources anywhere. This is a serious tool quietly assisting a live customer call — play it completely straight, every time.'
       ].join('\n');
 
-      const DEFAULT_VOICE_PERSONALITY = "Your reply will be spoken aloud, so write it the way you'd actually say it. Keep it to 2-3 short sentences. Use contractions and everyday phrasing, and vary the sentence length — flat, uniform sentences sound robotic. An occasional natural lead-in is good ('Yeah, so...', 'Honestly,', 'Short answer —') but never 'Great question.' Say numbers the way people talk — '120 grand', 'about a third', 'a couple hundred'. No markdown, no lists, no formatting of any kind. Warm, direct, like a colleague answering across the desk.";
+      const DEFAULT_VOICE_PERSONALITY = "Your reply will be spoken aloud, so write it the way you'd actually say it. Keep it to 2-3 short sentences. Use contractions and everyday phrasing, and vary the sentence length — flat, uniform sentences sound robotic. An occasional natural lead-in is good ('Yeah, so...', 'Honestly,', 'Short answer —') but never a compliment about the question. Say numbers the way people talk — '120 grand', 'about a third', 'a couple hundred'. No markdown, no lists, no formatting of any kind. Warm, direct, like a colleague answering across the desk.";
 
       // Classifier gate for overheard utterances.
       const CLASSIFIER_SYSTEM = [
@@ -753,6 +753,28 @@
         return String(text || '').split(/\n?=+\s*SPOKEN\s*=+\s*\n?/i)[0].trim();
       }
 
+      // Assist answers must open with "**Bottom line:**". Models occasionally
+      // ad-lib a fake-out first ("Great question! ... Just kidding. Here's
+      // the real answer:"). Two passes, both anchored so they can't damage
+      // a genuine answer: peel known opener patterns off the start, then if
+      // the bolded Bottom-line marker still sits past the start, cut to it.
+      function sanitizeAssistAnswer(text) {
+        let t = String(text || '').trim();
+        let prev;
+        do {
+          prev = t;
+          t = t
+            .replace(/^\**(?:great|good|excellent|awesome|fantastic) question\b[.!…:]*\**\s*/i, '')
+            .replace(/^let me (?:explain|walk you through|break (?:this|that|it) down)\b[^\n.!?]*[.!?…]*\s*/i, '')
+            .replace(/^just kidding\b[.!,…]*\s*/i, '')
+            .replace(/^(?:here'?s|now for) the (?:real|actual|serious) answer[.!:]*\s*/i, '')
+            .trim();
+        } while (t !== prev);
+        const m = t.match(/\*\*\s*bottom\s+line\s*:?\s*\*\*/i);
+        if (m && m.index > 0 && m.index < 200) t = t.slice(m.index).trim();
+        return t || String(text || '').trim();
+      }
+
       function normalizeHistoryEntry(e) {
         const pairs = Array.isArray(e.pairs) ? e.pairs : [];
         const ts = e.timestamp || 0;
@@ -761,7 +783,7 @@
           session_id: e.session_id || '',
           date: e.date || (ts ? new Date(ts).toLocaleDateString('en-US') : ''),
           timestamp: ts,
-          pairs: pairs.map(p => ({ question: String(p.question || ''), answer: stripSpokenSection(p.answer) })),
+          pairs: pairs.map(p => ({ question: String(p.question || ''), answer: sanitizeAssistAnswer(stripSpokenSection(p.answer)) })),
           preview: (pairs[0] && pairs[0].question ? String(pairs[0].question).substring(0, 120) : '') || (e.preview || '')
         };
       }
@@ -890,8 +912,9 @@
       }
 
       // Tuck the current conversation into History and reset the chat to
-      // empty. The sheet already has every answered Q&A (the proxy saves as
-      // it goes), so this is instant and nothing is lost. Rotating the
+      // empty. The sheet already has every answered Q&A (the client saves
+      // each one in the background), so this is instant and nothing is lost.
+      // Rotating the
       // session id keeps the sheet's grouping in step with the local entry.
       // Returns true when something was actually archived.
       function archiveChatToHistory(slot) {
@@ -2104,6 +2127,27 @@
         return data;
       }
 
+      // Fire-and-forget Q&A save (the proxy's legacy save action). Chat calls
+      // send save:false so the proxy skips its synchronous sheet append —
+      // that append cost ~0.5-2s of SpreadsheetApp time on every answer's
+      // critical path. Saving from here instead happens after the answer is
+      // already on screen. Returns the fetch promise so callers can chain
+      // the history refresh behind the completed save.
+      function postSaveToSheet({ question, answer, sources, model, sessionId }) {
+        if (!GSHEET_WEBHOOK || !question || !answer) return Promise.resolve();
+        return fetch(GSHEET_WEBHOOK, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify({
+            question: question,
+            answer: answer,
+            sources: Array.isArray(sources) ? sources.join(', ') : String(sources || ''),
+            model: model || '',
+            session_id: sessionId || ''
+          })
+        }).catch(err => console.warn('Background save failed:', err));
+      }
+
       // System prompt as a block array so the stable persona prefix is
       // eligible for Anthropic prompt caching.
       function systemBlocks(text) {
@@ -2151,11 +2195,15 @@
 
           // The empty assistant placeholder is already excluded by the
           // content filter inside conversationPayloadMessages.
+          const sessionIdAtSend = SESSION_ID;
           const body = {
             model: viaVoice ? MODELS.voice : MODELS.chat,
             max_tokens: viaVoice ? 300 : 1500,
             system: systemBlocks(systemPrompt),
-            messages: conversationPayloadMessages(slot, 20)
+            messages: conversationPayloadMessages(slot, 20),
+            // Skip the proxy's synchronous sheet append; saved from the
+            // client below, off the answer's critical path.
+            save: false
           };
           if (needsSearch) {
             body.tools = [{ type: SEARCH_TOOL, name: 'web_search', max_uses: viaVoice ? 2 : 3 }];
@@ -2179,7 +2227,14 @@
             processTtsQueue(idx);
           }
 
-          setTimeout(() => fetchHistoryFromSheet({ silent: true }), 600);
+          // Background save (the proxy only saved non-empty replies; mirror that).
+          postSaveToSheet({
+            question: text,
+            answer: reply,
+            sources: data.sources,
+            model: body.model,
+            sessionId: sessionIdAtSend
+          }).then(() => fetchHistoryFromSheet({ silent: true }));
         } catch (err) {
           if (err && err.name === 'AbortError') {
             const placeholder = slot.messages[assistantMsgIdx];
@@ -2246,6 +2301,7 @@
           const tool = { type: SEARCH_TOOL, name: 'web_search', max_uses: ASSIST.SEARCH_MAX_USES };
           if (domains.length) tool.allowed_domains = domains;
 
+          const sessionIdAtSend = SESSION_ID;
           const baseBody = {
             model: MODELS.assist,
             max_tokens: 1100,
@@ -2254,7 +2310,10 @@
             // this field harmlessly.)
             output_config: { effort: 'medium' },
             system: systemBlocks(slot.prompt + '\n\n' + ASSIST_STYLE),
-            messages: prior.concat([{ role: 'user', content: question }])
+            messages: prior.concat([{ role: 'user', content: question }]),
+            // The proxy's synchronous sheet append would sit on the answer's
+            // critical path — skip it and save from the client afterwards.
+            save: false
           };
           let data;
           try {
@@ -2269,7 +2328,7 @@
 
           const { main, spoken } = splitSpoken(String(data.reply || ''));
           const msg = slot.messages[assistantMsgIdx];
-          msg.content = main || 'No response.';
+          msg.content = sanitizeAssistAnswer(main) || 'No response.';
           msg.spoken = spoken;
           if (Array.isArray(data.sources) && data.sources.length) {
             msg.sources = data.sources.slice(0, 6);
@@ -2282,7 +2341,15 @@
           TECH.recentPairs.push({ question, answer: msg.content });
           while (TECH.recentPairs.length > ASSIST.HISTORY_PAIRS) TECH.recentPairs.shift();
 
-          setTimeout(() => fetchHistoryFromSheet({ silent: true }), 600);
+          // Save the raw reply (same text the proxy used to append) in the
+          // background, then refresh history once the row actually exists.
+          postSaveToSheet({
+            question,
+            answer: String(data.reply || ''),
+            sources: data.sources,
+            model: MODELS.assist,
+            sessionId: sessionIdAtSend
+          }).then(() => fetchHistoryFromSheet({ silent: true }));
         } catch (err) {
           if (err && err.name === 'AbortError') {
             const placeholder = slot.messages[assistantMsgIdx];
