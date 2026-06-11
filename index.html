@@ -51,11 +51,9 @@
       .chat-user { background: var(--primary); color: #fff; border-radius: 14px 14px 4px 14px; margin-left: auto; box-shadow: var(--shadow-brand); }
       .chat-bot { background: #fff; color: var(--dark); border: 1px solid var(--divider); border-radius: 4px 14px 14px 14px; box-shadow: var(--shadow-card); }
 
-      /* ===== Markdown answer cards (technical assistance) ===== */
+      /* ===== Markdown answer cards (technical assistance) =====
+         Answers render at full height — the chat panel scrolls, never the bubble. */
       .chat-md { white-space: normal; }
-      .md-scroll { max-height: 360px; overflow-y: auto; overscroll-behavior: contain; padding-right: 4px; }
-      .md-scroll::-webkit-scrollbar { width: 6px; }
-      .md-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
       .chat-md p { margin: 0 0 8px; }
       .chat-md p:last-child { margin-bottom: 0; }
       .chat-md ul, .chat-md ol { margin: 4px 0 10px 4px; padding-left: 16px; }
@@ -180,9 +178,13 @@
       .tts-btn { position: absolute; bottom: 4px; right: 4px; background: transparent; border: none; cursor: pointer; padding: 6px; min-width: 28px; min-height: 28px; border-radius: 4px; color: #94a3b8; transition: color 0.15s, background 0.15s; line-height: 0; }
       .tts-btn:hover { color: #475569; background: rgba(148,163,184,0.12); }
       .tts-btn.playing { color: var(--primary); }
+      .msg-copy { position: absolute; top: 6px; right: 6px; background: rgba(255,255,255,0.85); border: 1px solid #e2e8f0; color: #64748b; padding: 4px; min-width: 26px; min-height: 26px; border-radius: 6px; cursor: pointer; display: grid; place-items: center; transition: opacity 0.12s, background 0.12s, color 0.12s, border-color 0.12s; opacity: 0.55; }
+      .msg-wrap:hover .msg-copy, .msg-copy:focus-visible { opacity: 1; }
+      .msg-copy:hover { background: #fff; color: var(--primary); border-color: var(--primary); }
+      .msg-copy.copied { background: #ecfdf5; border-color: #6ee7b7; color: #047857; opacity: 1; }
+      @media (pointer: coarse) { .msg-copy { opacity: 1; min-width: 32px; min-height: 32px; padding: 6px; } }
 
-      /* ===== Live interim transcript bubble ===== */
-      .interim-bubble { opacity: 0.6; font-style: italic; border: 1px dashed rgba(37,99,235,0.4); background: rgba(37,99,235,0.06) !important; color: #334155 !important; }
+      /* ===== Live transcript caret (voice stage "Hearing live" panel) ===== */
       .interim-caret { display: inline-block; width: 6px; margin-left: 2px; animation: interim-blink 1s steps(2,end) infinite; color: #2563eb; }
       @keyframes interim-blink { 50% { opacity: 0; } }
       @media (prefers-reduced-motion: reduce) { .interim-caret { animation: none; } }
@@ -258,6 +260,13 @@
       .ac-status .acs-dot { width:8px; height:8px; border-radius:50%; background:#34d399; flex-shrink:0; box-shadow: 0 0 0 0 rgba(52,211,153,.55); animation: statusPulse 2s ease-out infinite; }
       .ac-status .acs-dot.thinking { background: var(--cyan-hi); animation: statusPulse 0.9s ease-out infinite; }
       .ac-status .acs-dot.off { background: var(--muted-blue); animation:none; }
+      .ac-live { margin-top:12px; background: rgba(0,0,0,.18); border:1px solid rgba(255,255,255,.12); border-radius:8px; padding:8px 10px; }
+      .ac-live-label { font-size:9.5px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color: var(--muted-blue); display:flex; align-items:center; gap:5px; margin-bottom:4px; }
+      .ac-live-text { font-size:11.5px; line-height:1.45; color:#fff; min-height:30px; word-break:break-word; overflow:hidden; display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; }
+      #live-transcript-text:empty::before { content:'Waiting for speech…'; font-style:italic; color: var(--muted-blue); }
+      .ac-live .interim-caret { color: var(--cyan-hi); }
+      .ac-live .ac-cancel { display:none; margin-top:7px; background:rgba(239,68,68,.18); color:#fca5a5; border:1px solid rgba(239,68,68,.45); border-radius:9999px; font-size:10px; padding:3px 10px; cursor:pointer; font-weight:600; line-height:1; }
+      .ac-live.hearing .ac-cancel { display:inline-flex; }
       .ac-last { margin-top:8px; font-size:10.5px; line-height:1.45; color: var(--muted-blue); padding:0 2px; display:flex; gap:6px; align-items:flex-start; }
       .ac-last .ok { color:#6EE7B7; }
       .ac-last .skip { color: var(--muted-blue); }
@@ -269,9 +278,6 @@
       .conv-sub { font-size:11.5px; color: var(--gray); }
 
       /* Quick-prompt chips on empty state */
-      .qp-row { display:flex; flex-wrap:wrap; gap:8px; justify-content:center; max-width:420px; margin:14px auto 0; }
-      .qp-chip { font-size:12.5px; font-weight:500; color: var(--navy); background:#fff; border:1px solid var(--divider); border-radius:999px; padding:8px 14px; cursor:pointer; transition: all .15s var(--ease); }
-      .qp-chip:hover { border-color: var(--cyan); color: var(--primary); background: var(--quote); }
 
       /* Saved-conversation rail/panel */
       .saved-head { font-size:13px; font-weight:700; color: var(--navy); margin:0; letter-spacing:-0.01em; }
@@ -308,26 +314,6 @@
       }
 
       /* Assist status strip above the message list */
-      .passive-ribbon { padding: 8px 12px; background: linear-gradient(180deg, rgba(0,112,243,0.06), rgba(0,112,243,0.02)); border-top: 1px solid #e2e8f0; border-bottom: 1px solid #e2e8f0; display: flex; flex-direction: column; gap: 6px; }
-      .passive-ribbon .pr-head { display: flex; align-items: center; gap: 8px; font-size: 11px; color: #475569; }
-      .passive-ribbon .pr-label { font-weight: 700; color: var(--navy); letter-spacing: 0.01em; }
-      .passive-ribbon .pr-meta { color: #94a3b8; }
-      .passive-ribbon .pr-spacer { flex: 1; }
-      .passive-ribbon .pr-mute { color: #64748b; display: grid; place-items: center; }
-      .passive-ribbon .pr-dot { width: 8px; height: 8px; border-radius: 50%; background: #10b981; box-shadow: 0 0 0 0 rgba(16,185,129,0.55); animation: passivePulse 2s ease-out infinite; flex-shrink: 0; }
-      .passive-ribbon .pr-dot.thinking { background: var(--primary); animation: passivePulseFast 0.9s ease-out infinite; }
-      @keyframes passivePulse  { 0%{box-shadow:0 0 0 0 rgba(16,185,129,0.55);}70%{box-shadow:0 0 0 8px rgba(16,185,129,0);}100%{box-shadow:0 0 0 0 rgba(16,185,129,0);} }
-      @keyframes passivePulseFast { 0%{box-shadow:0 0 0 0 rgba(0,112,243,0.55);}70%{box-shadow:0 0 0 6px rgba(0,112,243,0);}100%{box-shadow:0 0 0 0 rgba(0,112,243,0);} }
-      @media (prefers-reduced-motion: reduce) { .passive-ribbon .pr-dot { animation: none; } }
-      .passive-ribbon .pr-last, .passive-ribbon .pr-empty { display: flex; align-items: center; gap: 8px; font-size: 11.5px; padding: 4px 6px; border-radius: 6px; line-height: 1.3; }
-      .passive-ribbon .pr-empty { color: #94a3b8; font-style: italic; padding-left: 16px; }
-      .passive-ribbon .pr-last .pr-text { flex: 1; min-width: 0; color: var(--navy); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-      .passive-ribbon .pr-last .pr-conf { font-size: 10px; font-weight: 700; color: #64748b; letter-spacing: 0.04em; flex-shrink: 0; }
-      .passive-ribbon .pr-accepted { background: rgba(16,185,129,0.08); color: #047857; }
-      .passive-ribbon .pr-accepted .pr-text { color: #064e3b; font-weight: 500; }
-      .passive-ribbon .pr-accepted .pr-conf { color: #047857; }
-      .passive-ribbon .pr-skipped { color: #94a3b8; }
-      .passive-ribbon .pr-skipped .pr-text { color: #64748b; }
 
       .menu-toggle-state { margin-left: auto; font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 9999px; background: #f1f5f9; color: #64748b; letter-spacing: 0.04em; }
       .menu-toggle-state.on { background: #d1fae5; color: #047857; }
@@ -439,6 +425,8 @@
         DECISIONS_KEEP: 8,        // ring buffer for the status UI
         MAX_BUFFER_CHARS: 420,    // cap the join buffer so run-on speech still flushes
         MAX_DEFERRALS: 4,         // re-checks while a prior classify/answer is busy
+        INTERIM_FRESH_MS: 1500,   // interim words newer than this mean speech is still flowing
+        INTERIM_RECHECK_MS: 700,  // re-check cadence while waiting for a sentence to finish
         SEARCH_MAX_USES: 2,       // web searches per answer (latency budget)
         HISTORY_PAIRS: 2,         // prior assist Q&A pairs sent as context
         CONV_EXIT_MS: 20000       // follow-up window after a voice answer
@@ -457,6 +445,15 @@
         '- Names trade-offs honestly. Every tool has limits; pretending otherwise burns trust.',
         '- Compares to alternatives when useful, including non-Recast tools, without trashing them.',
         '- Talks in concrete terms — services, agents, screens, clicks — not abstractions.',
+        '',
+        '# How You Talk',
+        'You write the way you would talk to a colleague at their desk, not the way a vendor writes a datasheet:',
+        '- Use contractions naturally — "it\'s", "you\'ll", "doesn\'t", "that\'s". Stiff, uncontracted prose reads as robotic.',
+        '- Vary your rhythm. Mix short punchy sentences with longer ones. Three same-length sentences in a row sounds like a script.',
+        '- Speak in first person where it fits: "I\'d start with...", "what I usually see is...", "honestly, that depends on...".',
+        '- Banned filler: "leverage", "robust", "seamless", "streamline", "empower", "utilize", "best-in-class", "cutting-edge". Say what the thing does instead.',
+        '- Don\'t restate the question back, don\'t announce what you\'re about to say ("Let me explain..."), and don\'t close with a summary of what you just said.',
+        '- It\'s fine to have a take. "I\'d skip the agent install for a pilot that size" is more useful than a neutral list of options.',
         '',
         'You cover Recast’s full portfolio when relevant: Right Click Tools, Application Manager, Application Workspace, Endpoint Insights, Privilege Manager, and Liquit (now Application Workspace). Application Workspace is your home turf and the area you go deepest on.',
         '',
@@ -499,12 +496,12 @@
         '2. Then 3-7 bullet points, each starting with "- ". One concrete fact, step, or trade-off per bullet. Bold key terms with **double asterisks**. Keep each bullet to one or two short sentences.',
         '3. If steps are needed, use a numbered list ("1.", "2.", ...) instead of bullets for that part.',
         '4. After the bullets, output a line containing exactly: ===SPOKEN===',
-        '5. After that marker, write a 2-3 sentence conversational summary of the answer, as if speaking it aloud to a colleague. Natural spoken language, no formatting, say numbers the way people talk.',
+        '5. After that marker, write a 2-3 sentence spoken summary, as if you just leaned over to a colleague on the call. Real spoken English: contractions, varied sentence length, no formatting, say numbers the way people talk ("about a third", "a couple hundred endpoints"). A brief natural lead-in is fine ("Short answer — yes.", "So the way that works is..."), but never "Great question" and never read the bullets back word for word.',
         '',
         'Total length before the marker: under 180 words. Never mention searching, docs, or sources anywhere.'
       ].join('\n');
 
-      const DEFAULT_VOICE_PERSONALITY = "Keep all responses to 2-3 short sentences since they will be spoken aloud. Use natural conversational language. Say numbers the way people talk — like '120 grand' not '$120,000'. Never use markdown, bullet points, or formatting. Be direct and warm.";
+      const DEFAULT_VOICE_PERSONALITY = "Your reply will be spoken aloud, so write it the way you'd actually say it. Keep it to 2-3 short sentences. Use contractions and everyday phrasing, and vary the sentence length — flat, uniform sentences sound robotic. An occasional natural lead-in is good ('Yeah, so...', 'Honestly,', 'Short answer —') but never 'Great question.' Say numbers the way people talk — '120 grand', 'about a third', 'a couple hundred'. No markdown, no lists, no formatting of any kind. Warm, direct, like a colleague answering across the desk.";
 
       // Classifier gate for overheard utterances.
       const CLASSIFIER_SYSTEM = [
@@ -609,6 +606,11 @@
         };
       }
 
+      // Settings is gated behind this password (asked once per page load).
+      // Note: this is a soft lock against casual clicks, not real security —
+      // anyone reading the page source can see it.
+      const SETTINGS_PASSWORD = 'recast2026';
+
       const STATE = {
         activeTab: 'home',
         expandedSlot: null,
@@ -617,6 +619,7 @@
         historyConfirmDeleteId: null,
         composerExpanded: false,
         cardMenuOpen: false,
+        settingsUnlocked: false,
         slots: [makeSlot()]
       };
 
@@ -639,6 +642,7 @@
         playingMsg: null,         // {slot, msg} of the message currently being spoken
         interimText: '',          // live partial transcript
         interimSlot: null,
+        interimAt: 0,             // when the interim transcript last changed
         lastTtsEndAt: 0,          // for the post-playback echo grace window
         ttsPaused: false,         // recognition paused because TTS is playing
         resumeRecognitionId: null,
@@ -659,6 +663,7 @@
         lastSubmitted: '',
         lastSubmittedAt: 0,
         decisions: [],            // ring buffer {text, accepted, confidence, topic, ts}
+        recentPairs: [],          // last assist Q&As — API context that survives chat archiving
         heard: 0,
         answered: 0
       };
@@ -851,9 +856,30 @@
         return pairs;
       }
 
-      // "New chat": tuck the current conversation into History and start
-      // fresh. The sheet already has every answered Q&A (the proxy saves as
-      // it goes), so this is instant and nothing is lost.
+      // Tuck the current conversation into History and reset the chat to
+      // empty. The sheet already has every answered Q&A (the proxy saves as
+      // it goes), so this is instant and nothing is lost. Rotating the
+      // session id keeps the sheet's grouping in step with the local entry.
+      // Returns true when something was actually archived.
+      function archiveChatToHistory(slot) {
+        const pairs = collectPairs(slot);
+        if (!pairs.length) return false;
+        const ts = Date.now();
+        saveLocalHistoryEntry({
+          id: SESSION_ID + '-' + ts,
+          session_id: SESSION_ID,
+          date: new Date(ts).toLocaleDateString('en-US'),
+          timestamp: ts,
+          pairs,
+          preview: pairs[0].question.substring(0, 120)
+        });
+        slot.messages = [];
+        SESSION_ID = genSessionId();
+        setTimeout(() => fetchHistoryFromSheet({ silent: true }), 800);
+        return true;
+      }
+
+      // "New chat": archive and start fresh.
       function newChat() {
         const slot = STATE.slots[0];
         if (slot.abortController) { try { slot.abortController.abort(); } catch {} slot.abortController = null; }
@@ -861,23 +887,13 @@
         if (slot.isSpeaking) stopSpeaking();
         if (VOICE.conversationMode || VOICE.awaitingCommand) exitConversationMode();
         slot.loading = false;
-        const pairs = collectPairs(slot);
-        if (pairs.length) {
-          const ts = Date.now();
-          saveLocalHistoryEntry({
-            id: SESSION_ID + '-' + ts,
-            session_id: SESSION_ID,
-            date: new Date(ts).toLocaleDateString('en-US'),
-            timestamp: ts,
-            pairs,
-            preview: pairs[0].question.substring(0, 120)
-          });
-          setTimeout(() => fetchHistoryFromSheet({ silent: true }), 800);
+        const archived = archiveChatToHistory(slot);
+        if (!archived) {
+          slot.messages = [];
+          SESSION_ID = genSessionId();
         }
-        slot.messages = [];
         slot.inputText = '';
-        SESSION_ID = genSessionId();
-        showToast(pairs.length ? 'New chat — the old one is saved in History' : 'New chat');
+        showToast(archived ? 'New chat — the old one is saved in History' : 'New chat');
         render();
       }
 
@@ -893,7 +909,9 @@
               method: 'POST',
               mode: 'no-cors',
               headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ action: 'delete_history', id, session_id: entry ? entry.session_id : id.split('-')[0] })
+              // Entry ids are session_id + '-' + timestamp, and session ids
+              // contain hyphens themselves — strip only the trailing timestamp.
+              body: JSON.stringify({ action: 'delete_history', id, session_id: entry ? entry.session_id : id.replace(/-\d+$/, '') })
             });
           } catch (err) {
             console.warn('Remote delete failed:', err);
@@ -1013,6 +1031,29 @@
         return s.substring(0, 300);
       }
 
+      // Copy text to the clipboard with a toast + brief "copied" state on btn.
+      function copyTextToClipboard(text, btn) {
+        const done = () => {
+          showToast('Answer copied');
+          if (btn) {
+            btn.classList.add('copied');
+            setTimeout(() => btn.classList.remove('copied'), 1200);
+          }
+        };
+        const fail = () => showToast('Copy failed');
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(text).then(done).catch(fail);
+        } else {
+          try {
+            const ta = document.createElement('textarea');
+            ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0';
+            document.body.appendChild(ta); ta.select();
+            document.execCommand('copy'); document.body.removeChild(ta);
+            done();
+          } catch { fail(); }
+        }
+      }
+
       function hostnameOf(url) {
         try { return new URL(url).hostname.replace(/^www\./, ''); } catch { return url; }
       }
@@ -1060,21 +1101,62 @@
 
       const TTS_STATE = { speakingSlot: null };
 
+      // Rank voices by how human they sound. Modern neural voices ("Natural",
+      // "Online", Google's hosted voices) beat the legacy desktop synths by a
+      // mile, so quality outranks gender — a natural-sounding voice that isn't
+      // deep still sounds far less robotic than a deep legacy one.
+      function scoreVoice(v) {
+        let s = 0;
+        if (/\b(natural|neural)\b/i.test(v.name)) s += 16;
+        if (/\b(premium|enhanced|plus)\b/i.test(v.name)) s += 10;
+        if (/\bonline\b/i.test(v.name)) s += 6;
+        if (/google/i.test(v.name)) s += 6;
+        if (/\b(andrew|brian|christopher|guy|davis|roger|steffan|ryan|aaron|david|daniel|alex|tom|mark|eric|fred|george|james)\b/i.test(v.name)) s += 3;
+        if (/male/i.test(v.name) && !/female/i.test(v.name)) s += 3;
+        if (/female|\b(zira|susan|hazel|samantha|victoria|karen|moira|tessa|fiona|jenny|aria|michelle|sonia|libby|emma|ava|clara|ana)\b/i.test(v.name)) s -= 4;
+        if (/^en[-_]us/i.test(v.lang)) s += 2;
+        if (/desktop/i.test(v.name)) s -= 2;
+        return s;
+      }
+
       function pickDeepVoice() {
         if (!VOICE.ttsSupported) return null;
         const voices = window.speechSynthesis.getVoices() || [];
         if (voices.length === 0) return null;
         const enVoices = voices.filter(v => /^en(-|_|$)/i.test(v.lang));
         const pool = enVoices.length ? enVoices : voices;
-        return pool.find(v => /male/i.test(v.name))
-            || pool.find(v => /\b(david|daniel|alex|tom|mark|eric|fred|george|james|guy)\b/i.test(v.name))
-            || pool.find(v => /google us english/i.test(v.name))
-            || pool[0];
+        return pool.slice().sort((a, b) => scoreVoice(b) - scoreVoice(a))[0];
+      }
+
+      // Rewrites text the way a person would actually say it, so the speech
+      // engine doesn't trip over notation it reads literally or mispronounces.
+      function prepareForSpeech(text) {
+        return String(text || '')
+          .replace(/https?:\/\/([^\s\/]+)\S*/gi, '$1')  // out loud, a URL is just its hostname
+          .replace(/\bConfigMgr\b/gi, 'Config Manager')
+          .replace(/\bSCCM\b/g, 'S C C M')              // engines say "seck-em"
+          .replace(/\bMECM\b/g, 'M E C M')
+          .replace(/\be\.g\.,?\s*/gi, 'for example, ')
+          .replace(/\bi\.e\.,?\s*/gi, 'that is, ')
+          .replace(/\betc\.(\s|$)/gi, 'and so on$1')
+          .replace(/\bvs\.?(\s|$)/gi, 'versus$1')
+          .replace(/(\w)\s*\/\s*(\w)/g, '$1 or $2')     // "Intune/ConfigMgr"
+          .replace(/\s*&\s*/g, ' and ')
+          .replace(/\s+[—–]\s+/g, ', ')                 // dashes don't pause; commas do
+          .replace(/\s*\(\s*/g, ', ')
+          .replace(/\s*\)\s*([.,;:!?])?/g, (m, p) => (p || ',') + ' ')
+          .replace(/\s{2,}/g, ' ')
+          .trim();
       }
 
       // True while Randy is speaking OR within the tail window after speech
       // ends — the speaker keeps producing audio briefly after onend fires.
       const TTS_ECHO_GRACE_MS = 1200;
+      // Echo text-matching only applies while Randy's audio is playing or
+      // shortly after it stops (speaker → mic → ASR adds a few seconds of
+      // lag). Beyond that, overlap with shared vocabulary — product names
+      // come up in every question — must not swallow genuine speech.
+      const TTS_ECHO_TEXT_WINDOW_MS = 8000;
       function ttsEchoActive() {
         if (STATE.slots.some(s => s.isSpeaking)) return true;
         if (VOICE.ttsPaused) return true;
@@ -1100,6 +1182,7 @@
         const n = normalizeForEcho(text);
         if (!n || n.length < 4) return false;
         if (!VOICE.recentTtsText) return false;
+        if (!ttsEchoActive() && (Date.now() - VOICE.lastTtsEndAt) > TTS_ECHO_TEXT_WINDOW_MS) return false;
         if (VOICE.recentTtsText.indexOf(n) !== -1) return true;
         const words = n.split(' ').filter(w => w.length >= 3);
         if (words.length < 2) return false;
@@ -1207,7 +1290,7 @@
       }
 
       function playTtsChunk(idx, q, text) {
-        const clean = stripMarkdown(text);
+        const clean = prepareForSpeech(stripMarkdown(text));
         if (!clean) return Promise.resolve();
         if (!VOICE.ttsSupported) return Promise.resolve();
         return new Promise((resolve) => {
@@ -1216,8 +1299,11 @@
           const u = new SpeechSynthesisUtterance(clean);
           const v = pickDeepVoice();
           if (v) u.voice = v;
-          u.pitch = 0.85;
-          u.rate = 0.95;
+          // Neural voices are tuned at their defaults; bending pitch is what
+          // made the old output sound synthetic. A whisper-faster rate reads
+          // as engaged rather than narrated.
+          u.pitch = 1.0;
+          u.rate = 1.04;
           appendRecentTts(clean);
           pauseRecognitionForTts();
           slot.isSpeaking = true;
@@ -1241,7 +1327,7 @@
 
       function speakText(text, idx, msgIdx) {
         if (!VOICE.ttsSupported) return;
-        const clean = stripMarkdown(text);
+        const clean = prepareForSpeech(stripMarkdown(text));
         if (!clean) return;
         STATE.slots.forEach((_, i) => teardownTtsQueue(i));
         try { window.speechSynthesis.cancel(); } catch {}
@@ -1249,8 +1335,8 @@
         const u = new SpeechSynthesisUtterance(clean);
         const v = pickDeepVoice();
         if (v) u.voice = v;
-        u.pitch = 0.85;
-        u.rate = 0.95;
+        u.pitch = 1.0;
+        u.rate = 1.04;
         u.onstart = () => {
           STATE.slots[idx].isSpeaking = true;
           TTS_STATE.speakingSlot = idx;
@@ -1610,12 +1696,24 @@
       }
 
       /* ================================================================
-       * INTERIM TRANSCRIPT (live preview bubble)
+       * INTERIM TRANSCRIPT (live "Hearing live" panel on the voice stage)
        * ================================================================ */
 
       function interimTargetSlot() {
         if (VOICE.activeSlot !== null && VOICE.awaitingCommand) return VOICE.activeSlot;
         return listeningOn() ? 0 : null;
+      }
+
+      // Patch the stage panel's transcript text in place when it's mounted;
+      // fall back to a render only when it isn't (e.g. listening just turned
+      // on). Returns true when the cheap path worked.
+      function patchLiveTranscript(text) {
+        const wrap = document.getElementById('live-transcript');
+        const span = document.getElementById('live-transcript-text');
+        if (!wrap || !span) return false;
+        span.textContent = text;
+        wrap.classList.toggle('hearing', !!text);
+        return true;
       }
 
       function updateInterim(text) {
@@ -1631,13 +1729,9 @@
         const prevSlot = VOICE.interimSlot;
         VOICE.interimText = trimmed;
         VOICE.interimSlot = target;
+        VOICE.interimAt = Date.now();
 
-        // Cheap path: patch the existing node's text in place.
-        const existing = document.getElementById('interim-bubble-' + target);
-        if (existing && prevSlot === target) {
-          const span = existing.querySelector('.interim-text');
-          if (span) { span.textContent = trimmed; return; }
-        }
+        if (patchLiveTranscript(trimmed)) return;
         // One render to mount the node — but never while the user is typing,
         // since render() rebuilds the DOM and would steal composer focus.
         if (prevText !== trimmed || prevSlot !== target) {
@@ -1655,6 +1749,7 @@
         if (!VOICE.interimText && VOICE.interimSlot === null) return;
         VOICE.interimText = '';
         VOICE.interimSlot = null;
+        if (patchLiveTranscript('')) return;
         if (!isComposerFocused()) render();
       }
 
@@ -1747,6 +1842,18 @@
         const slot = STATE.slots[0];
         if (!slot.listenOn) { clearAssistBuffer(); return; }
         const candidate = TECH.buffer.trim();
+
+        // The speaker is still mid-sentence (fresh interim words are
+        // arriving) — hold the flush so the question isn't cut off halfway.
+        // The final transcript re-arms the timer when it lands; bounded so
+        // a stale interim can't stall the pipeline.
+        if (VOICE.interimText &&
+            Date.now() - VOICE.interimAt < ASSIST.INTERIM_FRESH_MS &&
+            TECH.deferrals < ASSIST.MAX_DEFERRALS) {
+          TECH.deferrals++;
+          TECH.bufferTimerId = setTimeout(flushAssistBuffer, ASSIST.INTERIM_RECHECK_MS);
+          return;
+        }
 
         // Busy with a previous classify/answer — defer briefly so we don't
         // pile up; give up after a few tries to stay current with the call.
@@ -2019,6 +2126,15 @@
         if (slot.loading) return;
         slot.loading = true;
 
+        // Every auto-answered question starts a visually fresh chat: the
+        // previous Q&A slides into Saved Conversations so the panel always
+        // shows just the question being answered now. Follow-up context is
+        // preserved separately in TECH.recentPairs.
+        if (collectPairs(slot).length) {
+          if (slot.isSpeaking) stopSpeaking();
+          archiveChatToHistory(slot);
+        }
+
         slot.messages.push({ role: 'user', content: question, kind: 'assist-q' });
         const controller = new AbortController();
         slot.abortController = controller;
@@ -2031,16 +2147,13 @@
         try {
           // Context: the last few assist Q&A pairs keep follow-up questions
           // coherent ("and what about Intune?") without dragging latency.
+          // Pulled from TECH.recentPairs, not the chat — the chat is archived
+          // to History before each new question.
           const prior = [];
-          const msgs = slot.messages;
-          for (let i = 0; i < msgs.length - 2 && prior.length < ASSIST.HISTORY_PAIRS * 2; i++) {
-            const m = msgs[msgs.length - 3 - i];
-            if (!m || !m.content) continue;
-            if (m.kind === 'assist' || m.kind === 'assist-q') prior.unshift({ role: m.role, content: m.content });
+          for (const p of TECH.recentPairs.slice(-ASSIST.HISTORY_PAIRS)) {
+            prior.push({ role: 'user', content: p.question });
+            prior.push({ role: 'assistant', content: p.answer });
           }
-          // The API requires the first message to be a user turn; the cap can
-          // slice a pair in half, leaving a leading assistant message.
-          while (prior.length && prior[0].role !== 'user') prior.shift();
 
           const domains = (slot.allowedDomains || []).filter(Boolean);
           const tool = { type: SEARCH_TOOL, name: 'web_search', max_uses: ASSIST.SEARCH_MAX_USES };
@@ -2079,6 +2192,8 @@
             speakText(spoken, idx, assistantMsgIdx);
           }
           TECH.answered++;
+          TECH.recentPairs.push({ question, answer: msg.content });
+          while (TECH.recentPairs.length > ASSIST.HISTORY_PAIRS) TECH.recentPairs.shift();
 
           setTimeout(() => fetchHistoryFromSheet({ silent: true }), 600);
         } catch (err) {
@@ -2184,8 +2299,8 @@
                 <button class="tab-btn ${STATE.activeTab==='home'?'active':''}" data-action="switch-tab" data-tab="home">
                   <i data-lucide="messages-square" class="w-4 h-4"></i> Chat
                 </button>
-                <button class="tab-btn ${STATE.activeTab==='settings'?'active':''}" data-action="switch-tab" data-tab="settings">
-                  <i data-lucide="settings" class="w-4 h-4"></i> Settings
+                <button class="tab-btn ${STATE.activeTab==='settings'?'active':''}" data-action="switch-tab" data-tab="settings" title="Settings" aria-label="Settings">
+                  <i data-lucide="settings" class="w-4 h-4"></i>
                 </button>
               </div>
             </div>
@@ -2274,6 +2389,7 @@
       function renderListenCard(slot) {
         const on = !!slot.listenOn;
         const last = TECH.decisions[TECH.decisions.length - 1];
+        const inConvo = VOICE.awaitingCommand || VOICE.conversationMode;
         const statusLine = !on ? ''
           : TECH.pending
             ? 'Checking a question…'
@@ -2290,6 +2406,11 @@
               <div class="ac-status">
                 <span class="acs-dot ${TECH.pending ? 'thinking' : ''}"></span>
                 <span>${escHtml(statusLine)}</span>
+              </div>
+              <div class="ac-live ${VOICE.interimText ? 'hearing' : ''}" id="live-transcript">
+                <div class="ac-live-label"><i data-lucide="audio-lines" class="w-3 h-3"></i>Hearing live</div>
+                <div class="ac-live-text"><span id="live-transcript-text">${escHtml(VOICE.interimText || '')}</span><span class="interim-caret">▊</span></div>
+                ${inConvo ? `<button class="ac-cancel" title="Cancel — don't send this" data-action="cancel-pending" data-idx="0">Cancel</button>` : ''}
               </div>
               ${last ? `
                 <div class="ac-last">
@@ -2390,16 +2511,16 @@
         if (m.kind === 'assist') {
           const srcs = Array.isArray(m.sources) ? m.sources : [];
           return `
-            <div class="msg-wrap"><div class="chat-bubble chat-bot chat-md" style="padding-right:30px;white-space:normal">
+            <div class="msg-wrap"><div class="chat-bubble chat-bot chat-md" style="padding-right:38px;white-space:normal">
               <div class="assist-badge"><i data-lucide="ear" class="w-3 h-3"></i>Technical assist</div>
-              <div class="md-scroll">${mdToHtml(m.content)}</div>
+              ${mdToHtml(m.content)}
               ${srcs.length ? `<div class="src-chips">${srcs.map(u => `
                 <a href="${escAttr(u)}" target="_blank" rel="noopener noreferrer" title="${escAttr(u)}">
                   <i data-lucide="link" class="w-3 h-3"></i>${escHtml(hostnameOf(u))}
                 </a>`).join('')}</div>` : ''}
-            </div>${speakerBtnHtml(slotIdx, mi)}</div>`;
+            </div>${copyBtnHtml(slotIdx, mi)}${speakerBtnHtml(slotIdx, mi)}</div>`;
         }
-        return `<div class="msg-wrap"><div class="chat-bubble chat-bot" style="padding-right:28px">${escHtml(m.content).replace(/\n/g, '<br>')}</div>${speakerBtnHtml(slotIdx, mi)}</div>`;
+        return `<div class="msg-wrap"><div class="chat-bubble chat-bot" style="padding-right:38px">${escHtml(m.content).replace(/\n/g, '<br>')}</div>${copyBtnHtml(slotIdx, mi)}${speakerBtnHtml(slotIdx, mi)}</div>`;
       }
 
       function renderUserMessage(m) {
@@ -2409,62 +2530,16 @@
         return `<div class="chat-bubble chat-user">${badge}${escHtml(m.content)}</div>`;
       }
 
+      function copyBtnHtml(slotIdx, msgIdx) {
+        return `<button class="msg-copy" title="Copy answer" aria-label="Copy answer" data-action="copy-msg" data-slot="${slotIdx}" data-msg="${msgIdx}"><i data-lucide="copy" class="w-3 h-3"></i></button>`;
+      }
+
       function speakerBtnHtml(slotIdx, msgIdx) {
         if (!VOICE.ttsSupported) return '';
         const isPlayingThis = !!(VOICE.playingMsg && VOICE.playingMsg.slot === slotIdx && VOICE.playingMsg.msg === msgIdx);
         const icon = isPlayingThis ? 'volume-x' : 'volume-2';
         const title = isPlayingThis ? 'Stop' : 'Speak';
         return `<button class="tts-btn ${isPlayingThis ? 'playing' : ''}" title="${title}" aria-label="${title}" data-action="tts-speak" data-slot="${slotIdx}" data-msg="${msgIdx}"><i data-lucide="${icon}" class="w-3 h-3"></i></button>`;
-      }
-
-      function interimBubbleHtml(slotIdx, expanded) {
-        if (!VOICE.wantRunning || !VOICE.interimText) return '';
-        if (VOICE.interimSlot !== slotIdx) return '';
-        const slot = STATE.slots[slotIdx];
-        if (!slot || !slot.listenOn) return '';
-        const inConvo = VOICE.awaitingCommand || VOICE.conversationMode;
-        const assistMode = !inConvo;
-        if (inConvo && ttsEchoActive()) return '';
-        const fontSize = expanded ? '' : 'font-size:11px;padding:6px 10px;';
-        const cancelSize = expanded ? 'font-size:11px;padding:4px 10px;' : 'font-size:10px;padding:3px 8px;';
-        return `
-          <div class="flex justify-end items-center gap-2" id="interim-bubble-${slotIdx}">
-            ${assistMode ? '' : `
-            <button title="Cancel — don't send this" data-action="cancel-pending" data-idx="${slotIdx}"
-              style="background:rgba(239,68,68,0.08);color:#ef4444;border:1px solid rgba(239,68,68,0.35);border-radius:9999px;${cancelSize}cursor:pointer;font-weight:600;line-height:1">
-              Cancel
-            </button>`}
-            <div class="chat-bubble chat-user interim-bubble" style="${fontSize}max-width:70%">
-              <span class="interim-text">${escHtml(VOICE.interimText)}</span><span class="interim-caret">▊</span>
-            </div>
-          </div>`;
-      }
-
-      // Thin status strip above the message list while tech assist is on.
-      function renderAssistRibbon(idx) {
-        const slot = STATE.slots[idx];
-        const last = TECH.decisions[TECH.decisions.length - 1];
-        return `
-          <div class="passive-ribbon">
-            <div class="pr-head">
-              <span class="pr-dot ${TECH.pending ? 'thinking' : ''}"></span>
-              <span class="pr-label">Randy is listening</span>
-              <span class="pr-meta">${TECH.answered} answered / ${TECH.heard} heard</span>
-              <span class="pr-spacer"></span>
-              <span class="pr-mute" title="${slot.speakAnswers ? 'Randy reads answers out loud' : 'Answers show in the chat only'}">
-                <i data-lucide="${slot.speakAnswers ? 'volume-2' : 'volume-x'}" class="w-3 h-3"></i>
-              </span>
-            </div>
-            ${last ? `
-              <div class="pr-last ${last.accepted ? 'pr-accepted' : 'pr-skipped'}" title="${last.accepted ? 'Randy heard a technical question and answered it' : 'Heard, but not a technical question — skipped'}">
-                <i data-lucide="${last.accepted ? 'check' : 'minus'}" class="w-3 h-3"></i>
-                <span class="pr-text">${escHtml(truncate(last.text, 90))}</span>
-                <span class="pr-conf">${Math.round((last.confidence || 0) * 100)}%</span>
-              </div>
-            ` : `
-              <div class="pr-empty">Waiting for a technical question…</div>
-            `}
-          </div>`;
       }
 
       function renderCard(slot, idx) {
@@ -2515,18 +2590,12 @@
                 </div>
               ` : ''}
             </div>
-            ${slot.listenOn ? renderAssistRibbon(idx) : ''}
             <div id="home-scroll-${idx}" class="flex-1 overflow-y-auto px-4 py-4 flex flex-col gap-3" style="background:var(--row);min-height:0">
               ${msgs.length === 0 ? `
                 <div class="flex-1 flex items-center justify-center">
                   <div class="text-center" style="max-width:340px">
                     <div style="width:46px;height:46px;border-radius:12px;background:var(--quote);display:grid;place-items:center;margin:0 auto 14px"><i data-lucide="message-square-text" class="w-5 h-5" style="color:var(--primary)"></i></div>
-                    <div style="font-size:13.5px;color:var(--gray);line-height:1.6">Tap the <b style="color:var(--navy)">mic button</b> and Randy listens for tech questions and answers them here. You can also type a question below, or say <b style="color:var(--navy)">“Hey ${escHtml(slot.voiceName || slot.label)}”</b>.</div>
-                    <div class="qp-row">
-                      <button class="qp-chip" data-action="quick-prompt" data-q="What is Application Workspace and how is it different from Application Manager?">What is Application Workspace?</button>
-                      <button class="qp-chip" data-action="quick-prompt" data-q="How does Application Workspace deploy apps to Intune-managed devices?">App delivery with Intune</button>
-                      <button class="qp-chip" data-action="quick-prompt" data-q="How do Right Click Tools help with ConfigMgr device management?">Right Click Tools + ConfigMgr</button>
-                    </div>
+                    <div style="font-size:13.5px;color:var(--gray);line-height:1.6">Tap the <b style="color:var(--navy)">mic button</b> and Randy listens for tech questions and answers them here.</div>
                   </div>
                 </div>
               ` : msgs.map((m, mi) => `
@@ -2534,7 +2603,6 @@
                   ${m.role==='user' ? renderUserMessage(m) : renderBotMessage(slot, m, mi, idx)}
                 </div>
               `).join('')}
-              ${interimBubbleHtml(idx, false)}
               ${slot.loading?'<div class="flex justify-start"><div class="chat-bot" style="padding:10px 14px;border-radius:14px"><span class="typing-dot"></span> <span class="typing-dot"></span> <span class="typing-dot"></span></div></div>':''}
             </div>
             <div class="action-bar">
@@ -2677,7 +2745,6 @@
                   ${m.role==='user' ? renderUserMessage(m) : renderBotMessage(slot, m, mi, idx)}
                 </div>
               `).join('')}
-              ${interimBubbleHtml(idx, true)}
               ${slot.loading?`<div class="flex justify-start"><div class="w-7 h-7 rounded-full grid place-items-center text-white text-xs font-bold flex-shrink-0 mr-2 mt-1" style="background:var(--primary)">${escHtml(slot.label.charAt(0))}</div><div class="chat-bubble chat-bot"><span class="typing-dot"></span> <span class="typing-dot"></span> <span class="typing-dot"></span></div></div>`:''}
             </div>
             <div class="chat-input-row flex-shrink-0">
@@ -2759,9 +2826,16 @@
 
                 ${VOICE.ttsSupported ? `
                   <div>
-                    <label class="block text-[11px] font-semibold text-slate-500 uppercase tracking-wide mb-1">Available Speech Voices <span class="text-slate-400 normal-case">(picked automatically — prefers deep male)</span></label>
+                    <label class="block text-[11px] font-semibold text-slate-500 uppercase tracking-wide mb-1">Available Speech Voices <span class="text-slate-400 normal-case">(picked automatically — prefers natural-sounding voices)</span></label>
                     <select id="setting-voice-list" disabled style="opacity:0.85;width:100%;padding:10px 14px;border:2px solid #e2e8f0;border-radius:10px;font-size:14px">
-                      ${(window.speechSynthesis.getVoices() || []).filter(v => /^en(-|_|$)/i.test(v.lang)).map(v => `<option>${escHtml(v.name)} — ${escHtml(v.lang)}</option>`).join('') || '<option>(voices will load after first click)</option>'}
+                      ${(() => {
+                        const picked = pickDeepVoice();
+                        const opts = (window.speechSynthesis.getVoices() || [])
+                          .filter(v => /^en(-|_|$)/i.test(v.lang))
+                          .map(v => `<option${picked && v.name === picked.name ? ' selected' : ''}>${escHtml(v.name)} — ${escHtml(v.lang)}${picked && v.name === picked.name ? ' (in use)' : ''}</option>`)
+                          .join('');
+                        return opts || '<option>(voices will load after first click)</option>';
+                      })()}
                     </select>
                     <button class="btn-outline" style="font-size:11px;padding:5px 12px;margin-top:8px" data-action="preview-voice" data-idx="${es}">
                       <i data-lucide="play" class="w-3 h-3 inline mr-1"></i> Preview Voice
@@ -2819,7 +2893,18 @@
           if (STATE.cardMenuOpen && action !== 'toggle-card-menu') STATE.cardMenuOpen = false;
 
           switch (action) {
-            case 'switch-tab': STATE.activeTab = act.dataset.tab; render(); break;
+            case 'switch-tab': {
+              const tab = act.dataset.tab;
+              if (tab === 'settings' && !STATE.settingsUnlocked) {
+                const entered = window.prompt('Enter the settings password:');
+                if (entered === null) break;
+                if (entered !== SETTINGS_PASSWORD) { showToast('Wrong password'); break; }
+                STATE.settingsUnlocked = true;
+              }
+              STATE.activeTab = tab;
+              render();
+              break;
+            }
             case 'toggle-history': STATE.historyOpen = !STATE.historyOpen; render(); break;
             case 'refresh-history': fetchHistoryFromSheet(); break;
             case 'toggle-composer': {
@@ -2848,13 +2933,6 @@
               const inp = document.getElementById('home-input-' + idx);
               if (inp) STATE.slots[idx].inputText = inp.value;
               sendMessage(idx);
-              break;
-            }
-            case 'quick-prompt': {
-              const slot = STATE.slots[0];
-              if (slot.loading) break;
-              slot.inputText = act.dataset.q || '';
-              sendMessage(0);
               break;
             }
             case 'toggle-listen': toggleListening(); break;
@@ -2891,7 +2969,7 @@
             }
             case 'preview-voice': {
               if (STATE.activeTab === 'settings') readFields();
-              speakText('Hello! This is how I sound.', idx !== null ? idx : 0);
+              speakText("Hey, it's Randy. This is how I'll sound when I answer out loud.", idx !== null ? idx : 0);
               break;
             }
             case 'save-settings': {
@@ -2942,25 +3020,16 @@
               const h = getHistory().find(x => x.id === act.dataset.id);
               const pi = parseInt(act.dataset.pair, 10);
               if (!h || !h.pairs[pi]) break;
-              const text = h.pairs[pi].answer || '';
-              const btn = act;
-              const done = () => {
-                showToast('Answer copied');
-                btn.classList.add('copied');
-                setTimeout(() => btn.classList.remove('copied'), 1200);
-              };
-              const fail = () => showToast('Copy failed');
-              if (navigator.clipboard && navigator.clipboard.writeText) {
-                navigator.clipboard.writeText(text).then(done).catch(fail);
-              } else {
-                try {
-                  const ta = document.createElement('textarea');
-                  ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0';
-                  document.body.appendChild(ta); ta.select();
-                  document.execCommand('copy'); document.body.removeChild(ta);
-                  done();
-                } catch { fail(); }
-              }
+              copyTextToClipboard(h.pairs[pi].answer || '', act);
+              break;
+            }
+            case 'copy-msg': {
+              const slot = STATE.slots[parseInt(act.dataset.slot, 10)];
+              const m = slot && slot.messages[parseInt(act.dataset.msg, 10)];
+              if (!m || !m.content) break;
+              // Plain text, not markdown source — pastes cleanly into
+              // chat/email mid-call.
+              copyTextToClipboard(stripMarkdown(m.content), act);
               break;
             }
             case 'noop': break;
