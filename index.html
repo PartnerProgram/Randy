@@ -6,53 +6,234 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700;9..40,800&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
-      :root {
-        --bg-main: #F7F8FC;
-        --primary: #0000CC;          /* Recast primary blue */
-        --primary-hover: #00009E;
-        --navy: #141B4D;             /* deep navy for headings */
-        --cyan: #00BFFF;             /* Recast accent cyan */
-        --cyan-hi: #33CCFF;
-        --decorator: #2222DD;        /* "+" texture on blue */
-        --dark: #1A1A2E;
-        --gray: #4A4A5A;
-        --muted-blue: #AABBEE;
-        --light: #F0F0F6;
-        --row: #FAFAFE;
-        --quote: #F6F8FF;
-        --divider: #DDDDEE;
-        --brand-green: #0F7A3F;
-        --radius: 14px;
-        --radius-sm: 8px;
-        --shadow-card: 0 1px 2px rgba(26,26,46,0.05), 0 1px 3px rgba(26,26,46,0.05);
-        --shadow-hover: 0 12px 32px rgba(26,26,46,0.12), 0 3px 10px rgba(26,26,46,0.06);
-        --shadow-brand: 0 16px 40px rgba(0,0,204,0.20);
-        --ease: cubic-bezier(.2,.8,.2,1);
-      }
-      html, body { background: var(--bg-main); color: var(--dark); font-family: Inter, system-ui, sans-serif; }
-      .card { border-radius: var(--radius); background: #fff; border: 1px solid var(--divider); box-shadow: var(--shadow-card); }
-      .btn-primary { background: var(--primary); color: #fff; border: none; border-radius: 8px; padding: 10px 18px; min-height: 40px; font-weight: 600; font-size: 13px; cursor: pointer; transition: background 0.2s; }
-      .btn-primary:hover { background: var(--primary-hover); }
-      .btn-outline { background: transparent; color: var(--navy); border: 2px solid var(--navy); border-radius: 8px; padding: 8px 16px; min-height: 40px; font-weight: 600; font-size: 13px; cursor: pointer; transition: all 0.2s; }
-      .btn-outline:hover { color: var(--primary); border-color: var(--primary); }
-      .btn-danger { background: transparent; color: #ef4444; border: 2px solid #ef4444; border-radius: 8px; padding: 8px 16px; min-height: 40px; font-weight: 600; font-size: 13px; cursor: pointer; transition: all 0.2s; }
-      .btn-danger:hover { background: #ef4444; color: #fff; }
-      input[type="text"], input[type="password"], textarea {
-        width: 100%; padding: 10px 14px; border: 2px solid #e2e8f0; border-radius: 10px;
-        font-size: 14px; font-weight: 500; color: var(--navy); background: #fff; outline: none; transition: border-color 0.2s, box-shadow 0.2s;
-      }
-      input:focus, textarea:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(0,112,243,0.1); }
-      textarea { resize: vertical; min-height: 80px; }
-      .chat-bubble { padding: 10px 14px; border-radius: 12px; font-size: 14px; line-height: 1.5; word-wrap: break-word; white-space: pre-wrap; }
-      .chat-user { background: var(--primary); color: #fff; border-radius: 14px 14px 4px 14px; margin-left: auto; box-shadow: var(--shadow-brand); }
-      .chat-bot { background: #fff; color: var(--dark); border: 1px solid var(--divider); border-radius: 4px 14px 14px 14px; box-shadow: var(--shadow-card); }
 
-      /* ===== Markdown answer cards (technical assistance) =====
-         Answers render at full height — the chat panel scrolls, never the bubble. */
+      :root {
+        /* Recast design tokens */
+        --navy: #1F289C;
+        --navy-deep: #161F5B;
+        --primary: #0372FF;
+        --primary-hover: #0262DB;
+        --primary-press: #014BAC;
+        --cyan: #31D1FF;
+        --cyan-hi: #7FE3FF;
+        --dark: #161F5B;
+        --gray: #4D5878;
+        --muted-blue: #AAB6E8;
+        --quote: #F0F6FF;
+        --divider: #DCE2EC;
+        --n25: #FBFCFE;
+        --n50: #F5F7FB;
+        --n100: #EDF0F7;
+        --n200: #DCE2EC;
+        --n300: #C3CBDC;
+        --n400: #97A2BB;
+        --n500: #6B7693;
+        --n600: #4D5878;
+        --brand-green: #0F7A3F;
+        --radius: 16px;
+        --radius-sm: 10px;
+        --shadow-card: 0 2px 6px rgba(22,31,91,0.08);
+        --shadow-hover: 0 8px 24px rgba(22,31,91,0.10);
+        --shadow-brand: 0 8px 24px rgba(3,114,255,0.22);
+        --focus-ring: 0 0 0 4px rgba(3,114,255,0.25);
+        --ease: cubic-bezier(.16,1,.3,1);
+      }
+      html, body { height: 100%; background: var(--n50); color: var(--dark); font-family: 'DM Sans', system-ui, sans-serif; }
+      body { margin: 0; overflow: hidden; }
+      #app { height: 100dvh; }
+      * { scrollbar-width: thin; scrollbar-color: var(--n300) transparent; }
+      *::-webkit-scrollbar { width: 8px; height: 8px; }
+      *::-webkit-scrollbar-thumb { background: var(--n300); border-radius: 4px; }
+      *::-webkit-scrollbar-track { background: transparent; }
+
+      button { font-family: inherit; }
+      :is(button, [role="button"], [role="switch"]):focus-visible { outline: none; box-shadow: var(--focus-ring); }
+
+      /* ===== Base form fields (settings) ===== */
+      input[type="text"], input[type="password"], textarea {
+        width: 100%; padding: 10px 14px; border: 1.5px solid var(--n200); border-radius: var(--radius-sm);
+        font-size: 14px; font-weight: 500; color: var(--navy-deep); background: #fff; outline: none;
+        transition: border-color 0.2s, box-shadow 0.2s; font-family: inherit;
+      }
+      input:focus, textarea:focus { border-color: var(--primary); box-shadow: 0 0 0 4px rgba(3,114,255,0.12); }
+      textarea { resize: vertical; min-height: 80px; }
+
+      .btn-primary { display: inline-flex; align-items: center; gap: 6px; background: var(--primary); color: #fff; border: none; border-radius: 999px; padding: 10px 22px; min-height: 42px; font-weight: 600; font-size: 13px; cursor: pointer; transition: background 0.12s; }
+      .btn-primary:hover { background: var(--primary-hover); }
+      .btn-primary:active { background: var(--primary-press); }
+      .btn-outline { display: inline-flex; align-items: center; gap: 6px; background: transparent; color: var(--navy-deep); border: 1.5px solid var(--n300); border-radius: 999px; padding: 9px 20px; min-height: 42px; font-weight: 600; font-size: 13px; cursor: pointer; transition: border-color 0.12s, color 0.12s; }
+      .btn-outline:hover { color: var(--primary); border-color: var(--primary); }
+      .btn-danger { display: inline-flex; align-items: center; gap: 6px; background: transparent; color: #dc2626; border: 1.5px solid #fca5a5; border-radius: 999px; padding: 9px 20px; min-height: 42px; font-weight: 600; font-size: 13px; cursor: pointer; transition: background 0.12s, color 0.12s; }
+      .btn-danger:hover { background: #dc2626; border-color: #dc2626; color: #fff; }
+
+      /* ================================================================
+       * APP SHELL — sidebar + main column
+       * ================================================================ */
+      .app-frame { display: flex; height: 100dvh; overflow: hidden; }
+      .main-col { flex: 1; min-width: 0; display: flex; flex-direction: column; background: #fff; }
+
+      /* ===== Sidebar (Recast navy) ===== */
+      .sidebar { width: 296px; flex-shrink: 0; display: flex; flex-direction: column; background: var(--navy); color: #fff; }
+      .sidebar * { scrollbar-color: rgba(255,255,255,0.25) transparent; }
+      .sidebar *::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.25); }
+
+      .sb-brand { display: flex; align-items: baseline; gap: 10px; padding: 20px 18px 14px; }
+      .sb-logo { font-size: 21px; font-weight: 700; letter-spacing: -0.025em; line-height: 1; color: #fff; }
+      .sb-logo .lg-re { color: var(--cyan); }
+      .sb-tagline { font-size: 10.5px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted-blue); }
+      .sb-close { display: none; margin-left: auto; background: transparent; border: none; color: var(--muted-blue); cursor: pointer; padding: 6px; border-radius: 8px; }
+      .sb-close:hover { color: #fff; background: rgba(255,255,255,0.10); }
+
+      .sb-new { display: flex; align-items: center; justify-content: center; gap: 8px; margin: 2px 14px 12px; padding: 11px 16px; background: #fff; color: var(--navy); border: none; border-radius: 999px; font-size: 13.5px; font-weight: 700; cursor: pointer; transition: background 0.12s, transform 0.12s; }
+      .sb-new:hover { background: var(--quote); }
+      .sb-new:active { transform: scale(0.98); }
+
+      .sb-search { position: relative; display: flex; align-items: center; margin: 0 14px 12px; flex-shrink: 0; }
+      .sb-search-ic { position: absolute; left: 12px; color: var(--muted-blue); pointer-events: none; }
+      .sb-search input[type="text"] { width: 100%; padding: 9px 32px 9px 34px; border: 1px solid rgba(255,255,255,0.18); border-radius: 999px; font-size: 12.5px; font-weight: 500; color: #fff; background: rgba(255,255,255,0.08); }
+      .sb-search input[type="text"]::placeholder { color: var(--muted-blue); }
+      .sb-search input[type="text"]:focus { border-color: var(--cyan); box-shadow: 0 0 0 3px rgba(49,209,255,0.20); background: rgba(255,255,255,0.12); }
+      .sb-search-clear { position: absolute; right: 8px; background: rgba(255,255,255,0.14); border: none; border-radius: 50%; width: 20px; height: 20px; display: grid; place-items: center; color: #fff; cursor: pointer; transition: background 0.12s; }
+      .sb-search-clear:hover { background: rgba(255,255,255,0.28); }
+
+      .sb-label { font-size: 10px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted-blue); padding: 4px 20px 6px; }
+      .sb-list { flex: 1; min-height: 0; overflow-y: auto; padding: 0 10px 12px; display: flex; flex-direction: column; gap: 2px; }
+      .sb-empty { padding: 28px 14px; font-size: 12px; line-height: 1.7; color: var(--muted-blue); text-align: center; }
+      .sb-group + .sb-group { margin-top: 12px; }
+      .sb-group-head { font-size: 10px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: rgba(255,255,255,0.45); padding: 6px 10px 4px; }
+
+      .sb-item { position: relative; display: flex; gap: 8px; align-items: flex-start; padding: 9px 10px; border-radius: 10px; cursor: pointer; transition: background 0.12s; }
+      .sb-item:hover { background: rgba(255,255,255,0.08); }
+      .sb-item.active { background: rgba(255,255,255,0.14); }
+      .sb-item:focus-visible { outline: none; box-shadow: 0 0 0 2px var(--cyan); }
+      .sb-item-body { flex: 1; min-width: 0; }
+      .sb-item-title { font-size: 12.5px; font-weight: 500; color: #fff; line-height: 1.4; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+      .sb-item-meta { font-size: 10.5px; color: var(--muted-blue); margin-top: 3px; line-height: 1; }
+      .sb-item-actions { display: flex; gap: 2px; opacity: 0; transition: opacity 0.12s; flex-shrink: 0; }
+      .sb-item:hover .sb-item-actions, .sb-item:focus-within .sb-item-actions { opacity: 1; }
+      .sb-item-actions button { background: rgba(255,255,255,0.10); border: none; padding: 5px; min-width: 26px; min-height: 26px; display: grid; place-items: center; border-radius: 7px; color: rgba(255,255,255,0.75); cursor: pointer; transition: background 0.1s, color 0.1s; }
+      .sb-item-actions button:hover { background: var(--primary); color: #fff; }
+      .sb-item-actions button.danger:hover { background: #dc2626; color: #fff; }
+      .sb-item.confirming { background: rgba(240,89,40,0.16); }
+      .sb-confirm { display: flex; gap: 6px; align-items: center; margin-top: 8px; flex-wrap: wrap; }
+      .sb-confirm span { font-size: 11px; font-weight: 600; color: #FFC9A8; }
+      .sb-confirm button { font-size: 11px; font-weight: 600; padding: 5px 12px; border-radius: 999px; border: none; cursor: pointer; line-height: 1; min-height: 26px; }
+      .sb-confirm .ok { background: #dc2626; color: #fff; }
+      .sb-confirm .ok:hover { background: #b91c1c; }
+      .sb-confirm .no { background: rgba(255,255,255,0.16); color: #fff; }
+      .sb-confirm .no:hover { background: rgba(255,255,255,0.28); }
+
+      .sb-foot { flex-shrink: 0; padding: 10px 14px 14px; border-top: 1px solid rgba(255,255,255,0.12); }
+      .sb-foot-btn { display: flex; align-items: center; gap: 10px; width: 100%; background: transparent; border: none; color: rgba(255,255,255,0.85); font-size: 13px; font-weight: 600; padding: 10px 10px; border-radius: 10px; cursor: pointer; transition: background 0.12s, color 0.12s; }
+      .sb-foot-btn:hover { background: rgba(255,255,255,0.08); color: #fff; }
+      .sb-foot-btn.active { background: rgba(255,255,255,0.14); color: #fff; }
+
+      .sidebar-scrim { display: none; }
+
+      /* ===== Chat header ===== */
+      .chat-head { position: relative; display: flex; align-items: center; gap: 12px; padding: 10px 20px; min-height: 64px; border-bottom: 1px solid var(--divider); background: #fff; flex-shrink: 0; z-index: 10; }
+      .head-titles { flex: 1; min-width: 0; }
+      .conv-title { font-size: 15px; font-weight: 700; color: var(--navy-deep); letter-spacing: -0.01em; line-height: 1.3; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+      .conv-sub { font-size: 11.5px; color: var(--n500); line-height: 1.4; }
+      .head-actions { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
+
+      .icon-btn { background: transparent; border: none; cursor: pointer; padding: 8px; min-width: 38px; min-height: 38px; display: grid; place-items: center; border-radius: 10px; color: var(--n500); transition: background 0.12s, color 0.12s; }
+      .icon-btn:hover { background: var(--n100); color: var(--navy-deep); }
+      .icon-btn.active { background: var(--quote); color: var(--primary); }
+      .icon-btn.danger:hover { background: #fef2f2; color: #dc2626; }
+      .sb-toggle { display: none; }
+
+      .chat-avatar { position: relative; width: 38px; height: 38px; border-radius: 50%; display: grid; place-items: center; color: #fff; font-weight: 700; font-size: 14px; flex-shrink: 0; background: var(--primary); }
+      .chat-avatar .status-dot { position: absolute; bottom: 0; right: 0; width: 11px; height: 11px; border-radius: 50%; background: #10b981; border: 2px solid #fff; box-shadow: 0 0 0 0 rgba(16,185,129,0.55); animation: statusPulse 2.2s ease-out infinite; }
+      .chat-avatar.muted .status-dot { background: var(--n400); animation: none; }
+      @keyframes statusPulse {
+        0%   { box-shadow: 0 0 0 0 rgba(16,185,129,0.55); }
+        70%  { box-shadow: 0 0 0 8px rgba(16,185,129,0); }
+        100% { box-shadow: 0 0 0 0 rgba(16,185,129,0); }
+      }
+
+      /* Voice pill — single control for every voice state */
+      .vp { display: inline-flex; align-items: center; gap: 8px; height: 40px; padding: 0 18px; border-radius: 999px; border: none; font-size: 13px; font-weight: 600; cursor: pointer; transition: background 0.12s, color 0.12s, box-shadow 0.12s; white-space: nowrap; }
+      .vp:disabled { cursor: not-allowed; opacity: 0.55; }
+      .vp.go { background: var(--primary); color: #fff; box-shadow: var(--shadow-brand); }
+      .vp.go:hover { background: var(--primary-hover); }
+      .vp.on { background: var(--quote); color: var(--navy); border: 1px solid rgba(3,114,255,0.25); }
+      .vp.on:hover { background: #E2EEFF; }
+      .vp.live { background: var(--primary); color: #fff; }
+      .vp.live:hover { background: var(--primary-hover); }
+      .vp.speak { background: var(--cyan); color: var(--navy-deep); }
+      .vp.think { background: var(--n100); color: var(--n600); }
+      .vp.off { background: var(--n100); color: var(--n500); }
+      .vp .vp-dot { width: 8px; height: 8px; border-radius: 50%; background: #10b981; flex-shrink: 0; box-shadow: 0 0 0 0 rgba(16,185,129,0.55); animation: statusPulse 1.8s ease-out infinite; }
+      .vp.live .vp-dot { background: #fff; box-shadow: 0 0 0 0 rgba(255,255,255,0.55); }
+      .vp-wave { height: 14px; gap: 2px; }
+      .vp-wave .sound-wave-bar { width: 3px; }
+      .vp-spin { animation: vpSpin 1s linear infinite; }
+      @keyframes vpSpin { to { transform: rotate(360deg); } }
+
+      /* Overflow menu */
+      .overflow-menu { position: absolute; top: 58px; right: 16px; z-index: 40; background: #fff; border: 1px solid var(--n200); border-radius: 14px; box-shadow: var(--shadow-hover); min-width: 230px; padding: 6px; animation: menuIn 0.15s ease-out; }
+      @keyframes menuIn { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: translateY(0); } }
+      .overflow-menu button { width: 100%; text-align: left; background: transparent; border: none; padding: 10px 12px; font-size: 13.5px; color: var(--navy-deep); display: flex; align-items: center; gap: 10px; border-radius: 9px; cursor: pointer; transition: background 0.12s; font-weight: 500; }
+      .overflow-menu button:hover:not(:disabled) { background: var(--n50); }
+      .overflow-menu button:disabled { opacity: 0.4; cursor: not-allowed; }
+      .overflow-menu button i { color: var(--n500); }
+      .overflow-menu hr { border: none; border-top: 1px solid var(--n100); margin: 4px 0; }
+      .overflow-menu .danger { color: #dc2626; }
+      .overflow-menu .danger i { color: #dc2626; }
+      .menu-toggle-state { margin-left: auto; font-size: 10.5px; font-weight: 700; padding: 2px 8px; border-radius: 999px; background: var(--n100); color: var(--n500); letter-spacing: 0.04em; }
+      .menu-toggle-state.on { background: #d1fae5; color: #047857; }
+
+      /* ===== Live listening strip ===== */
+      .live-strip { display: flex; align-items: center; gap: 16px; padding: 10px 24px; background: linear-gradient(0deg, rgba(49,209,255,0.07), rgba(49,209,255,0.07)), #fff; border-bottom: 1px solid var(--divider); flex-shrink: 0; }
+      .ls-wave { color: var(--primary); flex-shrink: 0; }
+      .ls-body { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+      .ls-top { display: flex; align-items: baseline; gap: 10px; min-width: 0; }
+      .ls-title { font-size: 12px; font-weight: 700; color: var(--navy); white-space: nowrap; }
+      .ls-stats { font-size: 11px; color: var(--n500); white-space: nowrap; }
+      .ls-stats.busy { color: var(--primary); font-weight: 600; }
+      .ls-live { display: flex; align-items: center; gap: 8px; min-width: 0; }
+      .ls-live-text { font-size: 12px; color: var(--n600); line-height: 1.4; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+      #live-transcript-text:empty::before { content: 'Waiting for speech…'; font-style: italic; color: var(--n400); }
+      .ac-live .ac-cancel { display: none; background: #fef2f2; color: #dc2626; border: 1px solid #fca5a5; border-radius: 999px; font-size: 10.5px; padding: 3px 11px; cursor: pointer; font-weight: 600; line-height: 1; flex-shrink: 0; }
+      .ac-live.hearing .ac-cancel { display: inline-flex; }
+      .ac-live .ac-cancel:hover { background: #dc2626; color: #fff; }
+      .ls-last { display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--n400); min-width: 0; }
+      .ls-last span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+      .ls-last .ok { color: var(--brand-green); }
+      .ls-last .skip { color: var(--n400); }
+      .ls-controls { display: flex; align-items: center; gap: 14px; flex-shrink: 0; }
+      .ls-speak { display: inline-flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 600; color: var(--n600); cursor: default; }
+      .ls-off { background: transparent; border: 1.5px solid var(--n300); color: var(--n600); font-size: 12px; font-weight: 600; padding: 6px 14px; border-radius: 999px; cursor: pointer; transition: border-color 0.12s, color 0.12s; }
+      .ls-off:hover { border-color: #dc2626; color: #dc2626; }
+
+      .interim-caret { display: inline-block; width: 6px; margin-left: 2px; animation: interim-blink 1s steps(2,end) infinite; color: var(--primary); }
+      @keyframes interim-blink { 50% { opacity: 0; } }
+
+      /* ===== Message area ===== */
+      .msg-scroll { flex: 1; min-height: 0; overflow-y: auto; background: var(--n25); }
+      .msg-col { max-width: 768px; margin: 0 auto; padding: 28px 24px 16px; display: flex; flex-direction: column; gap: 16px; }
+      .msg-row { display: flex; gap: 10px; align-items: flex-start; justify-content: flex-start; }
+      .msg-row.me { justify-content: flex-end; }
+      .msg-av { width: 28px; height: 28px; border-radius: 50%; background: var(--primary); color: #fff; font-weight: 700; font-size: 12px; display: grid; place-items: center; flex-shrink: 0; margin-top: 2px; }
+
+      .chat-bubble { padding: 11px 16px; border-radius: 18px; font-size: 14px; line-height: 1.55; word-wrap: break-word; white-space: pre-wrap; }
+      .chat-user { background: var(--primary); color: #fff; border-radius: 18px 18px 6px 18px; max-width: 70%; }
+      .chat-bot { background: #fff; color: var(--dark); border: 1px solid var(--divider); border-radius: 6px 18px 18px 18px; box-shadow: var(--shadow-card); }
+      .chat-bubble.typing { display: inline-flex; gap: 4px; padding: 14px 16px; }
+      .msg-wrap { position: relative; max-width: 86%; }
+      .msg-wrap .chat-bubble { max-width: 100%; }
+
+      @keyframes dotPulse { 0%,80%,100% { transform: scale(0); } 40% { transform: scale(1); } }
+      .typing-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--n400); display: inline-block; animation: dotPulse 1.4s infinite ease-in-out both; }
+      .typing-dot:nth-child(1) { animation-delay: -0.32s; }
+      .typing-dot:nth-child(2) { animation-delay: -0.16s; }
+
+      /* Markdown answers */
       .chat-md { white-space: normal; }
       .chat-md p { margin: 0 0 8px; }
       .chat-md p:last-child { margin-bottom: 0; }
@@ -61,334 +242,149 @@
       .chat-md ul li { position: relative; padding-left: 18px; margin-bottom: 6px; line-height: 1.55; }
       .chat-md ul li::before { content: ''; position: absolute; left: 2px; top: 8px; width: 7px; height: 7px; border-radius: 2px; background: var(--cyan); }
       .chat-md ol li { margin-bottom: 6px; line-height: 1.55; }
-      .chat-md strong { color: var(--navy); font-weight: 700; }
-      .chat-md code { background: #f1f5f9; padding: 2px 5px; border-radius: 4px; font-size: 12.5px; }
-      .chat-md a { color: var(--primary); text-decoration: underline; text-underline-offset: 2px; }
-      .chat-md .md-h { font-size: 13px; font-weight: 700; color: var(--navy); margin: 10px 0 6px; }
-      .assist-badge { display: inline-flex; align-items: center; gap: 5px; font-size: 10px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--primary); background: rgba(0,0,204,0.07); border: 1px solid rgba(0,0,204,0.14); border-radius: 6px; padding: 3px 8px; margin-bottom: 8px; }
-      .src-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; padding-top: 8px; border-top: 1px dashed #e2e8f0; }
-      .src-chips a { display: inline-flex; align-items: center; gap: 4px; font-size: 10.5px; font-weight: 600; color: #475569; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 999px; padding: 3px 9px; text-decoration: none; transition: all 0.15s; max-width: 220px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+      .chat-md strong { color: var(--navy-deep); font-weight: 700; }
+      .chat-md code { background: var(--n100); padding: 2px 5px; border-radius: 4px; font-size: 12.5px; }
+      .chat-md a { color: var(--primary); text-decoration: underline; text-underline-offset: 3px; }
+      .chat-md .md-h { font-size: 13px; font-weight: 700; color: var(--navy-deep); margin: 10px 0 6px; }
+      .assist-badge { display: inline-flex; align-items: center; gap: 5px; font-size: 10px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--primary); background: rgba(3,114,255,0.07); border: 1px solid rgba(3,114,255,0.16); border-radius: 6px; padding: 3px 8px; margin-bottom: 8px; }
+      .src-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; padding-top: 8px; border-top: 1px dashed var(--n200); }
+      .src-chips a { display: inline-flex; align-items: center; gap: 4px; font-size: 10.5px; font-weight: 600; color: var(--n600); background: var(--n50); border: 1px solid var(--n200); border-radius: 999px; padding: 3px 9px; text-decoration: none; transition: color 0.15s, border-color 0.15s, background 0.15s; max-width: 220px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
       .src-chips a:hover { color: var(--primary); border-color: var(--cyan); background: var(--quote); }
 
-      .chat-input-row { display: flex; gap: 8px; align-items: center; padding: 12px; border-top: 1px solid #e2e8f0; background: #fff; }
-      .chat-input-row input { flex: 1; border-radius: 9999px; padding: 10px 16px; font-size: 14px; }
-      .chat-send { width: 44px; height: 44px; border-radius: 50%; background: var(--primary); color: #fff; border: none; display: grid; place-items: center; cursor: pointer; transition: background 0.2s, transform 0.15s; flex-shrink: 0; box-shadow: 0 2px 6px rgba(0,112,243,0.25); }
-      .chat-send:hover { background: var(--primary-hover); transform: scale(1.04); }
-      .chat-send:disabled { background: #cbd5e1; cursor: not-allowed; box-shadow: none; transform: none; }
-      .card-icon-btn { background: transparent; border: none; cursor: pointer; padding: 6px; min-width: 32px; min-height: 32px; display: grid; place-items: center; border-radius: 8px; color: #64748b; transition: color 0.15s, background 0.15s; }
-      .card-icon-btn:hover { color: var(--navy); background: #f1f5f9; }
-      .card-icon-btn:disabled { color: #cbd5e1; cursor: not-allowed; background: transparent; }
-      .app-bar { position: sticky; top: 0; z-index: 20; background: rgba(255,255,255,0.94); backdrop-filter: blur(12px); border-bottom: 1px solid var(--divider); }
-      .history-rail { width: 44px; flex-shrink: 0; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; padding: 12px 0; gap: 6px; background: rgba(255,255,255,0.7); border: 1px solid rgba(226,232,240,0.7); border-radius: 12px; color: #64748b; cursor: pointer; transition: background 0.15s, color 0.15s; position: relative; }
-      .history-rail:hover, .history-rail:focus-visible { background: #fff; color: var(--navy); outline: none; }
-      .history-rail-badge { position: absolute; top: 6px; right: 4px; min-width: 18px; height: 18px; padding: 0 5px; border-radius: 9999px; background: var(--primary); color: #fff; font-size: 10px; font-weight: 700; display: grid; place-items: center; line-height: 1; }
-      .history-panel-open { width: 280px; flex-shrink: 0; display: flex; flex-direction: column; gap: 8px; overflow-y: auto; max-height: calc(100dvh - 120px); }
-      @keyframes railSpin { to { transform: rotate(360deg); } }
-      .rail-spin { animation: railSpin 0.9s linear infinite; transform-origin: center; }
-      @media (prefers-reduced-motion: reduce) { .rail-spin { animation: none; } }
+      /* Per-message actions */
+      .msg-copy { position: absolute; top: 6px; right: 6px; background: rgba(255,255,255,0.9); border: 1px solid var(--n200); color: var(--n500); padding: 4px; min-width: 26px; min-height: 26px; border-radius: 7px; cursor: pointer; display: grid; place-items: center; transition: opacity 0.12s, background 0.12s, color 0.12s, border-color 0.12s; opacity: 0; }
+      .msg-wrap:hover .msg-copy, .msg-copy:focus-visible { opacity: 1; }
+      .msg-copy:hover { background: #fff; color: var(--primary); border-color: var(--primary); }
+      .msg-copy.copied { background: #ecfdf5; border-color: #6ee7b7; color: #047857; opacity: 1; }
+      .tts-btn { position: absolute; bottom: 4px; right: 4px; background: transparent; border: none; cursor: pointer; padding: 6px; min-width: 28px; min-height: 28px; border-radius: 6px; color: var(--n400); transition: color 0.15s, background 0.15s; line-height: 0; }
+      .tts-btn:hover { color: var(--n600); background: var(--n100); }
+      .tts-btn.playing { color: var(--primary); }
 
-      .chat-avatar { position: relative; width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center; color: #fff; font-weight: 700; font-size: 14px; flex-shrink: 0; box-shadow: 0 2px 6px rgba(15,23,42,0.12); }
-      .chat-avatar .status-dot { position: absolute; bottom: 0; right: 0; width: 12px; height: 12px; border-radius: 50%; background: #10b981; border: 2px solid #fff; box-shadow: 0 0 0 0 rgba(16,185,129,0.55); animation: statusPulse 2.2s ease-out infinite; }
-      .chat-avatar.muted .status-dot { background: #94a3b8; animation: none; }
-      @keyframes statusPulse {
-        0%   { box-shadow: 0 0 0 0 rgba(16,185,129,0.55); }
-        70%  { box-shadow: 0 0 0 8px rgba(16,185,129,0); }
-        100% { box-shadow: 0 0 0 0 rgba(16,185,129,0); }
-      }
-      @media (prefers-reduced-motion: reduce) { .chat-avatar .status-dot { animation: none; } }
+      /* ===== Empty-state hero (voice orb) ===== */
+      .hero { display: flex; flex-direction: column; align-items: center; text-align: center; padding: 9vh 20px 24px; }
+      .orb-wrap { position: relative; width: 132px; height: 132px; margin-bottom: 18px; display: grid; place-items: center; }
+      .orb-wrap .orb-ring { position: absolute; inset: 0; border-radius: 50%; border: 2px solid var(--cyan); opacity: 0; pointer-events: none; }
+      .orb-wrap.live .orb-ring { animation: orbPulse 1.9s ease-out infinite; opacity: .5; }
+      .orb-wrap.live .orb-ring.d { animation-delay: .95s; }
+      @keyframes orbPulse { 0%{transform:scale(1);opacity:.55} 100%{transform:scale(1.5);opacity:0} }
+      .voice-orb { position: relative; z-index: 1; width: 108px; height: 108px; border-radius: 50%; border: none; cursor: pointer; display: grid; place-items: center; color: #fff; background: var(--primary); box-shadow: var(--shadow-brand); transition: transform .18s var(--ease), background .2s, box-shadow .2s, color .2s; }
+      .voice-orb:hover { transform: scale(1.04); }
+      .voice-orb:active { transform: scale(.97); }
+      .voice-orb.off { background: var(--primary); }
+      .voice-orb.off:hover { background: var(--primary-hover); }
+      .voice-orb.monitor { background: #fff; color: var(--primary); box-shadow: 0 0 0 7px rgba(49,209,255,.22), var(--shadow-hover); }
+      .voice-orb.listening { background: var(--primary); color: #fff; box-shadow: 0 0 0 7px rgba(49,209,255,.30), var(--shadow-brand); }
+      .voice-orb.speaking { background: var(--cyan); color: var(--navy-deep); box-shadow: 0 14px 42px rgba(49,209,255,.45); }
+      .voice-orb.thinking { background: var(--n100); color: var(--navy); box-shadow: inset 0 0 0 2px var(--n200); }
+      .voice-orb.thinking .typing-dot { background: var(--navy); }
+      .voice-orb .sound-wave { height: 30px; gap: 4px; }
+      .voice-orb .sound-wave-bar { width: 5px; border-radius: 3px; }
+      .voice-orb .orb-dots { display: inline-flex; gap: 6px; }
+      .voice-orb:disabled { background: var(--n100); color: var(--n400); cursor: not-allowed; box-shadow: none; transform: none; }
+      .hero-name { font-size: 26px; font-weight: 700; letter-spacing: -0.02em; color: var(--navy-deep); margin-bottom: 6px; }
+      .hero-sub { font-size: 13.5px; color: var(--gray); line-height: 1.6; max-width: 380px; margin-bottom: 16px; text-wrap: pretty; }
+      .hero-status { display: inline-flex; align-items: center; gap: 8px; font-size: 12.5px; font-weight: 600; color: var(--navy-deep); background: var(--n100); padding: 7px 16px; border-radius: 999px; }
+      .hero-status .st-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--n400); flex-shrink: 0; }
+      .hero-status.listening { background: var(--quote); color: var(--navy); }
+      .hero-status.listening .st-dot { background: #10b981; animation: statusPulse 1.6s ease-out infinite; }
+      .hero-status.speaking { background: rgba(49,209,255,0.14); }
+      .hero-status.speaking .st-dot { background: var(--cyan); }
 
-      .new-chat-btn { display:inline-flex; align-items:center; gap:6px; background:#fff; border:1.5px solid var(--divider); color:var(--navy); font-size:12px; font-weight:600; padding:7px 12px; border-radius:9999px; cursor:pointer; transition: all .15s; flex-shrink:0; line-height:1; }
-      .new-chat-btn:hover { border-color: var(--cyan); color: var(--primary); background: var(--quote); }
-      .overflow-btn { background: transparent; border: none; cursor: pointer; padding: 8px; min-width: 40px; min-height: 40px; display: grid; place-items: center; border-radius: 10px; color: #475569; transition: background 0.15s, color 0.15s; }
-      .overflow-btn:hover { background: #f1f5f9; color: var(--navy); }
-      .overflow-menu { position: absolute; top: 56px; right: 12px; z-index: 30; background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; box-shadow: 0 16px 40px rgba(15,23,42,0.16); min-width: 200px; padding: 6px; overflow: hidden; animation: menuIn 0.15s ease-out; }
-      @keyframes menuIn { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: translateY(0); } }
-      .overflow-menu button { width: 100%; text-align: left; background: transparent; border: none; padding: 10px 12px; font-size: 14px; color: var(--navy); display: flex; align-items: center; gap: 10px; border-radius: 8px; cursor: pointer; transition: background 0.12s; font-weight: 500; }
-      .overflow-menu button:hover:not(:disabled) { background: #f1f5f9; }
-      .overflow-menu button:disabled { opacity: 0.4; cursor: not-allowed; }
-      .overflow-menu button i { color: #64748b; }
-      .overflow-menu hr { border: none; border-top: 1px solid #f1f5f9; margin: 4px 0; }
-      .overflow-menu .danger { color: #dc2626; }
-      .overflow-menu .danger i { color: #dc2626; }
-
-      .action-bar { display: flex; align-items: flex-end; gap: 8px; padding: 12px; border-top: 1px solid var(--divider); background: #fff; }
-      .action-bar .composer-field { flex: 1; position: relative; min-width: 0; }
-      .action-bar textarea.composer-input,
-      .action-bar input.composer-input {
-        width: 100%; padding: 12px 16px; border: 1.5px solid var(--divider); border-radius: 22px; font-size: 15px; outline: none; color: var(--navy); background: #fff; transition: border-color 0.15s, background 0.15s, box-shadow 0.15s; font-family: inherit; line-height: 1.35; resize: none;
-      }
-      .action-bar .composer-input:focus { border-color: var(--cyan); box-shadow: 0 0 0 3px rgba(0,191,255,.16); }
-      .action-bar .composer-input:disabled { opacity: 0.6; }
-      .composer-expanded .action-bar textarea.composer-input { border-radius: 16px; min-height: 96px; max-height: 200px; padding: 12px 16px; }
-      .action-btn { width: 44px; height: 44px; border-radius: 50%; border: none; cursor: pointer; display: grid; place-items: center; flex-shrink: 0; transition: background 0.15s, transform 0.15s, box-shadow 0.15s, color 0.15s; }
-      .action-btn:disabled { cursor: not-allowed; opacity: 0.5; }
-      .action-btn:not(:disabled):hover { transform: scale(1.06); }
-      .action-btn:not(:disabled):active { transform: scale(0.96); }
-      .action-btn.edit { background: #f1f5f9; color: #475569; }
-      .action-btn.edit:hover:not(:disabled) { background: #e2e8f0; color: var(--navy); }
-      .action-btn.edit.active { background: #dbeafe; color: var(--primary); }
-      .action-btn.send { width: 52px; height: 52px; background: var(--primary); color: #fff; box-shadow: 0 6px 18px rgba(0,0,204,.25); }
-      .action-btn.send:hover:not(:disabled) { background: var(--primary-hover); box-shadow: 0 8px 22px rgba(0,0,204,.34); }
-      .action-btn.send:disabled { background: #cbd5e1; color: #fff; box-shadow: none; }
-
-      @keyframes dotPulse { 0%,80%,100% { transform: scale(0); } 40% { transform: scale(1); } }
-      .typing-dot { width: 8px; height: 8px; border-radius: 50%; background: #94a3b8; display: inline-block; animation: dotPulse 1.4s infinite ease-in-out both; }
-      .typing-dot:nth-child(1) { animation-delay: -0.32s; }
-      .typing-dot:nth-child(2) { animation-delay: -0.16s; }
-      .settings-section { border: 1px solid var(--divider); border-radius: var(--radius); padding: 22px; background: #fff; box-shadow: var(--shadow-card); }
-      .tab-btn { display: inline-flex; align-items: center; gap: 6px; padding: 10px 16px; min-height: 40px; font-size: 14px; font-weight: 600; border-radius: 8px; border: none; cursor: pointer; transition: all 0.2s; }
-      .tab-btn.active { background: var(--primary); color: #fff; }
-      .tab-btn:not(.active) { background: transparent; color: var(--navy); }
-      .tab-btn:not(.active):hover { background: #f1f5f9; }
-
-      /* ===== Voice widget bits ===== */
-      .voice-fab-wrap { position: fixed; bottom: 24px; right: 24px; z-index: 60; width: 56px; height: 56px; }
-      .voice-fab { position: absolute; inset: 0; width: 56px; height: 56px; border-radius: 50%; border: none; cursor: pointer; display: grid; place-items: center; color: #fff; box-shadow: 0 8px 24px rgba(15,23,42,0.18); transition: transform 0.15s ease; }
-      .voice-fab:hover { transform: scale(1.06); }
-      .voice-pulse-ring { position: absolute; inset: 0; border-radius: 50%; pointer-events: none; border: 3px solid currentColor; animation: voicePulse 1.8s ease-out infinite; }
-      .voice-pulse-ring.delay { animation-delay: 0.9s; }
-      @keyframes voicePulse {
-        0% { transform: scale(1); opacity: 0.55; }
-        100% { transform: scale(1.9); opacity: 0; }
-      }
-      .record-pulse { animation: recordPulse 1.2s ease-in-out infinite; }
-      @keyframes recordPulse {
-        0%, 100% { box-shadow: 0 0 0 0 rgba(239,68,68,0.55); }
-        50%      { box-shadow: 0 0 0 14px rgba(239,68,68,0); }
-      }
       .sound-wave { display: inline-flex; align-items: center; gap: 3px; height: 20px; }
       .sound-wave-bar { display: block; width: 4px; height: 100%; background: currentColor; border-radius: 2px; transform-origin: center; animation: soundWave 0.9s ease-in-out infinite; }
       .sound-wave-bar:nth-child(1) { animation-delay: -0.2s; }
       .sound-wave-bar:nth-child(2) { animation-delay: -0.1s; }
       .sound-wave-bar:nth-child(3) { animation-delay: 0s; }
-      @keyframes soundWave {
-        0%, 100% { transform: scaleY(0.3); }
-        50%      { transform: scaleY(1); }
-      }
-      .voice-toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); z-index: 100; background: #0f172a; color: #fff; padding: 10px 16px; border-radius: 10px; font-size: 13px; font-weight: 500; box-shadow: 0 12px 30px rgba(15,23,42,0.25); pointer-events: none; animation: toastIn 0.25s ease-out; max-width: min(92vw, 480px); text-align: center; }
-      @keyframes toastIn { from { opacity: 0; transform: translate(-50%, 12px); } to { opacity: 1; transform: translate(-50%, 0); } }
-      .voice-switch { position: relative; display: inline-flex; align-items: center; width: 44px; height: 24px; border-radius: 9999px; background: #cbd5e1; cursor: pointer; transition: background 0.2s; flex-shrink: 0; }
-      .voice-switch.on { background: #10b981; }
-      .voice-switch::after { content: ''; position: absolute; top: 2px; left: 2px; width: 20px; height: 20px; border-radius: 50%; background: #fff; transition: left 0.2s; box-shadow: 0 1px 3px rgba(15,23,42,0.2); }
+      @keyframes soundWave { 0%, 100% { transform: scaleY(0.3); } 50% { transform: scaleY(1); } }
+
+      /* ===== Composer ===== */
+      .composer-zone { flex-shrink: 0; background: var(--n25); padding: 8px 24px max(16px, env(safe-area-inset-bottom)); }
+      .composer { display: flex; align-items: flex-end; gap: 10px; max-width: 768px; margin: 0 auto; background: #fff; border: 1.5px solid var(--n200); border-radius: 26px; padding: 8px 8px 8px 20px; box-shadow: var(--shadow-card); transition: border-color 0.15s, box-shadow 0.15s; }
+      .composer:focus-within { border-color: var(--primary); box-shadow: 0 0 0 4px rgba(3,114,255,0.12); }
+      .composer textarea.composer-input { flex: 1; min-width: 0; border: none; background: transparent; padding: 8px 0; font-size: 14.5px; font-weight: 400; color: var(--navy-deep); line-height: 1.45; border-radius: 0; resize: none; min-height: 22px; max-height: 150px; field-sizing: content; }
+      .composer textarea.composer-input:focus { box-shadow: none; border: none; }
+      .composer textarea.composer-input:disabled { opacity: 0.55; }
+      .comp-send { width: 38px; height: 38px; border-radius: 50%; background: var(--primary); color: #fff; border: none; display: grid; place-items: center; cursor: pointer; flex-shrink: 0; transition: background 0.12s, transform 0.12s; }
+      .comp-send:hover:not(:disabled) { background: var(--primary-hover); }
+      .comp-send:active:not(:disabled) { transform: scale(0.94); }
+      .comp-send:disabled { background: var(--n200); color: #fff; cursor: not-allowed; }
+
+      /* ===== Saved-conversation view (read-only, in place) ===== */
+      .saved-view { display: flex; flex-direction: column; flex: 1; min-height: 0; }
+      .saved-note { align-self: center; display: inline-flex; align-items: center; gap: 7px; font-size: 11.5px; font-weight: 600; color: var(--n500); background: var(--n100); border-radius: 999px; padding: 6px 14px; margin-bottom: 4px; }
+      .popout-answer { position: relative; max-width: 86%; }
+      .popout-answer .chat-bubble { max-width: 100%; padding-right: 38px; }
+      .popout-copy { position: absolute; top: 6px; right: 6px; background: rgba(255,255,255,0.9); border: 1px solid var(--n200); color: var(--n500); padding: 4px; min-width: 26px; min-height: 26px; border-radius: 7px; cursor: pointer; display: grid; place-items: center; transition: opacity 0.12s, background 0.12s, color 0.12s, border-color 0.12s; opacity: 0; }
+      .popout-answer:hover .popout-copy, .popout-copy:focus-visible { opacity: 1; }
+      .popout-copy:hover { background: #fff; color: var(--primary); border-color: var(--primary); }
+      .popout-copy.copied { background: #ecfdf5; border-color: #6ee7b7; color: #047857; opacity: 1; }
+      .confirm-label { font-size: 12.5px; font-weight: 600; color: #b45309; }
+      .btn-ghost { background: var(--n100); border: none; color: var(--navy-deep); font-size: 12.5px; font-weight: 600; padding: 9px 16px; border-radius: 999px; cursor: pointer; transition: background 0.12s; }
+      .btn-ghost:hover { background: var(--n200); }
+      .btn-danger-solid { background: #dc2626; border: none; color: #fff; font-size: 12.5px; font-weight: 600; padding: 9px 18px; border-radius: 999px; cursor: pointer; transition: background 0.12s; }
+      .btn-danger-solid:hover { background: #b91c1c; }
+
+      /* ===== Settings ===== */
+      .settings-scroll { flex: 1; min-height: 0; overflow-y: auto; background: var(--n25); }
+      .settings-col { max-width: 880px; margin: 0 auto; padding: 28px 24px 48px; }
+      .settings-section { border: 1px solid var(--divider); border-radius: var(--radius); padding: 26px; background: #fff; box-shadow: var(--shadow-card); }
+      .settings-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px 24px; }
+      .settings-grid > .full { grid-column: 1 / -1; }
+
+      /* ===== Toggle switch ===== */
+      .voice-switch { position: relative; display: inline-flex; align-items: center; width: 44px; height: 24px; border-radius: 999px; background: var(--n300); cursor: pointer; transition: background 0.2s; flex-shrink: 0; }
+      .voice-switch.on { background: var(--primary); }
+      .voice-switch::after { content: ''; position: absolute; top: 2px; left: 2px; width: 20px; height: 20px; border-radius: 50%; background: #fff; transition: left 0.2s; box-shadow: 0 1px 3px rgba(22,31,91,0.2); }
       .voice-switch.on::after { left: 22px; }
       .voice-switch.disabled { opacity: 0.45; cursor: not-allowed; }
 
-      /* ===== TTS speaker button ===== */
-      .msg-wrap { position: relative; display: inline-block; }
-      .tts-btn { position: absolute; bottom: 4px; right: 4px; background: transparent; border: none; cursor: pointer; padding: 6px; min-width: 28px; min-height: 28px; border-radius: 4px; color: #94a3b8; transition: color 0.15s, background 0.15s; line-height: 0; }
-      .tts-btn:hover { color: #475569; background: rgba(148,163,184,0.12); }
-      .tts-btn.playing { color: var(--primary); }
-      .msg-copy { position: absolute; top: 6px; right: 6px; background: rgba(255,255,255,0.85); border: 1px solid #e2e8f0; color: #64748b; padding: 4px; min-width: 26px; min-height: 26px; border-radius: 6px; cursor: pointer; display: grid; place-items: center; transition: opacity 0.12s, background 0.12s, color 0.12s, border-color 0.12s; opacity: 0.55; }
-      .msg-wrap:hover .msg-copy, .msg-copy:focus-visible { opacity: 1; }
-      .msg-copy:hover { background: #fff; color: var(--primary); border-color: var(--primary); }
-      .msg-copy.copied { background: #ecfdf5; border-color: #6ee7b7; color: #047857; opacity: 1; }
-      @media (pointer: coarse) { .msg-copy { opacity: 1; min-width: 32px; min-height: 32px; padding: 6px; } }
+      /* ===== Toast ===== */
+      .voice-toast { position: fixed; bottom: 92px; left: 50%; transform: translateX(-50%); z-index: 100; background: var(--navy-deep); color: #fff; padding: 11px 18px; border-radius: 12px; font-size: 13px; font-weight: 500; box-shadow: 0 20px 48px rgba(22,31,91,0.30); pointer-events: none; animation: toastIn 0.25s ease-out; max-width: min(92vw, 480px); text-align: center; }
+      @keyframes toastIn { from { opacity: 0; transform: translate(-50%, 12px); } to { opacity: 1; transform: translate(-50%, 0); } }
 
-      /* ===== Live transcript caret (voice stage "Hearing live" panel) ===== */
-      .interim-caret { display: inline-block; width: 6px; margin-left: 2px; animation: interim-blink 1s steps(2,end) infinite; color: #2563eb; }
-      @keyframes interim-blink { 50% { opacity: 0; } }
-      @media (prefers-reduced-motion: reduce) { .interim-caret { animation: none; } }
-
-      @media (prefers-reduced-motion: reduce) {
-        .voice-pulse-ring, .record-pulse, .sound-wave-bar, .voice-toast { animation: none !important; }
-        .voice-pulse-ring { display: none; }
+      /* ===== Responsive ===== */
+      @media (max-width: 1023px) {
+        .sidebar { position: fixed; inset: 0 auto 0 0; z-index: 60; transform: translateX(-100%); transition: transform 0.22s var(--ease); box-shadow: var(--shadow-hover); width: min(320px, 86vw); }
+        .sidebar.open { transform: translateX(0); }
+        .sidebar-scrim { display: block; position: fixed; inset: 0; z-index: 55; background: rgba(22,31,91,0.45); opacity: 0; pointer-events: none; transition: opacity 0.2s; }
+        .sidebar-scrim.show { opacity: 1; pointer-events: auto; }
+        .sb-close { display: grid; }
+        .sb-toggle { display: grid; }
+        .chat-head { padding: 8px 12px; }
+        .vp .vp-label { display: none; }
+        .vp { padding: 0 13px; }
+        .vp.go .vp-label, .vp.off .vp-label { display: inline; }
+        .ls-controls .ls-speak span { display: none; }
+        .live-strip { padding: 10px 14px; gap: 12px; }
+        .msg-col { padding: 20px 14px 12px; }
+        .composer-zone { padding: 8px 12px max(12px, env(safe-area-inset-bottom)); }
+        .chat-user { max-width: 84%; }
+        .msg-wrap, .popout-answer { max-width: 92%; }
+        .settings-grid { grid-template-columns: 1fr; }
+        .hero { padding-top: 6vh; }
       }
-
-      /* ===== Responsive layout ===== */
-      .chat-card-wrap { min-height: calc(100svh - 120px); min-height: calc(100dvh - 120px); max-height: calc(100dvh - 80px); }
-      .settings-grid { display: grid; grid-template-columns: 1fr; gap: 16px; }
-      .settings-grid > .full { grid-column: 1 / -1; }
-      .chat-input-row { padding-bottom: max(8px, env(safe-area-inset-bottom)) !important; }
-
-      /* Brand wordmark */
-      .brand-mark { display:flex; align-items:center; gap:11px; }
-      .brand-mark .re { font-weight:800; font-size:22px; letter-spacing:-0.025em; line-height:1; }
-      .brand-mark .re .b1 { color: var(--primary); }
-      .brand-mark .re .b2 { color: var(--navy); }
-      .brand-mark .re .pl { color: var(--cyan); font-weight:800; }
-      .brand-tag { font-size:11px; font-weight:600; color: var(--gray); letter-spacing:0.04em; text-transform:uppercase; padding-left:11px; border-left:1px solid var(--divider); }
-
-      /* 3-zone home layout */
-      .home-grid { display:flex; gap:16px; align-items:stretch; }
-      .chat-panel { flex:1; min-width:0; display:flex; flex-direction:column; overflow:hidden; background:#fff; border:1px solid var(--divider); border-radius: var(--radius); box-shadow: var(--shadow-card); }
-
-      /* ===== Voice stage (left panel) ===== */
-      .voice-stage { width:330px; flex-shrink:0; background: var(--primary); border-radius: var(--radius); padding:22px 22px 20px; display:flex; flex-direction:column; align-items:center; position:relative; overflow-y:auto; color:#fff; box-shadow: var(--shadow-brand); }
-      .voice-stage .plus { position:absolute; color: var(--decorator); font-weight:400; pointer-events:none; user-select:none; line-height:1; z-index:0; }
-      .voice-stage > * { position:relative; z-index:1; }
-      .stage-eyebrow { font-size:11px; font-weight:700; letter-spacing:0.14em; text-transform:uppercase; color: var(--cyan); align-self:flex-start; margin-bottom:14px; }
-
-      .orb-wrap { position:relative; width:128px; height:128px; margin:2px 0 14px; display:grid; place-items:center; }
-      .orb-wrap .orb-ring { position:absolute; inset:0; border-radius:50%; border:2px solid var(--cyan); opacity:0; pointer-events:none; }
-      .orb-wrap.live .orb-ring { animation: orbPulse 1.9s ease-out infinite; opacity:.5; }
-      .orb-wrap.live .orb-ring.d { animation-delay:.95s; }
-      @keyframes orbPulse { 0%{transform:scale(1);opacity:.55} 100%{transform:scale(1.55);opacity:0} }
-
-      .voice-orb { position:relative; z-index:1; width:106px; height:106px; border-radius:50%; border:none; cursor:pointer; display:grid; place-items:center; color:#fff; background: var(--cyan); box-shadow: 0 10px 30px rgba(0,191,255,.42), inset 0 0 0 6px rgba(255,255,255,.14); transition: transform .18s var(--ease), background .2s, box-shadow .2s, color .2s; }
-      .voice-orb:hover { transform: scale(1.04); }
-      .voice-orb:active { transform: scale(.97); }
-      .voice-orb.ready { animation: orbBreathe 3.6s ease-in-out infinite; }
-      @keyframes orbBreathe { 0%,100%{box-shadow:0 10px 30px rgba(0,191,255,.38), inset 0 0 0 6px rgba(255,255,255,.12)} 50%{box-shadow:0 16px 42px rgba(0,191,255,.62), inset 0 0 0 6px rgba(255,255,255,.20)} }
-      .voice-orb.off { background: rgba(255,255,255,.10); box-shadow: inset 0 0 0 2px rgba(255,255,255,.22); color: var(--muted-blue); animation:none; }
-      .voice-orb.listening { background:#fff; color: var(--primary); box-shadow: 0 0 0 7px rgba(0,191,255,.28), 0 14px 40px rgba(0,191,255,.5); animation:none; }
-      .voice-orb.speaking { background: var(--cyan); color:#fff; box-shadow: 0 14px 42px rgba(0,191,255,.6); animation:none; }
-      .voice-orb.thinking { background: rgba(255,255,255,.15); color:#fff; box-shadow: inset 0 0 0 2px rgba(255,255,255,.25); animation:none; }
-      .voice-orb.monitor { background: rgba(255,255,255,.92); color: var(--primary); box-shadow: 0 0 0 6px rgba(0,191,255,.22), 0 12px 36px rgba(0,191,255,.45); animation:none; }
-      .voice-orb .sound-wave { height:30px; gap:4px; }
-      .voice-orb .sound-wave-bar { width:5px; border-radius:3px; }
-      .voice-orb .orb-dots { display:inline-flex; gap:6px; }
-      .voice-orb .orb-dots .typing-dot { background:#fff; width:9px; height:9px; }
-
-      .stage-name { font-size:25px; font-weight:800; letter-spacing:-0.02em; line-height:1; margin-bottom:5px; }
-      .stage-role { font-size:12px; color: var(--muted-blue); text-align:center; line-height:1.45; max-width:240px; margin-bottom:12px; }
-      .stage-status { display:inline-flex; align-items:center; gap:8px; font-size:12.5px; font-weight:600; color:#fff; background: rgba(255,255,255,.12); border:1px solid rgba(255,255,255,.18); padding:6px 14px; border-radius:999px; max-width:100%; }
-      .stage-status .st-dot { width:8px; height:8px; border-radius:50%; background: var(--cyan); flex-shrink:0; }
-      .stage-status.listening .st-dot { background:#fff; animation: statusPulse 1.6s ease-out infinite; }
-      .stage-status.speaking .st-dot { background:#9BE7FF; }
-      .stage-status.off .st-dot { background: var(--muted-blue); }
-      .stage-mutebtn { background:transparent; border:none; color: var(--muted-blue); font-size:11px; font-weight:600; cursor:pointer; margin-top:10px; transition: color .15s; display:inline-flex; align-items:center; gap:5px; }
-      .stage-mutebtn:hover { color:#fff; }
-
-      /* ===== Technical assistance card (left panel) ===== */
-      .assist-card { margin-top:14px; width:100%; background: rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.16); border-radius:12px; padding:14px; }
-      .assist-card .ac-head { display:flex; align-items:center; justify-content:space-between; gap:10px; }
-      .assist-card .ac-title { font-size:13px; font-weight:700; color:#fff; line-height:1.3; }
-      .assist-card .ac-sub { font-size:11px; color: var(--muted-blue); line-height:1.5; margin-top:6px; }
-      .assist-card .ac-row { display:flex; align-items:center; justify-content:space-between; gap:8px; margin-top:12px; }
-      .assist-card .ac-label { font-size:11.5px; font-weight:600; color:#E6ECFF; display:inline-flex; align-items:center; gap:6px; }
-      .ac-status { display:flex; align-items:center; gap:8px; margin-top:12px; font-size:11px; color:#DCE6FF; background: rgba(0,0,0,.14); border-radius:8px; padding:8px 10px; line-height:1.35; }
-      .ac-status .acs-dot { width:8px; height:8px; border-radius:50%; background:#34d399; flex-shrink:0; box-shadow: 0 0 0 0 rgba(52,211,153,.55); animation: statusPulse 2s ease-out infinite; }
-      .ac-status .acs-dot.thinking { background: var(--cyan-hi); animation: statusPulse 0.9s ease-out infinite; }
-      .ac-status .acs-dot.off { background: var(--muted-blue); animation:none; }
-      .ac-live { margin-top:12px; background: rgba(0,0,0,.18); border:1px solid rgba(255,255,255,.12); border-radius:8px; padding:8px 10px; }
-      .ac-live-label { font-size:9.5px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color: var(--muted-blue); display:flex; align-items:center; gap:5px; margin-bottom:4px; }
-      .ac-live-text { font-size:11.5px; line-height:1.45; color:#fff; min-height:30px; word-break:break-word; overflow:hidden; display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; }
-      #live-transcript-text:empty::before { content:'Waiting for speech…'; font-style:italic; color: var(--muted-blue); }
-      .ac-live .interim-caret { color: var(--cyan-hi); }
-      .ac-live .ac-cancel { display:none; margin-top:7px; background:rgba(239,68,68,.18); color:#fca5a5; border:1px solid rgba(239,68,68,.45); border-radius:9999px; font-size:10px; padding:3px 10px; cursor:pointer; font-weight:600; line-height:1; }
-      .ac-live.hearing .ac-cancel { display:inline-flex; }
-      .ac-last { margin-top:8px; font-size:10.5px; line-height:1.45; color: var(--muted-blue); padding:0 2px; display:flex; gap:6px; align-items:flex-start; }
-      .ac-last .ok { color:#6EE7B7; }
-      .ac-last .skip { color: var(--muted-blue); }
-      .ac-last .txt { flex:1; min-width:0; overflow:hidden; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; }
-
-      /* Slimmer chat header */
-      .conv-header { display:flex; align-items:center; gap:12px; padding:14px 16px; border-bottom:1px solid var(--divider); background:#fff; }
-      .conv-title { font-size:15px; font-weight:700; color: var(--navy); letter-spacing:-0.01em; }
-      .conv-sub { font-size:11.5px; color: var(--gray); }
-
-      /* Quick-prompt chips on empty state */
-
-      /* Saved-conversation rail/panel */
-      .saved-head { font-size:13px; font-weight:700; color: var(--navy); margin:0; letter-spacing:-0.01em; }
-      .saved-list { display: flex; flex-direction: column; gap: 2px; }
-      .saved-group + .saved-group { margin-top: 12px; }
-      .saved-group-head { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: #94a3b8; padding: 6px 10px 4px; }
-      .saved-item { position: relative; display: flex; gap: 10px; align-items: flex-start; padding: 10px 12px; border: 1px solid transparent; border-radius: 10px; background: rgba(255,255,255,0.55); cursor: pointer; transition: background 0.12s, border-color 0.12s, box-shadow 0.12s; }
-      .saved-item:hover { background: #fff; border-color: #e2e8f0; box-shadow: 0 2px 6px rgba(15,23,42,0.04); }
-      .saved-item:focus-visible { outline: 2px solid var(--primary); outline-offset: 1px; }
-      .saved-item .saved-icon { width: 30px; height: 30px; flex-shrink: 0; border-radius: 8px; background: linear-gradient(135deg, rgba(0,112,243,0.10), rgba(34,211,238,0.18)); color: var(--primary); display: grid; place-items: center; }
-      .saved-item .saved-body { flex: 1; min-width: 0; padding-right: 56px; }
-      .saved-item .saved-title { font-size: 12.5px; font-weight: 600; color: var(--navy); line-height: 1.35; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
-      .saved-item .saved-meta { display: flex; align-items: center; gap: 6px; margin-top: 4px; font-size: 10.5px; color: #94a3b8; line-height: 1; }
-      .saved-item .saved-meta .sep { width: 3px; height: 3px; border-radius: 50%; background: #cbd5e1; display: inline-block; }
-      .saved-actions { position: absolute; top: 6px; right: 6px; display: flex; gap: 2px; opacity: 0; transition: opacity 0.12s; }
-      .saved-item:hover .saved-actions, .saved-item:focus-within .saved-actions { opacity: 1; }
-      .saved-actions button { background: rgba(255,255,255,0.96); border: 1px solid #e2e8f0; padding: 4px; min-width: 26px; min-height: 26px; display: grid; place-items: center; border-radius: 6px; color: #64748b; cursor: pointer; transition: background 0.1s, color 0.1s, border-color 0.1s; }
-      .saved-actions button:hover { background: var(--primary); color: #fff; border-color: var(--primary); }
-      .saved-actions button.danger:hover { background: #dc2626; color: #fff; border-color: #dc2626; }
-      .saved-item.confirming { background: #fff7ed; border-color: #fed7aa; }
-      .saved-item.confirming .saved-actions { opacity: 0; pointer-events: none; }
-      .saved-item.confirming .saved-body { padding-right: 0; }
-      .saved-confirm { display: flex; gap: 6px; margin-top: 8px; align-items: center; flex-wrap: wrap; }
-      .saved-confirm .label { font-size: 11px; color: #b45309; font-weight: 600; line-height: 1.2; width: 100%; }
-      .saved-confirm button { font-size: 11px; padding: 5px 10px; border-radius: 6px; cursor: pointer; font-weight: 600; border: none; line-height: 1; min-height: 26px; }
-      .saved-confirm .ok { background: #dc2626; color: #fff; }
-      .saved-confirm .ok:hover { background: #b91c1c; }
-      .saved-confirm .no { background: #f1f5f9; color: var(--navy); }
-      .saved-confirm .no:hover { background: #e2e8f0; }
-      .saved-empty { text-align: center; padding: 32px 12px; color: #94a3b8; font-size: 12px; }
-      .saved-search { position: relative; display: flex; align-items: center; margin-bottom: 6px; flex-shrink: 0; }
-      .saved-search-icon { position: absolute; left: 11px; color: #94a3b8; pointer-events: none; }
-      .history-panel-open .saved-search input[type="text"] { width: 100%; padding: 8px 32px; border: 1.5px solid var(--divider); border-radius: 9999px; font-size: 12.5px; font-weight: 500; color: var(--navy); background: #fff; }
-      .history-panel-open .saved-search input[type="text"]:focus { border-color: var(--cyan); box-shadow: 0 0 0 3px rgba(0,191,255,.14); }
-      .saved-search-clear { position: absolute; right: 7px; background: #f1f5f9; border: none; border-radius: 50%; width: 20px; height: 20px; display: grid; place-items: center; color: #64748b; cursor: pointer; transition: background .12s, color .12s; }
-      .saved-search-clear:hover { background: #e2e8f0; color: var(--navy); }
       @media (pointer: coarse) {
-        .saved-actions { opacity: 1; }
-        .saved-actions button { min-width: 34px; min-height: 34px; padding: 7px; }
-      }
-
-      /* Assist status strip above the message list */
-
-      .menu-toggle-state { margin-left: auto; font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 9999px; background: #f1f5f9; color: #64748b; letter-spacing: 0.04em; }
-      .menu-toggle-state.on { background: #d1fae5; color: #047857; }
-
-      /* Per-answer copy button inside the saved-conversation popout */
-      .popout-answer { position: relative; max-width: 84%; }
-      .popout-answer .chat-bubble { max-width: 100%; padding-right: 38px; }
-      .popout-copy { position: absolute; top: 6px; right: 6px; background: rgba(255,255,255,0.85); border: 1px solid #e2e8f0; color: #64748b; padding: 4px; min-width: 26px; min-height: 26px; border-radius: 6px; cursor: pointer; display: grid; place-items: center; transition: opacity 0.12s, background 0.12s, color 0.12s, border-color 0.12s; opacity: 0.55; }
-      .popout-answer:hover .popout-copy { opacity: 1; }
-      .popout-copy:hover { background: #fff; color: var(--primary); border-color: var(--primary); }
-      .popout-copy.copied { background: #ecfdf5; border-color: #6ee7b7; color: #047857; opacity: 1; }
-      @media (pointer: coarse) {
-        .popout-copy { opacity: 1; min-width: 32px; min-height: 32px; padding: 6px; }
-        .popout-answer .chat-bubble { padding-right: 46px; }
-      }
-
-      .chat-panel .chat-bubble { max-width: 100%; }
-      .chat-panel .msg-wrap { max-width: 94%; }
-      .chat-panel .flex.justify-end > .chat-bubble { max-width: 84%; }
-
-      /* Phone (≤480px) */
-      @media (max-width: 480px) {
-        .brand-logo  { font-size: 18px !important; line-height: 1.05; }
-        .tab-btn     { padding: 8px 12px; font-size: 13px; min-height: 36px; }
-        .chat-bubble { max-width: 92%; font-size: 14px; }
-        .msg-wrap    { max-width: 96%; }
-        .settings-section { padding: 14px; }
-      }
-      /* iPad (481–1024px) */
-      @media (min-width: 481px) {
-        .app-shell       { max-width: 760px; margin-inline: auto; }
-        .settings-grid   { grid-template-columns: 1fr 1fr; }
-        .chat-bubble     { max-width: 78%; }
-        .msg-wrap        { max-width: 88%; }
-      }
-      /* Laptop / desktop (≥1025px) */
-      @media (min-width: 1025px) {
-        .app-shell       { max-width: 1232px; }
-        .chat-bubble     { max-width: 68%; }
-        .msg-wrap        { max-width: 75%; }
-        .settings-grid   { grid-template-columns: 1fr 1fr; gap: 20px 24px; }
-        .expanded-inner  { max-width: 1100px; margin-inline: auto; width: 100%; }
-      }
-      @media (min-width: 481px) and (orientation: landscape) and (max-height: 640px) {
-        .chat-card-wrap { min-height: calc(100dvh - 100px); }
-      }
-      /* Touch devices */
-      @media (pointer: coarse) {
-        .btn-primary, .btn-outline, .btn-danger { padding: 12px 18px; font-size: 14px; min-height: 44px; }
-        .tab-btn     { padding: 12px 18px; min-height: 44px; }
-        .tts-btn     { padding: 10px; min-width: 44px; min-height: 44px; bottom: 0; right: 0; }
-        .voice-switch       { width: 52px; height: 30px; }
-        .voice-switch::after{ width: 26px; height: 26px; }
+        .btn-primary, .btn-outline, .btn-danger { padding: 12px 22px; font-size: 14px; min-height: 44px; }
+        .icon-btn { min-width: 44px; min-height: 44px; }
+        .vp { height: 44px; }
+        .msg-copy, .popout-copy { opacity: 1; min-width: 32px; min-height: 32px; padding: 6px; }
+        .tts-btn { padding: 10px; min-width: 44px; min-height: 44px; bottom: 0; right: 0; }
+        .sb-item-actions { opacity: 1; }
+        .sb-item-actions button { min-width: 34px; min-height: 34px; }
+        .voice-switch { width: 52px; height: 30px; }
+        .voice-switch::after { width: 26px; height: 26px; }
         .voice-switch.on::after { left: 24px; }
-        .chat-send   { width: 48px; height: 48px; }
-        .card-icon-btn { min-width: 40px; min-height: 40px; padding: 8px; }
-        .card-icon-btn i { width: 18px; height: 18px; }
-        input[type="text"], input[type="password"], textarea { font-size: 16px; padding: 12px 14px; }
+        input[type="text"], input[type="password"], textarea { font-size: 16px; }
+        .comp-send { width: 44px; height: 44px; }
       }
-      @media (max-width: 1024px) {
-        .history-rail, .history-panel-open { display: none; }
-        .home-grid { flex-direction: column; }
-        .voice-stage { width:100%; }
-        .chat-card-wrap { min-height: auto; max-height: none; }
-        .home-grid .chat-panel { min-height: 62vh; }
+      @media (prefers-reduced-motion: reduce) {
+        .orb-wrap .orb-ring, .sound-wave-bar, .typing-dot, .vp .vp-dot, .chat-avatar .status-dot, .interim-caret, .voice-toast, .vp-spin { animation: none !important; }
+        .orb-wrap .orb-ring { display: none; }
       }
+
     </style>
   </head>
-  <body class="min-h-screen antialiased">
+  <body class="antialiased">
     <div id="app"></div>
     <script>
       'use strict';
@@ -583,6 +579,8 @@
       let SESSION_ID = genSessionId();
 
       const SETTINGS_KEY = 'recast_chatbot_settings';
+      // Legacy key from when history was cached on disk. Never written
+      // anymore — kept only so startup can clear stale data from old builds.
       const HISTORY_KEY  = 'recast_chat_history';
 
       /* ================================================================
@@ -624,6 +622,10 @@
         historyOpen: false,
         historyConfirmDeleteId: null,
         historyQuery: '',
+        // This visit's archived conversations, newest first. MEMORY ONLY by
+        // design: any refresh or tab close wipes it, so visitors never see
+        // each other's chats. (Q&As still log silently to the sheet.)
+        sessionHistory: [],
         composerExpanded: false,
         cardMenuOpen: false,
         settingsUnlocked: false,
@@ -631,6 +633,24 @@
       };
 
       let HISTORY_VIEW = { open: null };
+
+      // Floating pop-out chat (Chrome's Document Picture-in-Picture).
+      // The pop-out gets its own compact DOM built from STATE — nothing is
+      // ever moved out of #app, since render() rebuilds #app's innerHTML
+      // constantly and would orphan any adopted nodes.
+      const PIP = {
+        supported: 'documentPictureInPicture' in window,
+        window: null,     // the open PiP window, or null
+        slotIdx: null,    // slot the pop-out is pinned to
+        opening: false,   // requestWindow() in flight — ignore re-clicks
+        lastHtml: '',     // last message-list HTML, to skip no-op rebuilds
+        collapsed: false, // minimized to the floating blue "R" icon
+        swapping: false,  // mid window-swap — ignore the doomed pagehide
+        restoreSize: null,// window size to bring back on expand
+        unseen: 0,        // answers that landed while collapsed (badge count)
+        flashNext: false, // auto-expanded mid-answer — flash the reply when it lands
+        flashNow: false   // flash the newest answer on the next message rebuild
+      };
 
       const VOICE = {
         srSupported: !!(window.SpeechRecognition || window.webkitSpeechRecognition),
@@ -653,7 +673,9 @@
         lastTtsEndAt: 0,          // for the post-playback echo grace window
         ttsPaused: false,         // recognition paused because TTS is playing
         resumeRecognitionId: null,
-        recentTtsText: ''         // rolling buffer of spoken text for echo matching
+        recentTtsText: '',        // rolling buffer of spoken text for echo matching
+        srRunning: false,         // recognizer actually running (onstart..onend)
+        watchdogId: null          // background-tab restart watchdog interval
       };
 
       // Listening runtime state. Randy listens through the microphone only —
@@ -731,27 +753,18 @@
       }
 
       /* ================================================================
-       * HISTORY (Google Sheet is source of truth; localStorage = fallback)
+       * HISTORY (memory-only, this visit only)
+       *
+       * STATE.sessionHistory is the sole source for the side panel. Nothing
+       * is ever fetched back from the sheet and nothing is persisted to
+       * disk, so each device/session only ever sees its own conversations
+       * and a refresh or tab close starts clean. Q&As still flow UP to the
+       * sheet (postChat / postSaveToSheet) as a silent per-session log.
        * ================================================================ */
 
-      const HISTORY_CACHE = { loaded: false, loading: false, error: null, entries: null };
-
-      function readLocalHistory() {
-        try { return JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]'); } catch { return []; }
-      }
-      function writeLocalHistory(entries) {
-        try { localStorage.setItem(HISTORY_KEY, JSON.stringify(entries)); } catch {}
-      }
-      function getHistory() {
-        if (HISTORY_CACHE.loaded && Array.isArray(HISTORY_CACHE.entries)) return HISTORY_CACHE.entries;
-        return readLocalHistory();
-      }
-
-      // Strip the ===SPOKEN=== voice-summary section that assist answers carry
-      // (it's saved to the sheet as part of the raw reply).
-      function stripSpokenSection(text) {
-        return String(text || '').split(/\n?=+\s*SPOKEN\s*=+\s*\n?/i)[0].trim();
-      }
+      // One-time cleanup: older builds cached synced history on disk under
+      // HISTORY_KEY. Clear it so returning devices don't keep stale chats.
+      try { localStorage.removeItem(HISTORY_KEY); } catch {}
 
       // Assist answers must open with "**Bottom line:**". Models occasionally
       // ad-lib a fake-out first ("Great question! ... Just kidding. Here's
@@ -773,19 +786,6 @@
         const m = t.match(/\*\*\s*bottom\s+line\s*:?\s*\*\*/i);
         if (m && m.index > 0 && m.index < 200) t = t.slice(m.index).trim();
         return t || String(text || '').trim();
-      }
-
-      function normalizeHistoryEntry(e) {
-        const pairs = Array.isArray(e.pairs) ? e.pairs : [];
-        const ts = e.timestamp || 0;
-        return {
-          id: (e.session_id || 'unknown') + '-' + (ts || Date.now()),
-          session_id: e.session_id || '',
-          date: e.date || (ts ? new Date(ts).toLocaleDateString('en-US') : ''),
-          timestamp: ts,
-          pairs: pairs.map(p => ({ question: String(p.question || ''), answer: sanitizeAssistAnswer(stripSpokenSection(p.answer)) })),
-          preview: (pairs[0] && pairs[0].question ? String(pairs[0].question).substring(0, 120) : '') || (e.preview || '')
-        };
       }
 
       function entryMs(entry) {
@@ -866,37 +866,10 @@
           .map(k => ({ label: k, items: groups[k] }));
       }
 
-      async function fetchHistoryFromSheet({ silent = false } = {}) {
-        if (!GSHEET_WEBHOOK) return;
-        HISTORY_CACHE.loading = true;
-        HISTORY_CACHE.error = null;
-        if (!silent) render();
-        try {
-          const url = GSHEET_WEBHOOK + (GSHEET_WEBHOOK.includes('?') ? '&' : '?') + 'action=list_history';
-          const resp = await fetch(url);
-          if (!resp.ok) throw new Error('HTTP ' + resp.status);
-          const data = await resp.json();
-          const list = Array.isArray(data) ? data : (Array.isArray(data.history) ? data.history : []);
-          const normalized = list.map(normalizeHistoryEntry).sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
-          HISTORY_CACHE.entries = normalized;
-          HISTORY_CACHE.loaded = true;
-          writeLocalHistory(normalized);
-        } catch (err) {
-          HISTORY_CACHE.error = err && err.message ? err.message : 'Failed to load history';
-          console.warn('fetchHistoryFromSheet failed:', err);
-        } finally {
-          HISTORY_CACHE.loading = false;
-          render();
-        }
-      }
-
-      // Optimistic local insert; the next sheet refetch reconciles.
-      function saveLocalHistoryEntry(entry) {
-        const history = getHistory().slice();
-        history.unshift(entry);
-        if (history.length > 50) history.length = 50;
-        if (HISTORY_CACHE.loaded) HISTORY_CACHE.entries = history;
-        writeLocalHistory(history);
+      // Newest first; capped so a marathon visit can't grow memory unbounded.
+      function addSessionHistoryEntry(entry) {
+        STATE.sessionHistory.unshift(entry);
+        if (STATE.sessionHistory.length > 50) STATE.sessionHistory.length = 50;
       }
 
       function collectPairs(slot) {
@@ -911,17 +884,16 @@
         return pairs;
       }
 
-      // Tuck the current conversation into History and reset the chat to
-      // empty. The sheet already has every answered Q&A (the client saves
-      // each one in the background), so this is instant and nothing is lost.
-      // Rotating the
-      // session id keeps the sheet's grouping in step with the local entry.
-      // Returns true when something was actually archived.
+      // Tuck the current conversation into this visit's History panel and
+      // reset the chat to empty. The sheet already has every answered Q&A
+      // (the client saves each one in the background), so nothing is lost.
+      // Rotating the session id keeps the sheet's grouping in step with the
+      // local entry. Returns true when something was actually archived.
       function archiveChatToHistory(slot) {
         const pairs = collectPairs(slot);
         if (!pairs.length) return false;
         const ts = Date.now();
-        saveLocalHistoryEntry({
+        addSessionHistoryEntry({
           id: SESSION_ID + '-' + ts,
           session_id: SESSION_ID,
           date: new Date(ts).toLocaleDateString('en-US'),
@@ -931,7 +903,6 @@
         });
         slot.messages = [];
         SESSION_ID = genSessionId();
-        setTimeout(() => fetchHistoryFromSheet({ silent: true }), 800);
         return true;
       }
 
@@ -953,27 +924,10 @@
         render();
       }
 
-      async function deleteHistoryEntry(id) {
-        const entry = getHistory().find(h => h.id === id) || readLocalHistory().find(h => h.id === id);
-        // Optimistic local removal so the UI feels instant.
-        const remaining = getHistory().filter(h => h.id !== id);
-        if (HISTORY_CACHE.loaded) HISTORY_CACHE.entries = remaining;
-        writeLocalHistory(remaining);
-        if (GSHEET_WEBHOOK) {
-          try {
-            await fetch(GSHEET_WEBHOOK, {
-              method: 'POST',
-              mode: 'no-cors',
-              headers: { 'Content-Type': 'application/json' },
-              // Entry ids are session_id + '-' + timestamp, and session ids
-              // contain hyphens themselves — strip only the trailing timestamp.
-              body: JSON.stringify({ action: 'delete_history', id, session_id: entry ? entry.session_id : id.replace(/-\d+$/, '') })
-            });
-          } catch (err) {
-            console.warn('Remote delete failed:', err);
-          }
-        }
-        setTimeout(() => fetchHistoryFromSheet({ silent: true }), 600);
+      // Local-only: removes the entry from this visit's panel. The sheet log
+      // is an untouched audit record — no delete request is ever sent.
+      function deleteHistoryEntry(id) {
+        STATE.sessionHistory = STATE.sessionHistory.filter(h => h.id !== id);
       }
 
       /* ================================================================
@@ -1546,7 +1500,9 @@
           // Transient errors (no-speech, aborted, network) fall through to
           // onend, which restarts as needed.
         };
+        r.onstart = () => { VOICE.srRunning = true; };
         r.onend = () => {
+          VOICE.srRunning = false;
           // Intentionally paused for TTS — scheduleRecognitionResume restarts.
           if (VOICE.ttsPaused) return;
           if (!VOICE.wantRunning || !recognitionWanted()) return;
@@ -1578,6 +1534,26 @@
         VOICE.wantRunning = true;
         try { startRecognitionNow(); }
         catch (e) { /* already started — ignore */ }
+        startRecognitionWatchdog();
+      }
+
+      // Background-tab insurance. Chrome throttles timers in hidden tabs
+      // (e.g. while the user works beside the pop-out chat), so the onend
+      // retry chain can run out of attempts and strand the recognizer in a
+      // dead state after a long silence. This notices "should be listening
+      // but isn't" and kicks it. The live mic capture keeps the tab exempt
+      // from intensive throttling, so the interval still fires while hidden.
+      function startRecognitionWatchdog() {
+        if (VOICE.watchdogId) return;
+        VOICE.watchdogId = setInterval(() => {
+          if (!VOICE.wantRunning || !recognitionWanted()) return;
+          if (VOICE.ttsPaused || VOICE.srRunning) return;
+          try { startRecognitionNow(); } catch {}
+        }, 5000);
+      }
+
+      function stopRecognitionWatchdog() {
+        if (VOICE.watchdogId) { clearInterval(VOICE.watchdogId); VOICE.watchdogId = null; }
       }
 
       // Restart the recognizer so a source change (mic ↔ desktop track) takes
@@ -1597,6 +1573,7 @@
 
       function stopRecognition() {
         VOICE.wantRunning = false;
+        stopRecognitionWatchdog();
         if (VOICE.recognition) {
           try { VOICE.recognition.stop(); } catch {}
         }
@@ -2131,8 +2108,8 @@
       // send save:false so the proxy skips its synchronous sheet append —
       // that append cost ~0.5-2s of SpreadsheetApp time on every answer's
       // critical path. Saving from here instead happens after the answer is
-      // already on screen. Returns the fetch promise so callers can chain
-      // the history refresh behind the completed save.
+      // already on screen. This is the silent per-session log: rows go UP to
+      // the sheet tagged with session_id, and nothing is ever read back.
       function postSaveToSheet({ question, answer, sources, model, sessionId }) {
         if (!GSHEET_WEBHOOK || !question || !answer) return Promise.resolve();
         return fetch(GSHEET_WEBHOOK, {
@@ -2183,6 +2160,9 @@
 
         if (viaVoice) initTtsQueue(idx, controller.signal, assistantMsgIdx);
 
+        // If the pop-out is sitting collapsed, a new question should bring
+        // it back so the reply is visible.
+        pipAutoExpand();
         render();
         scrollChat();
 
@@ -2215,6 +2195,7 @@
           if (Array.isArray(data.sources) && data.sources.length) {
             slot.messages[assistantMsgIdx].sources = data.sources.slice(0, 6);
           }
+          notePipAnswerArrived();
 
           if (viaVoice && slot.ttsQueue) {
             const sentenceRe = /[^.!?]+[.!?]+(?:\s+|$)|[^.!?]+$/g;
@@ -2234,7 +2215,7 @@
             sources: data.sources,
             model: body.model,
             sessionId: sessionIdAtSend
-          }).then(() => fetchHistoryFromSheet({ silent: true }));
+          });
         } catch (err) {
           if (err && err.name === 'AbortError') {
             const placeholder = slot.messages[assistantMsgIdx];
@@ -2247,6 +2228,7 @@
             if (placeholder && placeholder.role === 'assistant') placeholder.content = errMsg;
             else slot.messages.push({ role: 'assistant', content: errMsg });
             if (viaVoice) teardownTtsQueue(idx);
+            notePipAnswerArrived();
           }
         }
 
@@ -2283,6 +2265,9 @@
         slot.messages.push({ role: 'assistant', content: '', kind: 'assist' });
         const assistantMsgIdx = slot.messages.length - 1;
 
+        // A question was overheard — bring the collapsed pop-out icon back
+        // so the user watches the answer arrive.
+        pipAutoExpand();
         render();
         scrollChat();
 
@@ -2337,19 +2322,20 @@
           if (slot.speakAnswers && spoken) {
             speakText(spoken, idx, assistantMsgIdx);
           }
+          notePipAnswerArrived();
           TECH.answered++;
           TECH.recentPairs.push({ question, answer: msg.content });
           while (TECH.recentPairs.length > ASSIST.HISTORY_PAIRS) TECH.recentPairs.shift();
 
           // Save the raw reply (same text the proxy used to append) in the
-          // background, then refresh history once the row actually exists.
+          // background.
           postSaveToSheet({
             question,
             answer: String(data.reply || ''),
             sources: data.sources,
             model: MODELS.assist,
             sessionId: sessionIdAtSend
-          }).then(() => fetchHistoryFromSheet({ silent: true }));
+          });
         } catch (err) {
           if (err && err.name === 'AbortError') {
             const placeholder = slot.messages[assistantMsgIdx];
@@ -2362,6 +2348,7 @@
             const placeholder = slot.messages[assistantMsgIdx];
             const errMsg = '⚠️ ' + (err.message || 'Connection failed. Check your internet connection and try again.');
             if (placeholder && placeholder.role === 'assistant') placeholder.content = errMsg;
+            notePipAnswerArrived();
           }
         }
 
@@ -2390,18 +2377,6 @@
         STATE.slots[idx].inputText = '';
         STATE.slots[idx].loading = false;
         render();
-      }
-
-      // The proxy auto-saves every Q&A; this just confirms and refreshes.
-      async function saveToSheet(slotIdx) {
-        const slot = STATE.slots[slotIdx];
-        if (!slot) return;
-        const pairs = slot.messages.filter((m, i) =>
-          m.role === 'user' && slot.messages[i + 1]?.role === 'assistant'
-        ).length;
-        if (pairs === 0) { showToast('No Q&A pairs yet'); return; }
-        showToast('Auto-saved ' + pairs + ' Q&A pair' + (pairs !== 1 ? 's' : '') + ' to the sheet');
-        fetchHistoryFromSheet({ silent: true });
       }
 
       /* ================================================================
@@ -2441,39 +2416,24 @@
         const root = document.getElementById('app');
         const scroll = captureScroll();
         root.innerHTML = `
-          <header class="app-bar">
-            <div class="app-shell mx-auto px-4 flex items-center justify-between gap-3" style="height:60px">
-              <div class="flex items-center gap-3">
-                <div class="brand-mark">
-                  <span class="re"><span class="b1">Re</span><span class="b2">cast</span><span class="pl">+</span></span>
-                </div>
-                <span class="brand-tag">Randy · SE Assistant</span>
-              </div>
-              <div class="flex gap-1 p-1 rounded-lg ring-1 ring-slate-200 bg-white/70">
-                <button class="tab-btn ${STATE.activeTab==='home'?'active':''}" data-action="switch-tab" data-tab="home">
-                  <i data-lucide="messages-square" class="w-4 h-4"></i> Chat
-                </button>
-                <button class="tab-btn ${STATE.activeTab==='settings'?'active':''}" data-action="switch-tab" data-tab="settings" title="Settings" aria-label="Settings">
-                  <i data-lucide="settings" class="w-4 h-4"></i>
-                </button>
-              </div>
-            </div>
-          </header>
-          <main class="app-shell mx-auto px-4 pb-6 mt-3">
-            ${STATE.activeTab === 'home' ? renderHome() : renderSettings()}
-          </main>
-          ${renderExpanded()}
+          <div class="app-frame">
+            ${renderSidebar()}
+            <div class="sidebar-scrim ${STATE.historyOpen ? 'show' : ''}" data-action="toggle-history"></div>
+            <main class="main-col" data-screen-label="${STATE.activeTab === 'home' ? (HISTORY_VIEW.open ? 'Saved conversation' : 'Chat') : 'Settings'}">
+              ${STATE.activeTab === 'home' ? renderMain() : renderSettingsShell()}
+            </main>
+          </div>
           ${renderToast()}
         `;
         if (window.lucide?.createIcons) try { window.lucide.createIcons(); } catch {}
         restoreScroll(scroll);
         bindEvents();
+        if (PIP.window) renderPip();
       }
 
-      /* ---------- left panel: orb + technical assistance ---------- */
+      /* ---------- voice state machine (shared by hero orb + header pill) ---------- */
 
-      function renderVoiceStage(slot, idx) {
-        const name = escHtml(slot.voiceName || slot.label);
+      function voiceModel(slot, idx) {
         const on = !!slot.listenOn;
         const isSpeaking = !!slot.isSpeaking;
         const loading = !!slot.loading;
@@ -2481,202 +2441,276 @@
         const inConversation = on && VOICE.activeSlot === idx && !loading && !isSpeaking &&
           (VOICE.conversationMode || VOICE.awaitingCommand);
 
-        let orbClass, orbInner, action, title, statusText, statusClass, live = false;
-        if (!sr) {
-          orbClass = 'off'; orbInner = '<i data-lucide="mic-off" class="w-9 h-9"></i>';
-          action = 'noop'; title = 'Randy needs Chrome or Edge';
-          statusText = 'Use Chrome or Edge to talk to Randy'; statusClass = 'off';
-        } else if (isSpeaking) {
-          orbClass = 'speaking';
-          orbInner = '<span class="sound-wave"><span class="sound-wave-bar"></span><span class="sound-wave-bar"></span><span class="sound-wave-bar"></span></span>';
-          action = 'stop-speaking'; title = 'Tap to stop Randy talking';
-          statusText = 'Talking…'; statusClass = 'speaking';
-        } else if (loading) {
-          orbClass = 'thinking';
-          orbInner = '<span class="orb-dots"><span class="typing-dot"></span><span class="typing-dot"></span><span class="typing-dot"></span></span>';
-          action = 'exit-conversation'; title = 'Tap to cancel';
-          statusText = 'Thinking…'; statusClass = '';
-        } else if (inConversation) {
-          orbClass = 'listening'; orbInner = '<i data-lucide="mic" class="w-9 h-9"></i>';
-          action = 'exit-conversation'; title = 'Randy is listening to you — tap to stop';
-          statusText = 'Listening to you — ask away'; statusClass = 'listening'; live = true;
-        } else if (on) {
-          orbClass = 'monitor'; orbInner = '<i data-lucide="mic" class="w-9 h-9"></i>';
-          action = 'toggle-listen'; title = 'Randy is on — tap to turn him off';
-          statusText = 'Listening for questions…';
-          statusClass = 'listening'; live = true;
-        } else {
-          orbClass = 'off'; orbInner = '<i data-lucide="mic-off" class="w-9 h-9"></i>';
-          action = 'toggle-listen'; title = 'Tap to turn Randy on';
-          statusText = 'Off — tap the mic to start'; statusClass = 'off';
-        }
+        if (!sr) return {
+          orbClass: 'off', orbInner: '<i data-lucide="mic-off" class="w-8 h-8"></i>',
+          action: 'noop', title: 'Randy needs Chrome or Edge', disabled: true, live: false,
+          statusText: 'Use Chrome or Edge to talk to Randy', statusClass: 'off',
+          pill: 'off', pillLabel: 'Voice needs Chrome', pillIcon: '<i data-lucide="mic-off" class="w-4 h-4"></i>'
+        };
+        if (isSpeaking) return {
+          orbClass: 'speaking', orbInner: '<span class="sound-wave"><span class="sound-wave-bar"></span><span class="sound-wave-bar"></span><span class="sound-wave-bar"></span></span>',
+          action: 'stop-speaking', title: 'Click to stop Randy talking', disabled: false, live: false,
+          statusText: 'Talking…', statusClass: 'speaking',
+          pill: 'speak', pillLabel: 'Stop talking', pillIcon: '<span class="sound-wave vp-wave"><span class="sound-wave-bar"></span><span class="sound-wave-bar"></span><span class="sound-wave-bar"></span></span>'
+        };
+        if (loading) return {
+          orbClass: 'thinking', orbInner: '<span class="orb-dots"><span class="typing-dot"></span><span class="typing-dot"></span><span class="typing-dot"></span></span>',
+          action: 'exit-conversation', title: 'Click to cancel', disabled: false, live: false,
+          statusText: 'Thinking…', statusClass: '',
+          pill: 'think', pillLabel: 'Thinking…', pillIcon: '<i data-lucide="loader-circle" class="w-4 h-4 vp-spin"></i>'
+        };
+        if (inConversation) return {
+          orbClass: 'listening', orbInner: '<i data-lucide="mic" class="w-8 h-8"></i>',
+          action: 'exit-conversation', title: 'Randy is listening to you — click to stop', disabled: false, live: true,
+          statusText: 'Listening to you — ask away', statusClass: 'listening',
+          pill: 'live', pillLabel: 'Listening to you', pillIcon: '<span class="vp-dot"></span>'
+        };
+        if (on) return {
+          orbClass: 'monitor', orbInner: '<i data-lucide="mic" class="w-8 h-8"></i>',
+          action: 'toggle-listen', title: 'Randy is on — click to turn him off', disabled: false, live: true,
+          statusText: 'Listening for questions…', statusClass: 'listening',
+          pill: 'on', pillLabel: 'Listening', pillIcon: '<span class="vp-dot"></span>'
+        };
+        return {
+          orbClass: 'off', orbInner: '<i data-lucide="mic" class="w-8 h-8"></i>',
+          action: 'toggle-listen', title: 'Click to turn Randy on', disabled: false, live: false,
+          statusText: 'Off — click the mic to start', statusClass: 'off',
+          pill: 'go', pillLabel: 'Turn on Randy', pillIcon: '<i data-lucide="mic" class="w-4 h-4"></i>'
+        };
+      }
 
-        // While Randy is busy talking or thinking, the orb does something
-        // else, so show a small "turn off" link to keep OFF one tap away.
-        const offLink = sr && on && (isSpeaking || loading || inConversation)
-          ? `<button class="stage-mutebtn" data-action="toggle-listen"><i data-lucide="power" class="w-3 h-3"></i>Turn Randy off</button>`
-          : '';
+      /* ---------- sidebar ---------- */
 
-        const disabled = action === 'noop' ? 'disabled' : '';
-
+      function renderSidebarItem(h) {
+        const confirming = STATE.historyConfirmDeleteId === h.id;
+        const active = HISTORY_VIEW.open === h.id;
         return `
-          <div class="voice-stage">
-            <span class="plus" style="top:16px;right:26px;font-size:20px">+</span>
-            <span class="plus" style="top:120px;right:38px;font-size:13px">+</span>
-            <span class="plus" style="bottom:92px;left:22px;font-size:16px">+</span>
-            <div class="stage-eyebrow">Voice Assistant</div>
-            <div class="orb-wrap ${live ? 'live' : ''}">
-              <span class="orb-ring"></span>
-              <span class="orb-ring d"></span>
-              <button class="voice-orb ${orbClass}" title="${escAttr(title)}" aria-label="${escAttr(title)}" data-action="${action}" data-idx="${idx}" ${disabled}>
-                ${orbInner}
-              </button>
+          <div class="sb-item ${active ? 'active' : ''}${confirming ? ' confirming' : ''}" role="button" tabindex="0" data-action="${confirming ? 'noop' : 'view-history'}" data-id="${escAttr(h.id)}" title="Open saved conversation">
+            <div class="sb-item-body">
+              <div class="sb-item-title">${escHtml(h.preview || 'Untitled conversation')}</div>
+              <div class="sb-item-meta">${escHtml(formatHistoryTime(h))}${h.pairs.length > 1 ? ' · ' + h.pairs.length + ' Q&amp;As' : ''}</div>
+              ${confirming ? `
+                <div class="sb-confirm">
+                  <span>Delete this conversation?</span>
+                  <button class="no" data-action="cancel-delete-history" data-id="${escAttr(h.id)}">Cancel</button>
+                  <button class="ok" data-action="confirm-delete-history-yes" data-id="${escAttr(h.id)}">Delete</button>
+                </div>
+              ` : ''}
             </div>
-            <div class="stage-name">${name}</div>
-            <div class="stage-role">Your Recast product expert. He listens, spots tech questions, and answers them in the chat.</div>
-            <div class="stage-status ${statusClass}"><span class="st-dot"></span>${statusText}</div>
-            ${offLink}
-            ${renderListenCard(slot)}
+            ${confirming ? '' : `
+              <div class="sb-item-actions">
+                <button data-action="load-history" data-id="${escAttr(h.id)}" title="Continue in chat" aria-label="Continue in chat">
+                  <i data-lucide="message-circle-plus" class="w-3.5 h-3.5"></i>
+                </button>
+                <button class="danger" data-action="confirm-delete-history" data-id="${escAttr(h.id)}" title="Delete" aria-label="Delete">
+                  <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                </button>
+              </div>
+            `}
           </div>`;
       }
 
-      function renderListenCard(slot) {
-        const on = !!slot.listenOn;
-        const last = TECH.decisions[TECH.decisions.length - 1];
-        const inConvo = VOICE.awaitingCommand || VOICE.conversationMode;
-        const statusLine = !on ? ''
-          : TECH.pending
-            ? 'Checking a question…'
-            : 'Listening · ' + TECH.answered + ' answered / ' + TECH.heard + ' heard';
+      function renderSidebar() {
+        const history = STATE.sessionHistory;
+        const filtered = filterHistory(history, STATE.historyQuery);
         return `
-          <div class="assist-card">
-            <div class="ac-row" style="margin-top:0">
-              <span class="ac-label"><i data-lucide="${slot.speakAnswers ? 'volume-2' : 'volume-x'}" class="w-3.5 h-3.5"></i>Read answers out loud</span>
-              <div class="voice-switch ${slot.speakAnswers ? 'on' : ''}" role="switch" aria-checked="${!!slot.speakAnswers}" tabindex="0"
-                   title="${slot.speakAnswers ? 'Randy reads each answer out loud' : 'Answers show in the chat only'}"
-                   data-action="toggle-speak-answers"></div>
+          <aside class="sidebar ${STATE.historyOpen ? 'open' : ''}" data-screen-label="Sidebar">
+            <div class="sb-brand">
+              <span class="sb-logo"><span class="lg-re">Re</span>cast</span>
+              <span class="sb-tagline">SE Assistant</span>
+              <button class="sb-close" data-action="toggle-history" title="Close menu" aria-label="Close menu">
+                <i data-lucide="x" class="w-4 h-4"></i>
+              </button>
             </div>
-            ${on ? `
-              <div class="ac-status">
-                <span class="acs-dot ${TECH.pending ? 'thinking' : ''}"></span>
-                <span>${escHtml(statusLine)}</span>
+            <button class="sb-new" data-action="new-chat" title="Start a new chat — the current one is saved below">
+              <i data-lucide="square-pen" class="w-4 h-4"></i>New chat
+            </button>
+            ${history.length > 0 ? `
+              <div class="sb-search">
+                <i data-lucide="search" class="sb-search-ic w-3.5 h-3.5"></i>
+                <input type="text" id="history-search" placeholder="Search conversations" value="${escAttr(STATE.historyQuery)}" autocomplete="off" aria-label="Search saved conversations" />
+                ${STATE.historyQuery ? `
+                  <button class="sb-search-clear" data-action="clear-history-search" title="Clear search" aria-label="Clear search">
+                    <i data-lucide="x" class="w-3 h-3"></i>
+                  </button>
+                ` : ''}
               </div>
-              <div class="ac-live ${VOICE.interimText ? 'hearing' : ''}" id="live-transcript">
-                <div class="ac-live-label"><i data-lucide="audio-lines" class="w-3 h-3"></i>Hearing live</div>
-                <div class="ac-live-text"><span id="live-transcript-text">${escHtml(VOICE.interimText || '')}</span><span class="interim-caret">▊</span></div>
+            ` : ''}
+            <div class="sb-label">Conversations</div>
+            <div class="sb-list history-panel-open">
+              ${history.length === 0 ? `
+                <div class="sb-empty">Finished chats from this visit show up here.<br>History clears when the page closes.</div>
+              ` : filtered.length === 0 ? `
+                <div class="sb-empty">No conversations match &ldquo;${escHtml(truncate(STATE.historyQuery.trim(), 30))}&rdquo;.</div>
+              ` : groupHistoryByBucket(filtered).map(g => `
+                <div class="sb-group">
+                  <div class="sb-group-head">${escHtml(g.label)}</div>
+                  ${g.items.map(h => renderSidebarItem(h)).join('')}
+                </div>
+              `).join('')}
+            </div>
+            <div class="sb-foot">
+              <button class="sb-foot-btn ${STATE.activeTab === 'settings' ? 'active' : ''}" data-action="switch-tab" data-tab="settings">
+                <i data-lucide="settings" class="w-4 h-4"></i>Settings
+              </button>
+            </div>
+          </aside>`;
+      }
+
+      /* ---------- main column ---------- */
+
+      function renderMain() {
+        if (HISTORY_VIEW.open) {
+          const entry = STATE.sessionHistory.find(h => h.id === HISTORY_VIEW.open);
+          if (entry) return renderSavedView(entry);
+        }
+        return renderChat(STATE.slots[0], 0);
+      }
+
+      function renderVoicePill(vm, idx) {
+        return `
+          <button class="vp ${vm.pill}" data-action="${vm.action}" data-idx="${idx}" title="${escAttr(vm.title)}" ${vm.disabled ? 'disabled' : ''}>
+            ${vm.pillIcon}<span class="vp-label">${vm.pillLabel}</span>
+          </button>`;
+      }
+
+      function renderChatHeader(slot, idx, vm) {
+        const on = !!slot.listenOn;
+        const sub = slot.isSpeaking ? 'Talking…'
+          : slot.loading ? 'Thinking…'
+          : vm.live && vm.statusClass === 'listening' && vm.pill === 'live' ? 'Listening to you…'
+          : on ? 'Listening for tech questions'
+          : 'Online · Recast product expert';
+        return `
+          <header class="chat-head">
+            <button class="icon-btn sb-toggle" data-action="toggle-history" title="Conversations" aria-label="Open conversations">
+              <i data-lucide="panel-left" class="w-5 h-5"></i>
+            </button>
+            <div class="chat-avatar ${on ? '' : 'muted'}">${escHtml(slot.label.charAt(0))}<span class="status-dot"></span></div>
+            <div class="head-titles">
+              <div class="conv-title">${escHtml(slot.label)}</div>
+              <div class="conv-sub">${sub}</div>
+            </div>
+            <div class="head-actions">
+              ${renderVoicePill(vm, idx)}
+              ${PIP.supported ? `
+                <button class="icon-btn ${PIP.window ? 'active' : ''}" title="${PIP.window ? 'Close the pop-out chat window' : 'Pop out chat — floats on top while you use other apps'}" aria-label="${PIP.window ? 'Close pop-out chat' : 'Pop out chat'}" data-action="pop-out-chat" data-idx="${idx}">
+                  <i data-lucide="picture-in-picture-2" class="w-5 h-5"></i>
+                </button>
+              ` : ''}
+              <button class="icon-btn" title="More actions" aria-label="More actions" aria-haspopup="true" aria-expanded="${STATE.cardMenuOpen ? 'true' : 'false'}" data-action="toggle-card-menu" data-idx="${idx}">
+                <i data-lucide="more-vertical" class="w-5 h-5"></i>
+              </button>
+            </div>
+            ${STATE.cardMenuOpen ? `
+              <div class="overflow-menu" data-menu="card">
+                <button data-action="new-chat">
+                  <i data-lucide="square-pen" class="w-4 h-4"></i> New chat
+                </button>
+                <button data-action="toggle-speak-answers">
+                  <i data-lucide="${slot.speakAnswers ? 'volume-2' : 'volume-x'}" class="w-4 h-4"></i> Read answers aloud
+                  <span class="menu-toggle-state ${slot.speakAnswers ? 'on' : ''}">${slot.speakAnswers ? 'ON' : 'OFF'}</span>
+                </button>
+                ${on ? `
+                  <button data-action="toggle-listen">
+                    <i data-lucide="power" class="w-4 h-4"></i> Turn Randy off
+                  </button>
+                ` : ''}
+                <hr>
+                <button class="danger" data-action="clear-chat" data-idx="${idx}" ${slot.messages.length === 0 ? 'disabled' : ''}>
+                  <i data-lucide="trash-2" class="w-4 h-4"></i> Clear chat
+                </button>
+              </div>
+            ` : ''}
+          </header>`;
+      }
+
+      function renderLiveStrip(slot, idx) {
+        const inConvo = VOICE.awaitingCommand || VOICE.conversationMode;
+        const last = TECH.decisions[TECH.decisions.length - 1];
+        const stats = TECH.pending ? 'Checking a question…' : TECH.answered + ' answered · ' + TECH.heard + ' heard';
+        return `
+          <div class="live-strip">
+            <span class="sound-wave ls-wave" aria-hidden="true"><span class="sound-wave-bar"></span><span class="sound-wave-bar"></span><span class="sound-wave-bar"></span></span>
+            <div class="ls-body">
+              <div class="ls-top">
+                <span class="ls-title">${inConvo ? 'Listening to you' : 'Listening for tech questions'}</span>
+                <span class="ls-stats ${TECH.pending ? 'busy' : ''}">${escHtml(stats)}</span>
+              </div>
+              <div class="ls-live ac-live ${VOICE.interimText ? 'hearing' : ''}" id="live-transcript">
+                <span class="ls-live-text"><span id="live-transcript-text">${escHtml(VOICE.interimText || '')}</span><span class="interim-caret">▊</span></span>
                 ${inConvo ? `<button class="ac-cancel" title="Cancel — don't send this" data-action="cancel-pending" data-idx="0">Cancel</button>` : ''}
               </div>
               ${last ? `
-                <div class="ac-last">
-                  <i data-lucide="${last.accepted ? 'check' : 'minus'}" class="w-3 h-3 ${last.accepted ? 'ok' : 'skip'}" style="margin-top:1px"></i>
-                  <span class="txt">${escHtml(truncate(last.text, 110))} (${Math.round((last.confidence || 0) * 100)}%)</span>
+                <div class="ls-last">
+                  <i data-lucide="${last.accepted ? 'check' : 'minus'}" class="w-3 h-3 ${last.accepted ? 'ok' : 'skip'}"></i>
+                  <span>${escHtml(truncate(last.text, 90))} · ${Math.round((last.confidence || 0) * 100)}%</span>
                 </div>
-              ` : '<div class="ac-last"><span class="txt" style="font-style:italic">Waiting for a question…</span></div>'}
-            ` : ''}
+              ` : ''}
+            </div>
+            <div class="ls-controls">
+              <label class="ls-speak" title="${slot.speakAnswers ? 'Randy reads each answer out loud' : 'Answers show in the chat only'}">
+                <span>Read aloud</span>
+                <span class="voice-switch ${slot.speakAnswers ? 'on' : ''}" role="switch" aria-checked="${!!slot.speakAnswers}" tabindex="0" data-action="toggle-speak-answers"></span>
+              </label>
+              <button class="ls-off" data-action="toggle-listen" title="Turn Randy off">Turn off</button>
+            </div>
           </div>`;
       }
 
-      /* ---------- home grid ---------- */
-
-      function renderHome() {
-        const history = getHistory();
-        const filtered = filterHistory(history, STATE.historyQuery);
-        const open = STATE.historyOpen;
+      function renderHero(slot, idx, vm) {
         return `
-          <div class="home-grid chat-card-wrap">
-            ${renderVoiceStage(STATE.slots[0], 0)}
-            ${renderCard(STATE.slots[0], 0)}
-            ${open ? `
-              <div class="history-panel history-panel-open">
-                <div class="flex items-center justify-between" style="margin-bottom:4px">
-                  <h3 class="saved-head">Saved Conversations${HISTORY_CACHE.loading ? ' <span style=\"font-weight:400;color:#94a3b8\">· loading…</span>' : ''}</h3>
-                  <div class="flex items-center gap-1">
-                    <button class="card-icon-btn" title="Refresh" aria-label="Refresh saved conversations" data-action="refresh-history" ${HISTORY_CACHE.loading ? 'disabled' : ''}>
-                      <i data-lucide="refresh-cw" class="w-4 h-4"></i>
-                    </button>
-                    <button class="card-icon-btn" title="Collapse" aria-label="Collapse saved conversations" data-action="toggle-history">
-                      <i data-lucide="chevron-right" class="w-4 h-4"></i>
-                    </button>
-                  </div>
+          <div class="hero">
+            <div class="orb-wrap ${vm.live ? 'live' : ''}">
+              <span class="orb-ring"></span>
+              <span class="orb-ring d"></span>
+              <button class="voice-orb ${vm.orbClass}" title="${escAttr(vm.title)}" aria-label="${escAttr(vm.title)}" data-action="${vm.action}" data-idx="${idx}" ${vm.disabled ? 'disabled' : ''}>
+                ${vm.orbInner}
+              </button>
+            </div>
+            <div class="hero-name">${escHtml(slot.voiceName || slot.label)}</div>
+            <div class="hero-sub">Your Recast product expert. Turn him on and he listens to the call, spots technical questions, and answers them here — or just type below.</div>
+            <div class="hero-status ${vm.statusClass}"><span class="st-dot"></span>${vm.statusText}</div>
+          </div>`;
+      }
+
+      function renderChat(slot, idx) {
+        const vm = voiceModel(slot, idx);
+        return `
+          ${renderChatHeader(slot, idx, vm)}
+          ${slot.listenOn && VOICE.srSupported ? renderLiveStrip(slot, idx) : ''}
+          <div id="home-scroll-${idx}" class="msg-scroll">
+            <div class="msg-col">
+              ${slot.messages.length === 0 ? renderHero(slot, idx, vm) : slot.messages.map((m, mi) => `
+                <div class="msg-row ${m.role === 'user' ? 'me' : ''}">
+                  ${m.role === 'user' ? renderUserMessage(m) : renderBotMessage(slot, m, mi, idx)}
                 </div>
-                ${history.length > 0 ? `
-                  <div class="saved-search">
-                    <i data-lucide="search" class="saved-search-icon w-3.5 h-3.5"></i>
-                    <input type="text" id="history-search" placeholder="Search conversations…" value="${escAttr(STATE.historyQuery)}" autocomplete="off" aria-label="Search saved conversations" />
-                    ${STATE.historyQuery ? `
-                      <button class="saved-search-clear" data-action="clear-history-search" title="Clear search" aria-label="Clear search">
-                        <i data-lucide="x" class="w-3 h-3"></i>
-                      </button>
-                    ` : ''}
-                  </div>
-                ` : ''}
-                ${HISTORY_CACHE.error && history.length === 0 ? `
-                  <div style="text-align:center;padding:24px 12px;color:#ef4444;font-size:12px">
-                    Couldn't load from Google Sheet.<br>
-                    <span style="color:#94a3b8">${escHtml(HISTORY_CACHE.error)}</span><br>
-                    <button class="btn-outline" style="margin-top:10px;padding:6px 12px;min-height:auto;font-size:12px" data-action="refresh-history">Retry</button>
-                  </div>
-                ` : history.length === 0 ? `
-                  <div class="saved-empty">${HISTORY_CACHE.loading ? 'Loading from Google Sheet…' : 'No saved conversations yet.<br>Every answered question is saved automatically.'}</div>
-                ` : filtered.length === 0 ? `
-                  <div class="saved-empty">No conversations match “${escHtml(truncate(STATE.historyQuery.trim(), 40))}”.</div>
-                ` : `
-                  <div class="saved-list">
-                    ${groupHistoryByBucket(filtered).map(g => `
-                      <div class="saved-group">
-                        <div class="saved-group-head">${escHtml(g.label)}</div>
-                        ${g.items.map(h => {
-                          const confirming = STATE.historyConfirmDeleteId === h.id;
-                          const itemAction = confirming ? 'noop' : 'view-history';
-                          const pairCount = h.pairs.length;
-                          return `
-                          <div class="saved-item${confirming ? ' confirming' : ''}" role="button" tabindex="0" data-action="${itemAction}" data-id="${escAttr(h.id)}" title="Open saved conversation">
-                            <div class="saved-icon"><i data-lucide="message-square-text" class="w-4 h-4"></i></div>
-                            <div class="saved-body">
-                              <div class="saved-title">${escHtml(h.preview || 'Untitled conversation')}</div>
-                              <div class="saved-meta">
-                                <span>${escHtml(formatHistoryTime(h))}</span>
-                                ${pairCount > 1 ? `<span class="sep"></span><span>${pairCount} Q&As</span>` : ''}
-                              </div>
-                              ${confirming ? `
-                                <div class="saved-confirm">
-                                  <span class="label">Delete this conversation?</span>
-                                  <button class="no" data-action="cancel-delete-history" data-id="${escAttr(h.id)}">Cancel</button>
-                                  <button class="ok" data-action="confirm-delete-history-yes" data-id="${escAttr(h.id)}">Delete</button>
-                                </div>
-                              ` : ''}
-                            </div>
-                            <div class="saved-actions">
-                              <button data-action="load-history" data-id="${escAttr(h.id)}" title="Continue in chat" aria-label="Continue in chat">
-                                <i data-lucide="message-circle-plus" class="w-3.5 h-3.5"></i>
-                              </button>
-                              <button class="danger" data-action="confirm-delete-history" data-id="${escAttr(h.id)}" title="Delete" aria-label="Delete">
-                                <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
-                              </button>
-                            </div>
-                          </div>`;
-                        }).join('')}
-                      </div>
-                    `).join('')}
-                  </div>
-                `}
-              </div>
-            ` : `
-              <div class="history-rail" role="button" tabindex="0" title="Saved conversations (${history.length})${HISTORY_CACHE.loading ? ' — loading…' : ''}" aria-label="Show saved conversations" data-action="toggle-history">
-                <i data-lucide="${HISTORY_CACHE.loading ? 'loader' : 'history'}" class="w-5 h-5${HISTORY_CACHE.loading ? ' rail-spin' : ''}"></i>
-                ${history.length > 0 ? `<span class="history-rail-badge">${history.length}</span>` : ''}
-              </div>
-            `}
+              `).join('')}
+              ${slot.loading ? `
+                <div class="msg-row">
+                  <div class="msg-av">${escHtml(slot.label.charAt(0))}</div>
+                  <div class="chat-bubble chat-bot typing"><span class="typing-dot"></span><span class="typing-dot"></span><span class="typing-dot"></span></div>
+                </div>
+              ` : ''}
+            </div>
           </div>
-          ${renderHistoryPopout()}`;
+          <div class="composer-zone">
+            <div class="composer">
+              <textarea id="home-input-${idx}" class="composer-input" rows="1" placeholder="Message ${escAttr(slot.label)}…" ${slot.loading ? 'disabled' : ''}>${escHtml(slot.inputText || '')}</textarea>
+              <button class="comp-send" data-action="send-home" data-idx="${idx}" title="Send message" aria-label="Send message" ${(slot.loading || !(slot.inputText || '').trim()) ? 'disabled' : ''}>
+                <i data-lucide="arrow-up" class="w-5 h-5"></i>
+              </button>
+            </div>
+          </div>`;
       }
 
       /* ---------- message rendering ---------- */
 
       function renderBotMessage(slot, m, mi, slotIdx) {
+        const av = `<div class="msg-av">${escHtml(slot.label.charAt(0))}</div>`;
         if (m.kind === 'assist') {
           const srcs = Array.isArray(m.sources) ? m.sources : [];
-          return `
+          return `${av}
             <div class="msg-wrap"><div class="chat-bubble chat-bot chat-md" style="padding-right:38px;white-space:normal">
               <div class="assist-badge"><i data-lucide="ear" class="w-3 h-3"></i>Technical assist</div>
               ${mdToHtml(m.content)}
@@ -2686,7 +2720,7 @@
                 </a>`).join('')}</div>` : ''}
             </div>${copyBtnHtml(slotIdx, mi)}${speakerBtnHtml(slotIdx, mi)}</div>`;
         }
-        return `<div class="msg-wrap"><div class="chat-bubble chat-bot" style="padding-right:38px">${escHtml(m.content).replace(/\n/g, '<br>')}</div>${copyBtnHtml(slotIdx, mi)}${speakerBtnHtml(slotIdx, mi)}</div>`;
+        return `${av}<div class="msg-wrap"><div class="chat-bubble chat-bot" style="padding-right:38px">${escHtml(m.content).replace(/\n/g, '<br>')}</div>${copyBtnHtml(slotIdx, mi)}${speakerBtnHtml(slotIdx, mi)}</div>`;
       }
 
       function renderUserMessage(m) {
@@ -2708,219 +2742,83 @@
         return `<button class="tts-btn ${isPlayingThis ? 'playing' : ''}" title="${title}" aria-label="${title}" data-action="tts-speak" data-slot="${slotIdx}" data-msg="${msgIdx}"><i data-lucide="${icon}" class="w-3 h-3"></i></button>`;
       }
 
-      function renderCard(slot, idx) {
-        const msgs = slot.messages;
-        const composerExpanded = STATE.composerExpanded;
-        const hasText = (slot.inputText || '').trim().length > 0;
-        const on = !!slot.listenOn;
-        const isSpeaking = !!slot.isSpeaking;
-        const inConversation = VOICE.conversationMode && VOICE.activeSlot === idx;
-        const isListening = on && !slot.loading && !isSpeaking &&
-          (inConversation || (VOICE.activeSlot === idx && VOICE.awaitingCommand));
+      /* ---------- saved conversation (read-only, opens in place) ---------- */
 
+      function renderSavedView(entry) {
+        const confirming = STATE.historyConfirmDeleteId === entry.id;
+        const pairCount = entry.pairs.length;
         return `
-          <div class="chat-panel ${composerExpanded ? 'composer-expanded' : ''}" style="position:relative">
-            <div class="conv-header">
-              <div class="chat-avatar ${on ? '' : 'muted'}" style="background:var(--primary);width:34px;height:34px;font-size:13px">
-                ${escHtml(slot.label.charAt(0))}
-                <span class="status-dot"></span>
+          <div class="saved-view history-popout">
+            <header class="chat-head">
+              <button class="icon-btn sb-toggle" data-action="toggle-history" title="Conversations" aria-label="Open conversations">
+                <i data-lucide="panel-left" class="w-5 h-5"></i>
+              </button>
+              <button class="icon-btn" data-action="close-history" title="Back to current chat" aria-label="Back to current chat">
+                <i data-lucide="arrow-left" class="w-5 h-5"></i>
+              </button>
+              <div class="head-titles">
+                <div class="conv-title">${escHtml(entry.preview || 'Saved conversation')}</div>
+                <div class="conv-sub">Saved · ${escHtml(formatHistoryDate(entry))} · ${pairCount === 1 ? '1 Q&amp;A' : pairCount + ' Q&amp;As'}</div>
               </div>
-              <div style="flex:1;min-width:0">
-                <div class="conv-title">${escHtml(slot.label)}</div>
-                <div class="conv-sub">${
-                  isSpeaking ? 'Talking…'
-                  : isListening ? 'Listening to you…'
-                  : slot.loading ? 'Thinking…'
-                  : on ? `<i data-lucide="ear" class="w-3 h-3 inline" style="vertical-align:-2px;margin-right:4px"></i>Listening for tech questions`
-                  : 'Online · Recast product expert'
-                }</div>
-              </div>
-              <button class="new-chat-btn" title="Start a new chat — this one is saved in History" data-action="new-chat">
-                <i data-lucide="plus" class="w-3.5 h-3.5"></i>New chat
-              </button>
-              <button class="overflow-btn" title="More actions" aria-label="More actions" aria-haspopup="true" aria-expanded="${STATE.cardMenuOpen ? 'true' : 'false'}" data-action="toggle-card-menu" data-idx="${idx}">
-                <i data-lucide="more-vertical" class="w-5 h-5"></i>
-              </button>
-              ${STATE.cardMenuOpen ? `
-                <div class="overflow-menu" data-menu="card">
-                  <button data-action="save-to-sheet" data-idx="${idx}" ${slot.messages.length === 0 ? 'disabled' : ''}>
-                    <i data-lucide="download" class="w-4 h-4"></i> Save conversation
-                  </button>
-                  <button data-action="expand-slot" data-idx="${idx}">
-                    <i data-lucide="maximize-2" class="w-4 h-4"></i> Open fullscreen
-                  </button>
-                  <hr>
-                  <button class="danger" data-action="clear-chat" data-idx="${idx}" ${slot.messages.length === 0 ? 'disabled' : ''}>
-                    <i data-lucide="trash-2" class="w-4 h-4"></i> Clear chat
-                  </button>
-                </div>
-              ` : ''}
-            </div>
-            <div id="home-scroll-${idx}" class="flex-1 overflow-y-auto px-4 py-4 flex flex-col gap-3" style="background:var(--row);min-height:0">
-              ${msgs.length === 0 ? `
-                <div class="flex-1 flex items-center justify-center">
-                  <div class="text-center" style="max-width:340px">
-                    <div style="width:46px;height:46px;border-radius:12px;background:var(--quote);display:grid;place-items:center;margin:0 auto 14px"><i data-lucide="message-square-text" class="w-5 h-5" style="color:var(--primary)"></i></div>
-                    <div style="font-size:13.5px;color:var(--gray);line-height:1.6">Tap the <b style="color:var(--navy)">mic button</b> and Randy listens for tech questions and answers them here.</div>
-                  </div>
-                </div>
-              ` : msgs.map((m, mi) => `
-                <div class="flex ${m.role==='user'?'justify-end':'justify-start'}">
-                  ${m.role==='user' ? renderUserMessage(m) : renderBotMessage(slot, m, mi, idx)}
-                </div>
-              `).join('')}
-              ${slot.loading?'<div class="flex justify-start"><div class="chat-bot" style="padding:10px 14px;border-radius:14px"><span class="typing-dot"></span> <span class="typing-dot"></span> <span class="typing-dot"></span></div></div>':''}
-            </div>
-            <div class="action-bar">
-              <button class="action-btn edit ${composerExpanded ? 'active' : ''}" title="${composerExpanded ? 'Collapse text editor' : 'Expand text editor'}" aria-label="${composerExpanded ? 'Collapse composer' : 'Expand composer'}" data-action="toggle-composer">
-                <i data-lucide="${composerExpanded ? 'chevron-down' : 'edit-3'}" class="w-5 h-5"></i>
-              </button>
-              <div class="composer-field">
-                ${composerExpanded ? `
-                  <textarea id="home-input-${idx}" class="composer-input" rows="3" placeholder="Message ${escAttr(slot.label)}…" ${slot.loading?'disabled':''}>${escHtml(slot.inputText || '')}</textarea>
+              <div class="head-actions">
+                ${confirming ? `
+                  <span class="confirm-label">Delete this conversation?</span>
+                  <button class="btn-ghost" data-action="cancel-delete-history" data-id="${escAttr(entry.id)}">Cancel</button>
+                  <button class="btn-danger-solid" data-action="confirm-delete-history-popout" data-id="${escAttr(entry.id)}">Delete</button>
                 ` : `
-                  <input type="text" id="home-input-${idx}" class="composer-input" placeholder="Message ${escAttr(slot.label)}…" value="${escAttr(slot.inputText)}" ${slot.loading?'disabled':''} />
+                  <button class="btn-primary" style="min-height:40px;padding:8px 18px" data-action="load-history" data-id="${escAttr(entry.id)}">
+                    <i data-lucide="message-circle-plus" class="w-4 h-4"></i>Continue in chat
+                  </button>
+                  <button class="icon-btn danger" data-action="confirm-delete-history" data-id="${escAttr(entry.id)}" title="Delete conversation" aria-label="Delete conversation">
+                    <i data-lucide="trash-2" class="w-5 h-5"></i>
+                  </button>
                 `}
               </div>
-              <button class="action-btn send" title="Send message" aria-label="Send message" data-action="send-home" data-idx="${idx}" ${(slot.loading || !hasText) ? 'disabled' : ''}>
-                <i data-lucide="send" class="w-5 h-5"></i>
-              </button>
-            </div>
-          </div>`;
-      }
-
-      function renderHistoryPopout() {
-        if (!HISTORY_VIEW.open) return '';
-        const history = getHistory();
-        const entry = history.find(h => h.id === HISTORY_VIEW.open);
-        if (!entry) return '';
-        const pairCount = entry.pairs.length;
-        const pairLabel = pairCount === 1 ? '1 Q&A pair' : pairCount + ' Q&A pairs';
-        const title = entry.preview || 'Saved conversation';
-        const confirmingDelete = STATE.historyConfirmDeleteId === entry.id;
-
-        return `
-          <div class="fixed inset-0 z-50 flex items-center justify-center" style="background:rgba(15,23,42,0.55);padding:20px" data-action="close-history-bg">
-            <div class="card history-popout" style="max-width:680px;width:100%;max-height:85vh;display:flex;flex-direction:column;border-radius:14px;overflow:hidden;box-shadow:0 24px 60px rgba(15,23,42,0.28)">
-              <div style="padding:16px 18px;display:flex;align-items:flex-start;gap:12px;background:var(--navy);color:#fff">
-                <div style="flex:1;min-width:0">
-                  <div style="font-size:14px;font-weight:600;line-height:1.35;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden">${escHtml(title)}</div>
-                  <div style="font-size:11px;color:rgba(255,255,255,0.65);margin-top:4px;display:flex;align-items:center;gap:8px;flex-wrap:wrap">
-                    <span>${escHtml(formatHistoryDate(entry))}</span>
-                    <span style="width:3px;height:3px;border-radius:50%;background:rgba(255,255,255,0.4)"></span>
-                    <span>${pairLabel}</span>
-                  </div>
-                </div>
-                <button style="background:rgba(255,255,255,0.08);border:none;color:#fff;cursor:pointer;padding:6px;border-radius:8px;display:grid;place-items:center" data-action="close-history" title="Close" aria-label="Close">
-                  <i data-lucide="x" class="w-4 h-4"></i>
-                </button>
-              </div>
-              <div style="flex:1;overflow-y:auto;padding:18px;display:flex;flex-direction:column;gap:14px;background:#fafbfc">
+            </header>
+            <div class="msg-scroll">
+              <div class="msg-col">
+                <div class="saved-note"><i data-lucide="archive" class="w-3.5 h-3.5"></i>Read-only copy — use &ldquo;Continue in chat&rdquo; to pick it back up</div>
                 ${entry.pairs.map((p, i) => `
-                  <div>
-                    <div style="display:flex;justify-content:flex-end;margin-bottom:6px">
-                      <div class="chat-bubble chat-user" style="font-size:13px">${escHtml(p.question)}</div>
-                    </div>
-                    <div style="display:flex;justify-content:flex-start">
-                      <div class="popout-answer">
-                        <div class="chat-bubble chat-bot chat-md" style="font-size:13px;white-space:normal">${mdToHtml(p.answer)}</div>
-                        <button class="popout-copy" data-action="copy-answer" data-id="${escAttr(entry.id)}" data-pair="${i}" title="Copy answer" aria-label="Copy answer">
-                          <i data-lucide="copy" class="w-3.5 h-3.5"></i>
-                        </button>
-                      </div>
+                  <div class="msg-row me"><div class="chat-bubble chat-user">${escHtml(p.question)}</div></div>
+                  <div class="msg-row">
+                    <div class="msg-av">R</div>
+                    <div class="popout-answer">
+                      <div class="chat-bubble chat-bot chat-md" style="white-space:normal">${mdToHtml(p.answer)}</div>
+                      <button class="popout-copy" data-action="copy-answer" data-id="${escAttr(entry.id)}" data-pair="${i}" title="Copy answer" aria-label="Copy answer">
+                        <i data-lucide="copy" class="w-3.5 h-3.5"></i>
+                      </button>
                     </div>
                   </div>
                 `).join('')}
               </div>
-              <div style="padding:12px 14px;border-top:1px solid #e2e8f0;background:#fff;display:flex;align-items:center;gap:8px;flex-wrap:wrap">
-                <button class="btn-primary" style="padding:8px 14px;font-size:12.5px;min-height:auto;display:inline-flex;align-items:center;gap:6px" data-action="load-history" data-id="${escAttr(entry.id)}">
-                  <i data-lucide="message-circle-plus" class="w-3.5 h-3.5"></i>Continue in chat
-                </button>
-                <span style="font-size:11px;color:#94a3b8">Tip: hover an answer to copy it</span>
-                <div style="flex:1"></div>
-                ${confirmingDelete ? `
-                  <span style="font-size:12px;color:#b45309;font-weight:600;margin-right:4px">Delete this conversation?</span>
-                  <button style="background:#f1f5f9;border:none;color:var(--navy);font-size:12.5px;padding:8px 12px;border-radius:8px;cursor:pointer;font-weight:600" data-action="cancel-delete-history" data-id="${escAttr(entry.id)}">Cancel</button>
-                  <button style="background:#dc2626;border:none;color:#fff;font-size:12.5px;padding:8px 14px;border-radius:8px;cursor:pointer;font-weight:600" data-action="confirm-delete-history-popout" data-id="${escAttr(entry.id)}">Delete</button>
-                ` : `
-                  <button style="background:transparent;border:1px solid #fecaca;color:#dc2626;padding:8px 12px;font-size:12.5px;border-radius:8px;cursor:pointer;font-weight:600;display:inline-flex;align-items:center;gap:6px" data-action="confirm-delete-history" data-id="${escAttr(entry.id)}">
-                    <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>Delete
-                  </button>
-                `}
-              </div>
             </div>
+          </div>`;
+      }
+
+      /* ---------- settings shell ---------- */
+
+      function renderSettingsShell() {
+        return `
+          <header class="chat-head">
+            <button class="icon-btn sb-toggle" data-action="toggle-history" title="Conversations" aria-label="Open conversations">
+              <i data-lucide="panel-left" class="w-5 h-5"></i>
+            </button>
+            <button class="icon-btn" data-action="switch-tab" data-tab="home" title="Back to chat" aria-label="Back to chat">
+              <i data-lucide="arrow-left" class="w-5 h-5"></i>
+            </button>
+            <div class="head-titles">
+              <div class="conv-title">Settings</div>
+              <div class="conv-sub">Randy&rsquo;s persona, research domains, and voice</div>
+            </div>
+          </header>
+          <div class="settings-scroll">
+            <div class="settings-col">${renderSettings()}</div>
           </div>`;
       }
 
       function renderToast() {
         if (!VOICE.toastMessage) return '';
         return `<div class="voice-toast">${escHtml(VOICE.toastMessage)}</div>`;
-      }
-
-      /* ---------- expanded (fullscreen) chat ---------- */
-
-      function renderExpanded() {
-        if (STATE.expandedSlot === null) return '';
-        const idx = STATE.expandedSlot;
-        const slot = STATE.slots[idx];
-        return `
-          <div class="fixed inset-0 z-50 flex flex-col" style="background:#fff">
-           <div class="expanded-inner flex flex-col" style="flex:1;min-height:0;width:100%">
-            <div class="flex items-center justify-between px-4 py-3 flex-shrink-0" style="background:var(--navy);color:#fff">
-              <div class="flex items-center gap-3">
-                <div class="w-9 h-9 rounded-full grid place-items-center text-white font-bold" style="background:var(--primary)">${escHtml(slot.label.charAt(0))}</div>
-                <div>
-                  <div class="text-sm font-semibold">${escHtml(slot.label)}</div>
-                  <div class="text-[10px] text-white/50">${slot.messages.length} messages${slot.listenOn?' · listening':''}</div>
-                </div>
-              </div>
-              <div class="flex items-center gap-2">
-                ${(VOICE.conversationMode && VOICE.activeSlot === idx) || slot.isSpeaking || slot.loading ? `
-                  <button style="background:rgba(239,68,68,0.15);border:1px solid rgba(239,68,68,0.5);color:#fca5a5;font-size:11px;padding:5px 10px;border-radius:6px;cursor:pointer;font-weight:600" data-action="exit-conversation" data-idx="${idx}">
-                    <i data-lucide="square" class="w-3 h-3 inline mr-1"></i>Stop
-                  </button>
-                ` : ''}
-                <button style="background:transparent;border:1px solid rgba(255,255,255,0.25);color:#fff;font-size:11px;padding:5px 10px;border-radius:6px;cursor:pointer;font-weight:600" data-action="new-chat">
-                  <i data-lucide="plus" class="w-3 h-3 inline mr-1"></i>New chat
-                </button>
-                <button style="background:transparent;border:1px solid rgba(255,255,255,0.25);color:var(--cyan);font-size:11px;padding:5px 10px;border-radius:6px;cursor:pointer;font-weight:600" data-action="save-to-sheet" data-idx="${idx}" ${slot.messages.length === 0 ? 'disabled' : ''}>
-                  <i data-lucide="download" class="w-3 h-3 inline mr-1"></i>Save
-                </button>
-                <button style="background:transparent;border:1px solid rgba(255,255,255,0.25);color:rgba(255,255,255,0.7);font-size:11px;padding:5px 10px;border-radius:6px;cursor:pointer;font-weight:600" data-action="clear-chat" data-idx="${idx}">
-                  <i data-lucide="trash-2" class="w-3 h-3 inline mr-1"></i>Clear
-                </button>
-                <button style="background:transparent;border:1px solid rgba(255,255,255,0.25);color:#fff;font-size:11px;padding:5px 10px;border-radius:6px;cursor:pointer;font-weight:600" data-action="close-expanded">
-                  <i data-lucide="x" class="w-3 h-3 inline mr-1"></i>Close
-                </button>
-              </div>
-            </div>
-            <div id="chat-scroll" class="flex-1 overflow-y-auto px-4 py-4 space-y-3" style="background:#fafbfc">
-              ${slot.messages.length === 0 ? `
-                <div class="flex items-center justify-center" style="min-height:60vh">
-                  <div class="text-center">
-                    <div class="w-20 h-20 mx-auto mb-4 rounded-full grid place-items-center" style="background:rgba(0,0,204,0.08)">
-                      <i data-lucide="message-circle" class="w-10 h-10" style="color:var(--primary)"></i>
-                    </div>
-                    <div class="text-lg font-semibold text-slate-700">${escHtml(slot.label)}</div>
-                    <div class="text-sm text-slate-400 mt-1">Type a message below to start chatting.</div>
-                  </div>
-                </div>
-              ` : slot.messages.map((m, mi) => `
-                <div class="flex ${m.role==='user'?'justify-end':'justify-start'}">
-                  ${m.role==='assistant'?'<div class="w-7 h-7 rounded-full grid place-items-center text-white text-xs font-bold flex-shrink-0 mr-2 mt-1" style="background:var(--primary)">'+escHtml(slot.label.charAt(0))+'</div>':''}
-                  ${m.role==='user' ? renderUserMessage(m) : renderBotMessage(slot, m, mi, idx)}
-                </div>
-              `).join('')}
-              ${slot.loading?`<div class="flex justify-start"><div class="w-7 h-7 rounded-full grid place-items-center text-white text-xs font-bold flex-shrink-0 mr-2 mt-1" style="background:var(--primary)">${escHtml(slot.label.charAt(0))}</div><div class="chat-bubble chat-bot"><span class="typing-dot"></span> <span class="typing-dot"></span> <span class="typing-dot"></span></div></div>`:''}
-            </div>
-            <div class="chat-input-row flex-shrink-0">
-              <input type="text" id="expanded-input" placeholder="Type a message..." value="${escAttr(slot.inputText)}" ${slot.loading?'disabled':''} />
-              <button class="chat-send" data-action="send-expanded" ${(slot.loading || !(slot.inputText || '').trim()) ? 'disabled' : ''}>
-                <i data-lucide="send" class="w-4 h-4"></i>
-              </button>
-            </div>
-           </div>
-          </div>`;
       }
 
       /* ---------- settings ---------- */
@@ -3026,6 +2924,555 @@
       }
 
       /* ================================================================
+       * POP-OUT CHAT (Document Picture-in-Picture, Chrome 116+)
+       *
+       * A compact always-on-top chat window that stays visible while the
+       * user works in other tabs/apps. All voice code (recognition, wake
+       * word, TTS) keeps running in THIS tab — the pop-out is a dumb view
+       * over STATE.slots[PIP.slotIdx], refreshed by renderPip() at the end
+       * of every render(). It has its own document, so the main page's
+       * Tailwind classes and delegated listeners don't reach it: it gets a
+       * self-contained stylesheet and listeners bound to its own document.
+       *
+       * Two modes: the full chat, and a collapsed "listening" icon docked
+       * in the bottom-right corner of the screen. PiP windows can't be
+       * moved programmatically, so the dock works the only way Chrome
+       * allows: minimize/expand close the current window and request a
+       * fresh one with preferInitialWindowPlacement, which Chrome places
+       * at its default spot — the bottom-right corner of the work area.
+       * requestWindow() needs transient user activation on this (main)
+       * window; clicks inside the PiP window propagate activation here,
+       * so the swap works for real clicks, and falls back to reshaping
+       * the current window in place when no activation exists.
+       *
+       * When a question arrives while collapsed, the code immediately
+       * tries to bring the chat back so the answer lands in view. With no
+       * gesture anywhere Chrome refuses, and the icon runs a status
+       * sequence instead — thinking dots while answering, then a glowing
+       * badge — and one click anywhere on it reopens the full chat with
+       * the newest answer highlighted.
+       * ================================================================ */
+
+      const PIP_CSS = `
+        :root { --primary:#0372FF; --primary-hover:#0262DB; --navy:#1F289C; --cyan:#31D1FF; --dark:#161F5B; --divider:#DCE2EC; --row:#F5F7FB; --quote:#F0F6FF; }
+        * { box-sizing: border-box; }
+        html, body { height: 100%; }
+        body { margin: 0; display: flex; flex-direction: column; background: var(--row); color: var(--dark); font-family: 'DM Sans', system-ui, sans-serif; }
+        .pip-head { display: flex; align-items: center; gap: 10px; padding: 10px 14px; background: var(--navy); color: #fff; flex-shrink: 0; }
+        .pip-avatar { position: relative; width: 30px; height: 30px; border-radius: 50%; background: var(--primary); display: grid; place-items: center; font-weight: 700; font-size: 13px; flex-shrink: 0; }
+        .pip-dot { position: absolute; bottom: -1px; right: -1px; width: 10px; height: 10px; border-radius: 50%; background: #94a3b8; border: 2px solid var(--navy); }
+        .pip-dot.live { background: #10b981; animation: pipPulse 2.2s ease-out infinite; }
+        @keyframes pipPulse { 0% { box-shadow: 0 0 0 0 rgba(16,185,129,0.55); } 70% { box-shadow: 0 0 0 6px rgba(16,185,129,0); } 100% { box-shadow: 0 0 0 0 rgba(16,185,129,0); } }
+        .pip-titles { min-width: 0; }
+        .pip-name { font-size: 13px; font-weight: 600; line-height: 1.2; }
+        .pip-sub { font-size: 10.5px; color: rgba(255,255,255,0.6); line-height: 1.3; }
+        .pip-min { margin-left: auto; width: 26px; height: 26px; border-radius: 7px; border: none; background: rgba(255,255,255,0.12); color: #fff; display: grid; place-items: center; cursor: pointer; flex-shrink: 0; transition: background 0.15s; }
+        .pip-min:hover { background: rgba(255,255,255,0.26); }
+        /* Collapsed mode — the floating "listening" icon. The whole window
+           is one click target; the orb carries the state: green dot while
+           listening, white dots while answering, badge + glow when an
+           answer is waiting. */
+        .pip-mini { display: none; position: relative; flex-direction: column; align-items: center; justify-content: center; gap: 9px; width: 100%; height: 100%; padding: 0; border: none; background: transparent; cursor: pointer; font-family: inherit; }
+        body.pip-collapsed .pip-head, body.pip-collapsed .pip-msgs, body.pip-collapsed .pip-inputrow { display: none; }
+        body.pip-collapsed .pip-mini { display: flex; }
+        .pip-mini-stage { position: relative; width: 72px; height: 72px; }
+        .pip-mini-ring { position: absolute; inset: 0; border-radius: 50%; border: 2px solid var(--cyan); opacity: 0; pointer-events: none; }
+        .pip-mini.is-live .pip-mini-ring { animation: pipRing 2s ease-out infinite; }
+        @keyframes pipRing { 0% { transform: scale(1); opacity: 0.5; } 100% { transform: scale(1.55); opacity: 0; } }
+        .pip-mini-orb { position: relative; width: 72px; height: 72px; border-radius: 50%; background: var(--primary); color: #fff; display: grid; place-items: center; font-size: 26px; font-weight: 700; box-shadow: 0 8px 24px rgba(3,114,255,0.35); transition: transform 0.15s, background 0.15s; }
+        .pip-mini:hover .pip-mini-orb { transform: scale(1.05); background: var(--primary-hover); }
+        .pip-mini-dots { display: none; gap: 5px; }
+        .pip-mini-dots i { width: 8px; height: 8px; border-radius: 50%; background: #fff; animation: pipDot 1.4s infinite ease-in-out both; }
+        .pip-mini-dots i:nth-child(1) { animation-delay: -0.32s; }
+        .pip-mini-dots i:nth-child(2) { animation-delay: -0.16s; }
+        .pip-mini.is-thinking .pip-mini-letter { display: none; }
+        .pip-mini.is-thinking .pip-mini-dots { display: inline-flex; }
+        .pip-mini-dot { position: absolute; bottom: 2px; right: 2px; width: 15px; height: 15px; border-radius: 50%; background: #94a3b8; border: 3px solid var(--row); }
+        .pip-mini-dot.live { background: #10b981; animation: pipPulse 2.2s ease-out infinite; }
+        .pip-mini-badge { position: absolute; top: -5px; right: -5px; min-width: 22px; height: 22px; padding: 0 5px; border-radius: 999px; background: #fff; color: var(--primary); border: 2px solid var(--primary); font-size: 11px; font-weight: 800; display: none; place-items: center; box-shadow: 0 2px 8px rgba(22,31,91,0.25); }
+        .pip-mini.has-unseen .pip-mini-badge { display: grid; }
+        .pip-mini.has-unseen .pip-mini-orb { animation: pipGlow 1.6s ease-in-out infinite; }
+        @keyframes pipGlow { 0%, 100% { box-shadow: 0 8px 24px rgba(3,114,255,0.35); } 50% { box-shadow: 0 0 0 9px rgba(3,114,255,0.16), 0 8px 28px rgba(3,114,255,0.5); } }
+        .pip-mini-label { font-size: 10.5px; font-weight: 600; color: #6B7693; letter-spacing: 0.01em; }
+        .pip-mini.has-unseen .pip-mini-label { color: var(--primary); font-weight: 700; }
+        .pip-new { animation: pipNewFlash 1.8s ease-out 1; }
+        @keyframes pipNewFlash { 0% { box-shadow: 0 0 0 3px rgba(3,114,255,0.5); } 100% { box-shadow: 0 0 0 3px rgba(3,114,255,0); } }
+        .pip-msgs { flex: 1; overflow-y: auto; padding: 12px; display: flex; flex-direction: column; gap: 8px; }
+        .pip-empty { margin: auto; max-width: 250px; text-align: center; color: #64748b; font-size: 12.5px; line-height: 1.6; }
+        .pip-row { display: flex; justify-content: flex-start; }
+        .pip-row.user { justify-content: flex-end; }
+        .pip-bubble { max-width: 88%; padding: 8px 12px; border-radius: 12px; font-size: 13px; line-height: 1.5; overflow-wrap: break-word; white-space: pre-wrap; }
+        .pip-user { background: var(--primary); color: #fff; border-radius: 12px 12px 4px 12px; }
+        .pip-bot { background: #fff; color: var(--dark); border: 1px solid var(--divider); border-radius: 4px 12px 12px 12px; }
+        .pip-md { white-space: normal; }
+        .pip-bubble.pip-md { position: relative; padding-right: 34px; }
+        .pip-copy { position: absolute; top: 6px; right: 6px; width: 24px; height: 24px; padding: 0; border-radius: 6px; border: 1px solid var(--divider); background: #fff; color: #64748b; display: grid; place-items: center; cursor: pointer; transition: color 0.15s, border-color 0.15s, background 0.15s; }
+        .pip-copy:hover { color: var(--primary); border-color: var(--cyan); background: var(--quote); }
+        .pip-copy .ic-check { display: none; }
+        .pip-copy.copied { color: #0F7A3F; border-color: #0F7A3F; }
+        .pip-copy.copied .ic-copy { display: none; }
+        .pip-copy.copied .ic-check { display: block; }
+        .pip-md p { margin: 0 0 7px; }
+        .pip-md p:last-child { margin-bottom: 0; }
+        .pip-md ul, .pip-md ol { margin: 4px 0 8px; padding-left: 18px; }
+        .pip-md li { margin-bottom: 4px; }
+        .pip-md strong { color: var(--navy); }
+        .pip-md code { background: #f1f5f9; padding: 1px 4px; border-radius: 4px; font-size: 12px; }
+        .pip-md a { color: var(--primary); }
+        .pip-md .md-h { font-weight: 700; color: var(--navy); margin: 8px 0 5px; font-size: 12.5px; }
+        .pip-badge { display: block; font-size: 9px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; opacity: 0.75; margin-bottom: 3px; }
+        .pip-badge.assist { color: var(--primary); opacity: 1; }
+        .pip-src { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 8px; padding-top: 7px; border-top: 1px dashed #e2e8f0; }
+        .pip-src a { font-size: 10px; font-weight: 600; color: #475569; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 999px; padding: 2px 8px; text-decoration: none; max-width: 160px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .pip-src a:hover { color: var(--primary); border-color: var(--cyan); background: var(--quote); }
+        .pip-tdot { width: 7px; height: 7px; border-radius: 50%; background: #94a3b8; display: inline-block; margin-right: 3px; animation: pipDot 1.4s infinite ease-in-out both; }
+        .pip-tdot:nth-child(1) { animation-delay: -0.32s; }
+        .pip-tdot:nth-child(2) { animation-delay: -0.16s; }
+        @keyframes pipDot { 0%, 80%, 100% { transform: scale(0); } 40% { transform: scale(1); } }
+        .pip-inputrow { display: flex; gap: 8px; align-items: center; padding: 10px; border-top: 1px solid var(--divider); background: #fff; flex-shrink: 0; }
+        .pip-inputrow input { flex: 1; min-width: 0; border: 1.5px solid var(--divider); border-radius: 9999px; padding: 9px 14px; font-size: 13px; outline: none; color: var(--navy); font-family: inherit; }
+        .pip-inputrow input:focus { border-color: var(--cyan); box-shadow: 0 0 0 3px rgba(0,191,255,0.16); }
+        .pip-send { width: 38px; height: 38px; border-radius: 50%; background: var(--primary); color: #fff; border: none; display: grid; place-items: center; cursor: pointer; flex-shrink: 0; transition: background 0.15s; }
+        .pip-send:hover { background: var(--primary-hover); }
+        .pip-send:disabled { background: #cbd5e1; cursor: not-allowed; }
+        @media (prefers-reduced-motion: reduce) { .pip-dot.live, .pip-mini-dot.live, .pip-mini.is-live .pip-mini-ring, .pip-mini.has-unseen .pip-mini-orb, .pip-mini-dots i, .pip-new, .pip-tdot { animation: none; } }
+      `;
+
+      // Toggle the floating window. Must run from a real user click —
+      // requestWindow() requires a user gesture.
+      async function togglePipWindow(idx) {
+        if (!PIP.supported) return;
+        if (PIP.window) { try { PIP.window.close(); } catch {} return; } // pagehide does the cleanup
+        if (PIP.opening) return;
+        PIP.opening = true;
+        try {
+          // preferInitialWindowPlacement: always dock at Chrome's default
+          // spot (bottom-right of the screen) instead of wherever a past
+          // PiP window was left.
+          const pipWindow = await window.documentPictureInPicture.requestWindow({ width: 380, height: 560, preferInitialWindowPlacement: true });
+          PIP.window = pipWindow;
+          PIP.slotIdx = idx;
+          PIP.collapsed = false;
+          PIP.restoreSize = null;
+          PIP.unseen = 0;
+          PIP.flashNext = false;
+          PIP.flashNow = false;
+          setupPipWindow(pipWindow);
+          showToast('Chat popped out — it stays on top while you work');
+          render();
+        } catch (err) {
+          console.warn('Pop-out window failed:', err);
+          showToast("Couldn't open the pop-out window");
+        } finally {
+          PIP.opening = false;
+        }
+      }
+
+      // One-time scaffold of a PiP document: stylesheet, static skeleton
+      // (header / message list / composer / collapsed icon) and its own
+      // event listeners. Both modes get the full skeleton — `collapsed`
+      // just decides which half shows, so renderPip() works unchanged on
+      // either window. renderPip() only ever rewrites #pip-msgs and the
+      // status bits — the input element is never rebuilt, so its text and
+      // focus survive re-renders (the PiP-side answer to
+      // isComposerFocused()).
+      function setupPipWindow(w, { collapsed = false } = {}) {
+        const doc = w.document;
+        const slot = STATE.slots[PIP.slotIdx];
+        const label = slot ? slot.label : 'Randy';
+        doc.title = label + ' — pop-out chat';
+
+        // The PiP document doesn't inherit page resources: bring the brand
+        // font along, then the self-contained styles.
+        const font = document.querySelector('link[rel="stylesheet"][href*="fonts.googleapis.com"]');
+        if (font) {
+          const l = doc.createElement('link');
+          l.rel = 'stylesheet';
+          l.href = font.href;
+          doc.head.appendChild(l);
+        }
+        const style = doc.createElement('style');
+        style.textContent = PIP_CSS;
+        doc.head.appendChild(style);
+
+        doc.body.innerHTML = `
+          <div class="pip-head">
+            <div class="pip-avatar">${escHtml(label.charAt(0))}<span class="pip-dot" id="pip-dot"></span></div>
+            <div class="pip-titles">
+              <div class="pip-name">${escHtml(label)}</div>
+              <div class="pip-sub" id="pip-sub">Online</div>
+            </div>
+            <button class="pip-min" data-action="pip-minimize" title="Minimize to a floating icon" aria-label="Minimize to a floating icon">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/></svg>
+            </button>
+          </div>
+          <div class="pip-msgs" id="pip-msgs"></div>
+          <div class="pip-inputrow">
+            <input type="text" id="pip-input" placeholder="Message ${escAttr(label)}…" autocomplete="off" />
+            <button class="pip-send" id="pip-send" data-action="pip-send" title="Send message" aria-label="Send message">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
+            </button>
+          </div>
+          <button class="pip-mini" id="pip-mini" data-action="pip-expand" title="Randy is listening — click to open the chat" aria-label="Open the chat">
+            <span class="pip-mini-stage">
+              <span class="pip-mini-ring"></span>
+              <span class="pip-mini-orb">
+                <span class="pip-mini-letter">${escHtml(label.charAt(0))}</span>
+                <span class="pip-mini-dots" aria-hidden="true"><i></i><i></i><i></i></span>
+                <span class="pip-mini-dot" id="pip-mini-dot"></span>
+                <span class="pip-mini-badge" id="pip-mini-badge">1</span>
+              </span>
+            </span>
+            <span class="pip-mini-label" id="pip-mini-label">Listening…</span>
+          </button>`;
+
+        // The main page's delegated listeners are bound to the MAIN document
+        // and never fire here — the PiP document needs its own.
+        doc.addEventListener('click', e => {
+          if (!e.target.closest) return;
+          if (e.target.closest('[data-action="pip-send"]')) { sendFromPip(); return; }
+          if (e.target.closest('[data-action="pip-minimize"]')) { collapsePip(); return; }
+          if (e.target.closest('[data-action="pip-expand"]')) { expandPip(); return; }
+          const cp = e.target.closest('[data-action="pip-copy"]');
+          if (cp) copyFromPip(cp);
+        });
+        doc.addEventListener('keydown', e => {
+          if (e.key === 'Enter' && !e.shiftKey && e.target && e.target.id === 'pip-input') {
+            e.preventDefault();
+            sendFromPip();
+          }
+        });
+        w.addEventListener('pagehide', () => {
+          if (PIP.swapping) return; // window replaced by a swap, not closed
+          if (PIP.window === w) {
+            PIP.window = null;
+            PIP.slotIdx = null;
+            PIP.lastHtml = '';
+            PIP.collapsed = false;
+            PIP.restoreSize = null;
+            PIP.unseen = 0;
+            PIP.flashNext = false;
+            PIP.flashNow = false;
+            render(); // put the pop-out buttons back in their closed state
+          }
+        });
+
+        if (collapsed) doc.body.classList.add('pip-collapsed');
+        PIP.lastHtml = '';
+        renderPip();
+        if (!collapsed) setTimeout(() => { try { doc.getElementById('pip-input').focus(); } catch {} }, 50);
+      }
+
+      function sendFromPip() {
+        const w = PIP.window;
+        if (!w || w.closed) return;
+        const slot = STATE.slots[PIP.slotIdx];
+        const input = w.document.getElementById('pip-input');
+        if (!slot || !input) return;
+        const text = input.value.trim();
+        if (!text || slot.loading) return;
+        slot.inputText = text;
+        input.value = '';
+        sendMessage(PIP.slotIdx); // its render() syncs the pop-out too
+      }
+
+      // Copy an assist answer from the pop-out. Goes through the PiP
+      // window's OWN clipboard: the async Clipboard API rejects when the
+      // calling document isn't focused, and during this click the focused
+      // document is the pop-out, not the main page. Plain text, same as
+      // the main app's copy-msg, so it pastes cleanly into chat/email.
+      function copyFromPip(btn) {
+        const w = PIP.window;
+        if (!w || w.closed) return;
+        const slot = STATE.slots[PIP.slotIdx];
+        const m = slot && slot.messages[parseInt(btn.dataset.msg, 10)];
+        if (!m || !m.content) return;
+        const text = stripMarkdown(m.content);
+        const done = () => {
+          btn.classList.add('copied');
+          setTimeout(() => { try { btn.classList.remove('copied'); } catch {} }, 1200);
+        };
+        const fallback = () => {
+          try {
+            const d = w.document;
+            const ta = d.createElement('textarea');
+            ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0';
+            d.body.appendChild(ta); ta.select();
+            d.execCommand('copy'); d.body.removeChild(ta);
+            done();
+          } catch {}
+        };
+        if (w.navigator.clipboard && w.navigator.clipboard.writeText) {
+          w.navigator.clipboard.writeText(text).then(done).catch(fallback);
+        } else fallback();
+      }
+
+      // True when the main window holds transient user activation — clicks
+      // inside the PiP window propagate it here, which is exactly what
+      // requestWindow() and resizeTo() need.
+      function canSwapPipWindow() {
+        return !!(navigator.userActivation && navigator.userActivation.isActive);
+      }
+
+      // PiP windows can't be moved programmatically, so changing where one
+      // sits means replacing it: request a fresh window with
+      // preferInitialWindowPlacement and Chrome docks it at its default
+      // spot — the bottom-right corner of the screen. Chrome closes the
+      // old window itself (one PiP window at a time); the swapping flag
+      // keeps that pagehide from being mistaken for the user closing it.
+      async function swapPipWindow({ width, height }) {
+        const old = PIP.window;
+        PIP.swapping = true;
+        try {
+          const next = await window.documentPictureInPicture.requestWindow({
+            width, height, preferInitialWindowPlacement: true
+          });
+          if (old && old !== next) { try { old.close(); } catch {} }
+          PIP.window = next;
+          PIP.lastHtml = '';
+          return next;
+        } finally {
+          PIP.swapping = false;
+        }
+      }
+
+      // Minimize the pop-out down to the small "R" icon, docked at the
+      // bottom-right of the screen, that keeps listening (green dot =
+      // voice on, same as everywhere else). Without activation to swap
+      // windows, shrink the current one where it sits instead.
+      async function collapsePip() {
+        const w = PIP.window;
+        if (!w || w.closed || PIP.collapsed || PIP.swapping) return;
+        PIP.collapsed = true;
+        PIP.unseen = 0;
+        PIP.flashNext = false;
+        PIP.flashNow = false;
+        PIP.restoreSize = {
+          width: w.innerWidth > 0 ? w.innerWidth : 380,
+          height: w.innerHeight > 0 ? w.innerHeight : 560,
+          outerWidth: w.outerWidth || 0,
+          outerHeight: w.outerHeight || 0
+        };
+        if (canSwapPipWindow()) {
+          try {
+            const mini = await swapPipWindow({ width: 240, height: 130 });
+            setupPipWindow(mini, { collapsed: true });
+            return;
+          } catch (err) {
+            console.warn('PiP swap to icon failed, resizing in place:', err);
+          }
+        }
+        try { w.document.body.classList.add('pip-collapsed'); } catch {}
+        try { w.resizeTo(240, 152); } catch (err) { console.warn('PiP collapse resize failed:', err); }
+        renderPip();
+      }
+
+      // Post-expand touches shared by both expand paths: land on the
+      // newest answer, highlight it (the typing indicator doesn't count),
+      // and only refocus the input on a deliberate click — never steal OS
+      // focus while the user is mid-call in another app.
+      function finishPipExpand(w, { auto, hadUnseen }) {
+        try {
+          const doc = w.document;
+          const msgs = doc.getElementById('pip-msgs');
+          if (msgs) msgs.scrollTop = msgs.scrollHeight;
+          if (auto || hadUnseen) {
+            const bots = doc.querySelectorAll('.pip-bubble.pip-bot:not(.pip-typing)');
+            if (bots.length) bots[bots.length - 1].classList.add('pip-new');
+            // Auto-expanded for a question that's still being answered —
+            // there's no answer bubble to highlight yet; flag the reply so
+            // it flashes the moment it lands.
+            else if (auto) PIP.flashNext = true;
+          }
+          if (!auto) setTimeout(() => { try { doc.getElementById('pip-input').focus(); } catch {} }, 50);
+        } catch {}
+      }
+
+      // Bring the full chat back at its previous size. Manual path = a
+      // click inside the PiP window, which propagates the activation the
+      // window swap needs. The auto path (a question just came in) has no
+      // gesture; Chrome refuses the swap, we stay collapsed, and the icon
+      // flips to its thinking / answer-ready state instead — returns false
+      // so callers know the chat didn't come back.
+      async function expandPip({ auto = false } = {}) {
+        const w = PIP.window;
+        if (!w || w.closed || !PIP.collapsed || PIP.swapping) return false;
+        const size = PIP.restoreSize || { width: 380, height: 560 };
+        const hadUnseen = PIP.unseen > 0;
+        if (canSwapPipWindow()) {
+          try {
+            const big = await swapPipWindow({ width: size.width, height: size.height });
+            PIP.collapsed = false;
+            PIP.unseen = 0;
+            PIP.restoreSize = null;
+            setupPipWindow(big, { collapsed: false });
+            finishPipExpand(big, { auto, hadUnseen });
+            return true;
+          } catch (err) {
+            if (auto) return false;
+            console.warn('PiP swap to chat failed, expanding in place:', err);
+          }
+        } else if (auto) {
+          return false;
+        }
+        // In-place fallback (manual click without a usable swap): grow the
+        // current window where it sits rather than leaving the user stuck.
+        PIP.collapsed = false;
+        PIP.unseen = 0;
+        PIP.restoreSize = null;
+        try { w.document.body.classList.remove('pip-collapsed'); } catch {}
+        try { w.resizeTo(size.outerWidth || size.width, size.outerHeight || size.height); }
+        catch (err) { console.warn('PiP expand resize failed:', err); }
+        renderPip();
+        finishPipExpand(w, { auto: false, hadUnseen });
+        return true;
+      }
+
+      // A question just came in — pop the collapsed icon back out so the
+      // answer lands in view. If Chrome refuses the gesture-less swap,
+      // renderPip() shows the thinking state on the icon instead.
+      function pipAutoExpand() {
+        if (!PIP.window || PIP.window.closed || !PIP.collapsed) return;
+        expandPip({ auto: true });
+      }
+
+      // An answer just finished. Collapsed: try once more to pop out with
+      // the result, badge the icon if that's refused. Expanded because of
+      // an earlier auto-expand: highlight the reply when the message list
+      // next rebuilds (the render that paints it).
+      async function notePipAnswerArrived() {
+        const w = PIP.window;
+        if (!w || w.closed) return;
+        if (PIP.collapsed) {
+          const expanded = await expandPip({ auto: true });
+          if (!expanded && PIP.collapsed) {
+            PIP.unseen++;
+            renderPip();
+          }
+          return;
+        }
+        if (PIP.flashNext) { PIP.flashNext = false; PIP.flashNow = true; }
+      }
+
+      // Status line + listening dot, mirroring the conv-sub logic in
+      // renderCard so the pop-out reflects the main tab's voice state.
+      function pipStatus(slot) {
+        const on = !!slot.listenOn;
+        const inConvo = on && VOICE.activeSlot === PIP.slotIdx && !slot.loading && !slot.isSpeaking &&
+          (VOICE.conversationMode || VOICE.awaitingCommand);
+        if (slot.isSpeaking) return { text: 'Talking…', live: true };
+        if (slot.loading) return { text: 'Thinking…', live: on };
+        if (inConvo) return { text: 'Listening to you…', live: true };
+        if (on) return { text: 'Listening for tech questions', live: true };
+        return { text: 'Online', live: false };
+      }
+
+      function pipMessagesHtml(slot) {
+        const msgs = slot.messages;
+        if (msgs.length === 0 && !slot.loading) {
+          return '<div class="pip-empty">No messages yet — say “Hey ' + escHtml(slot.voiceName || slot.label) + '” in the main tab or type below.</div>';
+        }
+        const out = msgs.map((m, mi) => {
+          if (m.role === 'user') {
+            const badge = m.kind === 'assist-q' ? '<span class="pip-badge">Overheard</span>' : '';
+            return '<div class="pip-row user"><div class="pip-bubble pip-user">' + badge + escHtml(m.content) + '</div></div>';
+          }
+          if (!m.content) return ''; // in-flight placeholder — the typing dots cover it
+          if (m.kind === 'assist') {
+            const srcs = Array.isArray(m.sources) ? m.sources : [];
+            return '<div class="pip-row"><div class="pip-bubble pip-bot pip-md">' +
+              '<button class="pip-copy" data-action="pip-copy" data-msg="' + mi + '" title="Copy answer" aria-label="Copy answer">' +
+                '<svg class="ic-copy" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>' +
+                '<svg class="ic-check" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>' +
+              '</button>' +
+              '<span class="pip-badge assist">Technical assist</span>' +
+              mdToHtml(m.content) +
+              (srcs.length ? '<div class="pip-src">' + srcs.map(u =>
+                '<a href="' + escAttr(u) + '" target="_blank" rel="noopener noreferrer" title="' + escAttr(u) + '">' + escHtml(hostnameOf(u)) + '</a>').join('') + '</div>' : '') +
+              '</div></div>';
+          }
+          return '<div class="pip-row"><div class="pip-bubble pip-bot">' + escHtml(m.content).replace(/\n/g, '<br>') + '</div></div>';
+        });
+        if (slot.loading) {
+          out.push('<div class="pip-row"><div class="pip-bubble pip-bot pip-typing"><span class="pip-tdot"></span><span class="pip-tdot"></span><span class="pip-tdot"></span></div></div>');
+        }
+        return out.join('');
+      }
+
+      // Refresh the pop-out from STATE. Runs at the end of every render()
+      // while the window is open, which is what makes voice answers landing
+      // in the main tab appear here in real time. Must never throw — the
+      // window can vanish between the .closed check and the DOM writes, and
+      // a PiP hiccup must not break the main render cycle.
+      function renderPip() {
+        const w = PIP.window;
+        if (!w || w.closed) return;
+        const slot = STATE.slots[PIP.slotIdx];
+        if (!slot) return;
+        try {
+          const doc = w.document;
+          const msgs = doc.getElementById('pip-msgs');
+          if (!msgs) return;
+
+          const st = pipStatus(slot);
+          const sub = doc.getElementById('pip-sub');
+          if (sub && sub.textContent !== st.text) sub.textContent = st.text;
+          const dot = doc.getElementById('pip-dot');
+          if (dot) dot.className = 'pip-dot' + (st.live ? ' live' : '');
+
+          // Collapsed icon: listening → answering → answer-ready.
+          const mini = doc.getElementById('pip-mini');
+          if (mini) {
+            const thinking = !!slot.loading;
+            const unseen = !thinking && PIP.unseen > 0;
+            mini.classList.toggle('is-live', st.live);
+            mini.classList.toggle('is-thinking', thinking);
+            mini.classList.toggle('has-unseen', unseen);
+            const miniDot = doc.getElementById('pip-mini-dot');
+            if (miniDot) miniDot.className = 'pip-mini-dot' + (st.live ? ' live' : '');
+            const badge = doc.getElementById('pip-mini-badge');
+            if (badge) badge.textContent = PIP.unseen > 9 ? '9+' : String(PIP.unseen || 1);
+            const lbl = doc.getElementById('pip-mini-label');
+            const lblText = thinking ? 'Answering…'
+              : unseen ? (PIP.unseen === 1 ? 'Answer ready' : PIP.unseen + ' answers ready')
+              : st.live ? 'Listening…' : 'Online';
+            if (lbl && lbl.textContent !== lblText) lbl.textContent = lblText;
+            const t = thinking ? 'Randy is answering — click to open the chat'
+              : unseen ? 'Answer ready — click to view it'
+              : st.live ? 'Randy is listening — click to open the chat'
+              : 'Click to open the chat';
+            if (mini.title !== t) mini.title = t;
+          }
+
+          const name = doc.querySelector('.pip-name');
+          if (name && name.textContent !== slot.label) {
+            name.textContent = slot.label;
+            doc.title = slot.label + ' — pop-out chat';
+          }
+
+          // Skip no-op rebuilds (toasts and interim updates re-render the
+          // main app constantly) so text selection in the pop-out survives.
+          const html = pipMessagesHtml(slot);
+          if (PIP.lastHtml !== html) {
+            const atBottom = msgs.scrollTop + msgs.clientHeight >= msgs.scrollHeight - 48;
+            msgs.innerHTML = html;
+            PIP.lastHtml = html;
+            if (atBottom) msgs.scrollTop = msgs.scrollHeight;
+            if (PIP.flashNow) {
+              PIP.flashNow = false;
+              const bots = msgs.querySelectorAll('.pip-bubble.pip-bot:not(.pip-typing)');
+              if (bots.length) bots[bots.length - 1].classList.add('pip-new');
+            }
+          }
+
+          const sendBtn = doc.getElementById('pip-send');
+          if (sendBtn && sendBtn.disabled !== !!slot.loading) sendBtn.disabled = !!slot.loading;
+        } catch (err) {
+          console.warn('renderPip failed:', err);
+        }
+      }
+
+      /* ================================================================
        * EVENTS
        * ================================================================ */
 
@@ -3084,7 +3531,6 @@
               if (si) si.focus();
               break;
             }
-            case 'refresh-history': fetchHistoryFromSheet(); break;
             case 'toggle-composer': {
               const cur = document.getElementById('home-input-' + (idx !== null ? idx : 0));
               if (cur && STATE.slots[idx !== null ? idx : 0]) STATE.slots[idx !== null ? idx : 0].inputText = cur.value;
@@ -3097,10 +3543,10 @@
               break;
             }
             case 'toggle-card-menu': STATE.cardMenuOpen = !STATE.cardMenuOpen; render(); break;
+            case 'pop-out-chat': togglePipWindow(idx !== null ? idx : 0); break;
             case 'expand-slot': STATE.expandedSlot = idx; render(); scrollChat(); setTimeout(()=>document.getElementById('expanded-input')?.focus(),100); break;
             case 'close-expanded': STATE.expandedSlot = null; render(); break;
             case 'clear-chat': clearChat(idx !== null ? idx : 0); break;
-            case 'save-to-sheet': saveToSheet(idx !== null ? idx : 0); break;
             case 'send-expanded': {
               const inp = document.getElementById('expanded-input');
               if (inp) STATE.slots[STATE.expandedSlot].inputText = inp.value;
@@ -3114,7 +3560,7 @@
               break;
             }
             case 'toggle-listen': toggleListening(); break;
-            case 'new-chat': newChat(); break;
+            case 'new-chat': HISTORY_VIEW.open = null; STATE.activeTab = 'home'; newChat(); break;
             case 'toggle-speak-answers': {
               const s = STATE.slots[0];
               s.speakAnswers = !s.speakAnswers;
@@ -3160,6 +3606,8 @@
             case 'view-history': {
               HISTORY_VIEW.open = act.dataset.id;
               STATE.historyConfirmDeleteId = null;
+              STATE.activeTab = 'home';
+              STATE.historyOpen = false;
               render();
               break;
             }
@@ -3195,7 +3643,7 @@
               break;
             }
             case 'copy-answer': {
-              const h = getHistory().find(x => x.id === act.dataset.id);
+              const h = STATE.sessionHistory.find(x => x.id === act.dataset.id);
               const pi = parseInt(act.dataset.pair, 10);
               if (!h || !h.pairs[pi]) break;
               copyTextToClipboard(h.pairs[pi].answer || '', act);
@@ -3212,17 +3660,18 @@
             }
             case 'noop': break;
             case 'load-history': {
-              const hist = getHistory().find(h => h.id === act.dataset.id);
+              const hist = STATE.sessionHistory.find(h => h.id === act.dataset.id);
               if (hist) {
                 const slot = STATE.slots[0];
                 const transcript = hist.pairs.map(p => 'User: ' + p.question + '\nRandy: ' + stripMarkdown(p.answer)).join('\n\n');
                 slot.inputText = 'Here is a previous conversation for context:\n\n' + transcript + '\n\nBased on this conversation, ';
                 HISTORY_VIEW.open = null;
-                STATE.expandedSlot = 0;
+                STATE.historyOpen = false;
+                STATE.activeTab = 'home';
                 render();
                 scrollChat();
                 setTimeout(() => {
-                  const inp = document.getElementById('expanded-input');
+                  const inp = document.getElementById('home-input-0');
                   if (inp) { inp.focus(); inp.setSelectionRange(inp.value.length, inp.value.length); }
                 }, 150);
               }
@@ -3303,8 +3752,8 @@
             render();
             return;
           }
-          if (e.key === 'Escape' && STATE.expandedSlot !== null) {
-            STATE.expandedSlot = null; render();
+          if (e.key === 'Escape' && HISTORY_VIEW.open) {
+            HISTORY_VIEW.open = null; render();
           }
         });
       }
@@ -3333,7 +3782,6 @@
       document.addEventListener('DOMContentLoaded', () => {
         render();
         loadRemoteConfig().then(render);
-        fetchHistoryFromSheet();
         // Re-render once the browser loads its speech voice list (async in Chrome).
         if (VOICE.ttsSupported && typeof speechSynthesis.onvoiceschanged !== 'undefined') {
           window.speechSynthesis.onvoiceschanged = () => {
