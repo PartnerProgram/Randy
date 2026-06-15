@@ -524,7 +524,7 @@
         '2. The question is in scope per the lists above.',
         '3. An SE could plausibly answer it now without asking anything back.',
         '',
-        'confidence is your 0-to-1 certainty that auto-answering helps. Below 0.6 means do not act. Be conservative; false positives interrupt a live call. Speech-to-text may garble product names ("in tune" = Intune, "config manager"/"SCCM" = ConfigMgr, "liquid" = Liquit) — interpret charitably but do not invent a question that is not there.',
+        'confidence is your 0-to-1 certainty that auto-answering helps. Below 0.6 means do not act. Be conservative; false positives interrupt a live call. Speech-to-text may garble product names ("in tune" = Intune, "config manager"/"SCCM"/"MECM" = ConfigMgr, "liquid" = Liquit, "auto pilot" = Autopilot, "right click tools" = Right Click Tools) — interpret charitably but do not invent a question that is not there.',
         '',
         'Respond with ONLY a JSON object — no prose, no code fences: {"is_question": boolean, "confidence": number 0-1, "topic": "short phrase", "reason": "max 12 words"}'
       ].join('\n');
@@ -558,6 +558,43 @@
       const INSTANT_QUESTION_RE = /^(how|what|why|when|where|which|who|can|could|does|do|did|is|are|will|would|should|tell me|walk me through|explain|show me)\b|\b(how (do|does|did|can|could|would|will)|what (is|are|about|does|happens)|can (it|you|we|they)|does (it|that|this)|is there|are there)\b/i;
       function isInstantTechQuestion(t) {
         return TECH_TOPIC_RE.test(t) && INSTANT_QUESTION_RE.test(t);
+      }
+
+      // Commercial / non-technical asks an SE shouldn't auto-answer on a live
+      // call even when they name an in-scope product ("what's Application
+      // Workspace cost per seat?"). These bypass the no-classifier fast path
+      // and fall through to the classifier, which already treats pricing,
+      // contracts, and scheduling as out of scope. The guard only ever ADDS a
+      // classifier round-trip — it never drops a question on its own.
+      const OUT_OF_SCOPE_RE = /\bhow much (?:do(?:es)?|is|are|would|will)\b|\b(pric(?:e|ing|ed)|quote|discount|per[\s-]?(?:seat|device|user)|license(?:s|ing)? (?:cost|fee|price|pricing)|renewal|contract|invoice|proposal|budget|sales ?rep|account (?:manager|exec))\b/i;
+
+      // Common speech-to-text garbles of endpoint-management product names.
+      // Applied to overheard utterances before they're classified, answered,
+      // and logged, so Randy reasons over "Intune", not "in tune", and the
+      // tech-topic detector and saved Q&A read cleanly. Kept tight: each
+      // pattern targets a phrase that is overwhelmingly the product on these
+      // calls. Correction never feeds the no-classifier fast path (that still
+      // runs on the raw text), so a wrong guess can only route to the
+      // classifier — it can never auto-answer on its own.
+      const TRANSCRIPT_FIXES = [
+        [/\bin\s?tune\b/gi, 'Intune'],
+        [/\bend[\s-]?point(s)?\b/gi, 'endpoint$1'],
+        [/\bauto[\s-]?pilot\b/gi, 'Autopilot'],
+        [/\bco[\s-]?management\b/gi, 'co-management'],
+        [/\bconfig(?:uration)?[\s-]?manager\b/gi, 'ConfigMgr'],
+        [/\bconfig\s?mgr\b/gi, 'ConfigMgr'],
+        [/\bright[\s-]?click tools\b/gi, 'Right Click Tools'],
+        [/\bapp(?:lication)? workspace\b/gi, 'Application Workspace'],
+        [/\bapplication manager\b/gi, 'Application Manager'],
+        [/\bprivilege manager\b/gi, 'Privilege Manager'],
+        [/\bendpoint insights\b/gi, 'Endpoint Insights'],
+        [/\bliqu(?:id|it|ot)\b/gi, 'Liquit'],
+        [/\bre[\s-]?cast\b/gi, 'Recast']
+      ];
+      function correctTranscript(text) {
+        let t = String(text || '');
+        for (const [re, sub] of TRANSCRIPT_FIXES) t = t.replace(re, sub);
+        return t.replace(/\s+/g, ' ').trim();
       }
 
       // Voice turns attach the (slower) web_search tool only when the prompt
@@ -1863,6 +1900,11 @@
         VOICE.interimSlot = target;
         VOICE.interimAt = Date.now();
 
+        // Stream into the pop-out's live band too — patchLiveTranscript()
+        // below can short-circuit the main render, which would otherwise
+        // leave the pop-out transcript stale.
+        if (PIP.window) updatePipLive(STATE.slots[PIP.slotIdx]);
+
         if (patchLiveTranscript(trimmed)) return;
         // One render to mount the node — but never while the user is typing,
         // since render() rebuilds the DOM and would steal composer focus.
@@ -1881,6 +1923,7 @@
         if (!VOICE.interimText && VOICE.interimSlot === null) return;
         VOICE.interimText = '';
         VOICE.interimSlot = null;
+        if (PIP.window) updatePipLive(STATE.slots[PIP.slotIdx]);
         if (patchLiveTranscript('')) return;
         if (!isComposerFocused()) render();
       }
@@ -2025,37 +2068,47 @@
           renderAssistStatus();
           return;
         }
+        // Repair common ASR garbles of product names ("in tune" → "Intune")
+        // so detection, the answer, and the saved log all read the real
+        // term. The fast-path test below still runs on the RAW candidate, so
+        // a correction can only ever route to the classifier, never create a
+        // new auto-answer.
+        const corrected = correctTranscript(candidate);
+
         const now = Date.now();
-        if (TECH.lastSubmitted && now - TECH.lastSubmittedAt < ASSIST.DEDUPE_MS && fuzzyEqual(candidate, TECH.lastSubmitted)) {
+        if (TECH.lastSubmitted && now - TECH.lastSubmittedAt < ASSIST.DEDUPE_MS && fuzzyEqual(corrected, TECH.lastSubmitted)) {
           return;
         }
 
-        pushAssistContext(candidate);
+        pushAssistContext(corrected);
 
         // Fast path: an obvious technical question goes straight to the
-        // answer — no classifier round-trip (saves a couple of seconds).
-        if (isInstantTechQuestion(candidate)) {
-          recordAssistDecision(candidate, true, 0.85, 'instant');
-          TECH.lastSubmitted = candidate;
+        // answer — no classifier round-trip (saves a couple of seconds). The
+        // out-of-scope guard keeps pricing/contract asks about in-scope
+        // products off the fast path; they fall to the classifier, which
+        // correctly declines them.
+        if (isInstantTechQuestion(candidate) && !OUT_OF_SCOPE_RE.test(candidate)) {
+          recordAssistDecision(corrected, true, 0.85, 'instant');
+          TECH.lastSubmitted = corrected;
           TECH.lastSubmittedAt = Date.now();
-          runAssistAnswer(0, candidate);
+          runAssistAnswer(0, corrected);
           return;
         }
 
         TECH.pending = true;
         renderAssistStatus();
-        classifyUtterance(candidate, TECH.context.slice(0, -1))
+        classifyUtterance(corrected, TECH.context.slice(0, -1))
           .then(decision => {
             TECH.pending = false;
             const accepted =
               decision.is_question === true &&
               typeof decision.confidence === 'number' &&
               decision.confidence >= ASSIST.CONF_THRESHOLD;
-            recordAssistDecision(candidate, accepted, decision.confidence || 0, decision.topic || '');
+            recordAssistDecision(corrected, accepted, decision.confidence || 0, decision.topic || '');
             if (!accepted) { renderAssistStatus(); return; }
-            TECH.lastSubmitted = candidate;
+            TECH.lastSubmitted = corrected;
             TECH.lastSubmittedAt = Date.now();
-            runAssistAnswer(0, candidate);
+            runAssistAnswer(0, corrected);
           })
           .catch(err => {
             TECH.pending = false;
@@ -2063,13 +2116,13 @@
             toastPipelineError("Randy couldn't check a question", err);
             // Keep the SE alive: obvious technical questions are answered
             // even when the classifier service is down.
-            if (looksLikeTechQuestion(candidate)) {
-              recordAssistDecision(candidate, true, 0.7, 'fallback match');
-              TECH.lastSubmitted = candidate;
+            if (looksLikeTechQuestion(corrected)) {
+              recordAssistDecision(corrected, true, 0.7, 'fallback match');
+              TECH.lastSubmitted = corrected;
               TECH.lastSubmittedAt = Date.now();
-              runAssistAnswer(0, candidate);
+              runAssistAnswer(0, corrected);
             } else {
-              recordAssistDecision(candidate, false, 0, 'check failed');
+              recordAssistDecision(corrected, false, 0, 'check failed');
               renderAssistStatus();
             }
           });
@@ -3035,7 +3088,7 @@
            listening, white dots while answering, badge + glow when an
            answer is waiting. */
         .pip-mini { display: none; position: relative; flex-direction: column; align-items: center; justify-content: center; gap: 9px; width: 100%; height: 100%; padding: 0; border: none; background: transparent; cursor: pointer; font-family: inherit; }
-        body.pip-collapsed .pip-head, body.pip-collapsed .pip-msgs, body.pip-collapsed .pip-inputrow { display: none; }
+        body.pip-collapsed .pip-head, body.pip-collapsed .pip-live, body.pip-collapsed .pip-msgs, body.pip-collapsed .pip-toolbar, body.pip-collapsed .pip-inputrow { display: none; }
         body.pip-collapsed .pip-mini { display: flex; }
         .pip-mini-stage { position: relative; width: 72px; height: 72px; }
         .pip-mini-ring { position: absolute; inset: 0; border-radius: 50%; border: 2px solid var(--cyan); opacity: 0; pointer-events: none; }
@@ -3061,6 +3114,29 @@
         @keyframes pipNewFlash { 0% { box-shadow: 0 0 0 3px rgba(3,114,255,0.5); } 100% { box-shadow: 0 0 0 3px rgba(3,114,255,0); } }
         .pip-msgs { flex: 1; overflow-y: auto; padding: 12px; display: flex; flex-direction: column; gap: 8px; }
         .pip-empty { margin: auto; max-width: 250px; text-align: center; color: #64748b; font-size: 12.5px; line-height: 1.6; }
+        /* Live listening band — mirrors the main tab's transcript strip:
+           streams the voice-to-text while hearing, then flips to a busy
+           "Processing/Researching" state once a question is identified. */
+        .pip-live { display: none; align-items: flex-start; gap: 10px; padding: 9px 14px; background: var(--quote); border-bottom: 1px solid var(--divider); flex-shrink: 0; }
+        .pip-live.show { display: flex; }
+        .pip-live-ind { display: inline-flex; align-items: center; height: 16px; margin-top: 1px; flex-shrink: 0; }
+        .pip-live-wave { display: inline-flex; align-items: flex-end; gap: 2px; height: 16px; }
+        .pip-live-wave i { width: 3px; height: 5px; background: var(--primary); border-radius: 2px; animation: pipWave 1s ease-in-out infinite; }
+        .pip-live-wave i:nth-child(2) { animation-delay: 0.15s; }
+        .pip-live-wave i:nth-child(3) { animation-delay: 0.3s; }
+        @keyframes pipWave { 0%, 100% { height: 4px; } 50% { height: 15px; } }
+        .pip-live-dots { display: none; gap: 3px; align-items: center; }
+        .pip-live-dots i { width: 6px; height: 6px; border-radius: 50%; background: var(--primary); animation: pipDot 1.4s infinite ease-in-out both; }
+        .pip-live-dots i:nth-child(1) { animation-delay: -0.32s; }
+        .pip-live-dots i:nth-child(2) { animation-delay: -0.16s; }
+        .pip-live.busy .pip-live-wave { display: none; }
+        .pip-live.busy .pip-live-dots { display: inline-flex; }
+        .pip-live-body { min-width: 0; flex: 1; }
+        .pip-live-label { font-size: 10px; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; color: var(--primary); line-height: 1.4; }
+        .pip-live-text { font-size: 12.5px; line-height: 1.45; color: var(--dark); margin-top: 2px; overflow-wrap: break-word; }
+        .pip-live-text:empty { display: none; }
+        .pip-live-caret { display: inline-block; margin-left: 1px; color: var(--primary); font-weight: 700; animation: pipCaret 1s steps(1) infinite; }
+        @keyframes pipCaret { 50% { opacity: 0; } }
         .pip-row { display: flex; justify-content: flex-start; }
         .pip-row.user { justify-content: flex-end; }
         .pip-bubble { max-width: 88%; padding: 8px 12px; border-radius: 12px; font-size: 13px; line-height: 1.5; overflow-wrap: break-word; white-space: pre-wrap; }
@@ -3091,13 +3167,28 @@
         .pip-tdot:nth-child(1) { animation-delay: -0.32s; }
         .pip-tdot:nth-child(2) { animation-delay: -0.16s; }
         @keyframes pipDot { 0%, 80%, 100% { transform: scale(0); } 40% { transform: scale(1); } }
+        /* Read-aloud toggle — mirrors the main tab's voice switch so the
+           pop-out can mute/unmute Randy's spoken answers. */
+        .pip-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 7px 12px; background: #fff; border-top: 1px solid var(--divider); flex-shrink: 0; }
+        .pip-speak { display: inline-flex; align-items: center; gap: 7px; font-size: 11.5px; font-weight: 600; color: #6B7693; cursor: pointer; user-select: none; transition: color 0.15s; }
+        .pip-speak:hover { color: var(--navy); }
+        .pip-speak.on { color: var(--primary); }
+        .pip-speak svg { width: 15px; height: 15px; flex-shrink: 0; }
+        .pip-speak .pip-ic-on { display: none; }
+        .pip-speak.on .pip-ic-on { display: inline-block; }
+        .pip-speak.on .pip-ic-off { display: none; }
+        .pip-switch { position: relative; display: inline-flex; width: 38px; height: 21px; border-radius: 999px; background: #C3CBDC; cursor: pointer; transition: background 0.2s; flex-shrink: 0; }
+        .pip-switch:focus-visible { outline: none; box-shadow: 0 0 0 3px rgba(3,114,255,0.28); }
+        .pip-switch.on { background: var(--primary); }
+        .pip-switch::after { content: ''; position: absolute; top: 2px; left: 2px; width: 17px; height: 17px; border-radius: 50%; background: #fff; transition: left 0.2s; box-shadow: 0 1px 3px rgba(22,31,91,0.25); }
+        .pip-switch.on::after { left: 19px; }
         .pip-inputrow { display: flex; gap: 8px; align-items: center; padding: 10px; border-top: 1px solid var(--divider); background: #fff; flex-shrink: 0; }
         .pip-inputrow input { flex: 1; min-width: 0; border: 1.5px solid var(--divider); border-radius: 9999px; padding: 9px 14px; font-size: 13px; outline: none; color: var(--navy); font-family: inherit; }
         .pip-inputrow input:focus { border-color: var(--cyan); box-shadow: 0 0 0 3px rgba(0,191,255,0.16); }
         .pip-send { width: 38px; height: 38px; border-radius: 50%; background: var(--primary); color: #fff; border: none; display: grid; place-items: center; cursor: pointer; flex-shrink: 0; transition: background 0.15s; }
         .pip-send:hover { background: var(--primary-hover); }
         .pip-send:disabled { background: #cbd5e1; cursor: not-allowed; }
-        @media (prefers-reduced-motion: reduce) { .pip-dot.live, .pip-mini-dot.live, .pip-mini.is-live .pip-mini-ring, .pip-mini.has-unseen .pip-mini-orb, .pip-mini-dots i, .pip-new, .pip-tdot { animation: none; } }
+        @media (prefers-reduced-motion: reduce) { .pip-dot.live, .pip-mini-dot.live, .pip-mini.is-live .pip-mini-ring, .pip-mini.has-unseen .pip-mini-orb, .pip-mini-dots i, .pip-new, .pip-tdot, .pip-live-wave i, .pip-live-dots i, .pip-live-caret { animation: none; } }
       `;
 
       // Toggle the floating window. Must run from a real user click —
@@ -3168,7 +3259,25 @@
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/></svg>
             </button>
           </div>
+          <div class="pip-live" id="pip-live">
+            <span class="pip-live-ind" aria-hidden="true">
+              <span class="pip-live-wave"><i></i><i></i><i></i></span>
+              <span class="pip-live-dots"><i></i><i></i><i></i></span>
+            </span>
+            <div class="pip-live-body">
+              <div class="pip-live-label" id="pip-live-label">Listening for tech questions</div>
+              <div class="pip-live-text" id="pip-live-text"></div>
+            </div>
+          </div>
           <div class="pip-msgs" id="pip-msgs"></div>
+          <div class="pip-toolbar">
+            <label class="pip-speak" id="pip-speak" data-action="pip-toggle-speak" title="Read each answer aloud">
+              <svg class="pip-ic-on" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4.7a.7.7 0 0 0-1.2-.5L6 8H3a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h3l3.8 3.8a.7.7 0 0 0 1.2-.5Z"/><path d="M16 9a5 5 0 0 1 0 6"/><path d="M19.4 5.6a10 10 0 0 1 0 12.8"/></svg>
+              <svg class="pip-ic-off" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4.7a.7.7 0 0 0-1.2-.5L6 8H3a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h3l3.8 3.8a.7.7 0 0 0 1.2-.5Z"/><line x1="22" y1="9" x2="16" y2="15"/><line x1="16" y1="9" x2="22" y2="15"/></svg>
+              <span>Read aloud</span>
+            </label>
+            <span class="pip-switch" id="pip-switch" role="switch" aria-checked="false" aria-label="Read answers aloud" tabindex="0" data-action="pip-toggle-speak"></span>
+          </div>
           <div class="pip-inputrow">
             <input type="text" id="pip-input" placeholder="Message ${escAttr(label)}…" autocomplete="off" />
             <button class="pip-send" id="pip-send" data-action="pip-send" title="Send message" aria-label="Send message">
@@ -3195,6 +3304,7 @@
           if (e.target.closest('[data-action="pip-send"]')) { sendFromPip(); return; }
           if (e.target.closest('[data-action="pip-minimize"]')) { collapsePip(); return; }
           if (e.target.closest('[data-action="pip-expand"]')) { expandPip(); return; }
+          if (e.target.closest('[data-action="pip-toggle-speak"]')) { toggleSpeakFromPip(); return; }
           const cp = e.target.closest('[data-action="pip-copy"]');
           if (cp) copyFromPip(cp);
         });
@@ -3202,6 +3312,11 @@
           if (e.key === 'Enter' && !e.shiftKey && e.target && e.target.id === 'pip-input') {
             e.preventDefault();
             sendFromPip();
+            return;
+          }
+          if ((e.key === 'Enter' || e.key === ' ') && e.target && e.target.id === 'pip-switch') {
+            e.preventDefault();
+            toggleSpeakFromPip();
           }
         });
         w.addEventListener('pagehide', () => {
@@ -3223,6 +3338,18 @@
         PIP.lastHtml = '';
         renderPip();
         if (!collapsed) setTimeout(() => { try { doc.getElementById('pip-input').focus(); } catch {} }, 50);
+      }
+
+      // Mute / unmute Randy's spoken answers from the pop-out. Shares the
+      // same slot.speakAnswers flag as the main tab's switch, so toggling
+      // here and there stays in sync; render() refreshes both views.
+      function toggleSpeakFromPip() {
+        const slot = STATE.slots[PIP.slotIdx];
+        if (!slot) return;
+        slot.speakAnswers = !slot.speakAnswers;
+        saveSettings();
+        if (!slot.speakAnswers && slot.isSpeaking) stopSpeaking();
+        render();
       }
 
       function sendFromPip() {
@@ -3416,6 +3543,62 @@
         if (PIP.flashNext) { PIP.flashNext = false; PIP.flashNow = true; }
       }
 
+      // Live listening band, mirroring the main tab's transcript strip:
+      // stream the voice-to-text while Randy hears speech, then flip to a
+      // busy "Processing/Researching" state the moment a question is being
+      // checked or answered. Hidden whenever Randy isn't actively listening,
+      // so typed-only use of the pop-out is unaffected.
+      function pipLiveModel(slot) {
+        if (!slot || !slot.listenOn) return { show: false };
+        const inConvo = VOICE.awaitingCommand || VOICE.conversationMode;
+        // Answering — the web search runs here. An overheard question is a
+        // technical-assist answer ("Researching"); a spoken one is a chat
+        // reply ("Thinking").
+        if (slot.loading) {
+          let lastUser = null;
+          for (let i = slot.messages.length - 1; i >= 0; i--) {
+            if (slot.messages[i].role === 'user') { lastUser = slot.messages[i]; break; }
+          }
+          const researching = lastUser && lastUser.kind === 'assist-q';
+          return { show: true, busy: true, label: researching ? 'Researching the question…' : 'Thinking…', text: '' };
+        }
+        // Classifier deciding whether the latest utterance is a question.
+        if (TECH.pending) return { show: true, busy: true, label: 'Processing question…', text: '' };
+        // Live transcription as it streams in.
+        if (VOICE.interimText) {
+          return { show: true, busy: false, label: inConvo ? 'Listening to you' : 'Hearing…', text: VOICE.interimText };
+        }
+        // Listening, nothing heard yet.
+        return { show: true, busy: false, label: inConvo ? 'Listening to you' : 'Listening for tech questions', text: '' };
+      }
+
+      // Push the live-band state into the pop-out document. Called from
+      // renderPip() (covers status changes) and directly from the interim
+      // transcript hooks (which bypass a full render for performance). Must
+      // never throw — the window can close between checks and DOM writes.
+      function updatePipLive(slot) {
+        const w = PIP.window;
+        if (!w || w.closed || PIP.collapsed) return;
+        try {
+          const doc = w.document;
+          const band = doc.getElementById('pip-live');
+          if (!band) return;
+          const m = pipLiveModel(slot || STATE.slots[PIP.slotIdx]);
+          band.classList.toggle('show', !!m.show);
+          band.classList.toggle('busy', !!(m.show && m.busy));
+          if (!m.show) return;
+          const lbl = doc.getElementById('pip-live-label');
+          if (lbl && lbl.textContent !== m.label) lbl.textContent = m.label;
+          const txt = doc.getElementById('pip-live-text');
+          if (txt) {
+            const html = m.text ? escHtml(m.text) + '<span class="pip-live-caret">▊</span>' : '';
+            if (txt.innerHTML !== html) txt.innerHTML = html;
+          }
+        } catch (err) {
+          // window vanished mid-write — harmless, next render reconciles.
+        }
+      }
+
       // Status line + listening dot, mirroring the conv-sub logic in
       // renderCard so the pop-out reflects the main tab's voice state.
       function pipStatus(slot) {
@@ -3432,6 +3615,9 @@
       function pipMessagesHtml(slot) {
         const msgs = slot.messages;
         if (msgs.length === 0 && !slot.loading) {
+          if (slot.listenOn) {
+            return '<div class="pip-empty">Listening to the call — technical questions get answered here as Randy hears them.</div>';
+          }
           return '<div class="pip-empty">No messages yet — say “Hey ' + escHtml(slot.voiceName || slot.label) + '” in the main tab or type below.</div>';
         }
         const out = msgs.map((m, mi) => {
@@ -3481,6 +3667,24 @@
           if (sub && sub.textContent !== st.text) sub.textContent = st.text;
           const dot = doc.getElementById('pip-dot');
           if (dot) dot.className = 'pip-dot' + (st.live ? ' live' : '');
+
+          // Live transcript / processing band.
+          updatePipLive(slot);
+
+          // Read-aloud switch — keep in sync with slot.speakAnswers (it can
+          // also be toggled from the main tab).
+          const speakOn = !!slot.speakAnswers;
+          const speakLbl = doc.getElementById('pip-speak');
+          if (speakLbl) {
+            speakLbl.classList.toggle('on', speakOn);
+            const t = speakOn ? 'Randy reads each answer aloud — click to mute' : 'Answers stay silent — click to have Randy read them aloud';
+            if (speakLbl.title !== t) speakLbl.title = t;
+          }
+          const speakSw = doc.getElementById('pip-switch');
+          if (speakSw) {
+            speakSw.classList.toggle('on', speakOn);
+            speakSw.setAttribute('aria-checked', speakOn ? 'true' : 'false');
+          }
 
           // Collapsed icon: listening → answering → answer-ready.
           const mini = doc.getElementById('pip-mini');
