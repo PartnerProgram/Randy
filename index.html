@@ -196,6 +196,8 @@
       .ls-title { font-size: 12px; font-weight: 700; color: var(--navy); white-space: nowrap; }
       .ls-stats { font-size: 11px; color: var(--n500); white-space: nowrap; }
       .ls-stats.busy { color: var(--primary); font-weight: 600; }
+      .ls-desktop { font-size: 10.5px; font-weight: 600; color: var(--n500); margin-top: 2px; }
+      .ls-desktop.on { color: var(--primary); }
       .ls-live { display: flex; align-items: center; gap: 8px; min-width: 0; }
       .ls-live-text { font-size: 12px; color: var(--n600); line-height: 1.4; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
       #live-transcript-text:empty::before { content: 'Waiting for speech…'; font-style: italic; color: var(--n400); }
@@ -219,7 +221,7 @@
       @keyframes interim-blink { 50% { opacity: 0; } }
 
       /* ===== Message area ===== */
-      .msg-scroll { flex: 1; min-height: 0; overflow-y: auto; background: var(--n25); }
+      .msg-scroll { flex: 1 1 0; min-height: 0; min-width: 0; overflow-y: auto; background: var(--n25); }
       .msg-col { max-width: 768px; margin: 0 auto; padding: 28px 24px 16px; display: flex; flex-direction: column; gap: 16px; }
       .msg-row { display: flex; gap: 10px; align-items: flex-start; justify-content: flex-start; }
       .msg-row.me { justify-content: flex-end; }
@@ -346,8 +348,124 @@
       .voice-toast { position: fixed; bottom: 92px; left: 50%; transform: translateX(-50%); z-index: 100; background: var(--navy-deep); color: #fff; padding: 11px 18px; border-radius: 12px; font-size: 13px; font-weight: 500; box-shadow: 0 20px 48px rgba(22,31,91,0.30); pointer-events: none; animation: toastIn 0.25s ease-out; max-width: min(92vw, 480px); text-align: center; }
       @keyframes toastIn { from { opacity: 0; transform: translate(-50%, 12px); } to { opacity: 1; transform: translate(-50%, 0); } }
 
+      /* Visually hidden but available to screen readers (live region). */
+      .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+
+      /* ===== Audio-mode chooser ("How should Randy listen?") ===== */
+      .ac-scrim, .ac-scrim * { box-sizing: border-box; }
+      .ac-scrim { position: fixed; inset: 0; z-index: 120; display: grid; place-items: center; padding: 20px; background: rgba(22,31,91,0.42); backdrop-filter: blur(2px); animation: acFade 0.18s ease-out; }
+      @keyframes acFade { from { opacity: 0; } to { opacity: 1; } }
+      .ac-modal { position: relative; width: min(440px, 100%); background: #fff; border-radius: var(--radius); box-shadow: 0 24px 64px rgba(22,31,91,0.34); padding: 26px 24px 22px; animation: acPop 0.22s var(--ease); }
+      @keyframes acPop { from { opacity: 0; transform: translateY(10px) scale(0.985); } to { opacity: 1; transform: translateY(0) scale(1); } }
+      .ac-modal:focus { outline: none; }
+      .ac-x { position: absolute; top: 13px; right: 13px; width: 32px; height: 32px; display: grid; place-items: center; border: none; background: transparent; color: var(--n500); border-radius: 8px; cursor: pointer; transition: background 0.12s, color 0.12s; }
+      .ac-x:hover { background: var(--n100); color: var(--navy-deep); }
+      .ac-title { font-size: 18px; font-weight: 700; color: var(--navy-deep); letter-spacing: -0.01em; padding-right: 28px; }
+      .ac-sub { margin: 5px 0 18px; font-size: 13px; color: var(--n600); line-height: 1.45; }
+      .ac-seg { position: relative; display: grid; grid-template-columns: 1fr 1fr; background: var(--n100); border-radius: 999px; padding: 4px; }
+      .ac-seg-thumb { position: absolute; top: 4px; bottom: 4px; left: 4px; width: calc(50% - 4px); border-radius: 999px; background: var(--primary); box-shadow: var(--shadow-brand); transition: left 0.22s var(--ease); }
+      .ac-seg.right .ac-seg-thumb { left: 50%; }
+      .ac-seg-opt { position: relative; z-index: 1; background: transparent; border: none; padding: 11px 8px; font-size: 13.5px; font-weight: 600; color: var(--n600); cursor: pointer; border-radius: 999px; transition: color 0.18s; white-space: nowrap; }
+      .ac-seg-opt.on { color: #fff; }
+      .ac-desc { display: flex; gap: 12px; align-items: flex-start; margin: 16px 2px 22px; }
+      .ac-desc-ic { flex-shrink: 0; width: 38px; height: 38px; border-radius: 10px; display: grid; place-items: center; background: var(--quote); color: var(--primary); }
+      .ac-desc-sub { font-size: 11.5px; font-weight: 700; color: var(--navy); text-transform: uppercase; letter-spacing: 0.03em; margin-bottom: 3px; }
+      .ac-desc-line { font-size: 13.5px; color: var(--navy-deep); line-height: 1.5; margin: 0; }
+      .ac-go { width: 100%; display: inline-flex; align-items: center; justify-content: center; gap: 8px; background: var(--primary); color: #fff; border: none; border-radius: 999px; padding: 13px 20px; font-size: 14px; font-weight: 700; cursor: pointer; box-shadow: var(--shadow-brand); transition: background 0.12s; }
+      .ac-go:hover { background: var(--primary-hover); }
+      .ac-go:active { background: var(--primary-press); }
+
+      /* ===== Sidebar control group ("Options") ===== */
+      .sb-controls { padding: 2px 10px 10px; display: flex; flex-direction: column; gap: 2px; flex-shrink: 0; }
+      .sb-controls .sb-label { padding: 4px 10px 6px; }
+      .sb-ctl { display: flex; align-items: center; gap: 11px; width: 100%; background: transparent; border: none; color: rgba(255,255,255,0.85); font-size: 13px; font-weight: 600; padding: 10px 10px; border-radius: 10px; cursor: pointer; transition: background 0.12s, color 0.12s; text-align: left; font-family: inherit; }
+      .sb-ctl:hover:not(:disabled) { background: rgba(255,255,255,0.08); color: #fff; }
+      .sb-ctl:focus-visible { outline: none; box-shadow: 0 0 0 2px var(--cyan); }
+      .sb-ctl:disabled { opacity: 0.4; cursor: not-allowed; }
+      .sb-ctl i { flex-shrink: 0; color: rgba(255,255,255,0.65); transition: color 0.12s; }
+      .sb-ctl:hover:not(:disabled) i { color: rgba(255,255,255,0.9); }
+      .sb-ctl .sb-ctl-label { flex: 1; min-width: 0; }
+      .sb-ctl.danger:hover:not(:disabled) { background: rgba(220,38,38,0.20); color: #fff; }
+      .sb-ctl.danger:hover:not(:disabled) i { color: #fff; }
+      .sb-switch { position: relative; width: 40px; height: 22px; border-radius: 999px; background: rgba(255,255,255,0.22); flex-shrink: 0; transition: background 0.2s; }
+      .sb-switch.on { background: var(--cyan); }
+      .sb-switch::after { content: ''; position: absolute; top: 2px; left: 2px; width: 18px; height: 18px; border-radius: 50%; background: #fff; transition: left 0.2s; box-shadow: 0 1px 2px rgba(22,31,91,0.25); }
+      .sb-switch.on::after { left: 20px; }
+      .sb-divider { height: 1px; background: rgba(255,255,255,0.12); margin: 8px 14px; flex-shrink: 0; }
+
+      /* ================================================================
+       * VOICE CONSOLE — the main stage: mic orb + live voice-to-text +
+       * what Randy is doing. Pinned above the composer, ~a third of the view.
+       * ================================================================ */
+      /* Split row = mic console (left) + results (right), side by side. */
+      .split-row { flex: 1; min-height: 0; display: flex; flex-direction: row; }
+      /* Left column: mic console + composer, 40% of the row width. */
+      .top-stage { flex: 4 1 0; min-width: 0; min-height: 0; display: flex; flex-direction: column; background: #fff; border-right: 1px solid var(--divider); box-shadow: 6px 0 22px rgba(22,31,91,0.05); }
+      .console { flex: 1; min-height: 0; overflow-y: auto; background: #fff; padding: 28px 24px; display: flex; align-items: flex-start; }
+      /* Right column: results (scrolls) on top, manual-question composer pinned at the bottom. */
+      .right-col { flex: 6 1 0; min-width: 0; min-height: 0; display: flex; flex-direction: column; }
+      .console-inner { max-width: 560px; width: 100%; margin: 0 auto; display: flex; flex-direction: column; align-items: center; text-align: center; gap: 22px; }
+
+      /* Status title, sits right above the mic and reflects what Randy is doing. */
+      .cl-status { font-size: 22px; font-weight: 700; letter-spacing: -0.02em; line-height: 1.2; color: var(--n500); transition: color 0.2s; }
+      .console.stage-listening .cl-status { color: var(--primary); }
+      .console.stage-analyzing .cl-status { color: #B45309; }
+      .console.stage-researching .cl-status { color: #047857; }
+      .console.stage-speaking .cl-status { color: var(--navy-deep); }
+
+      .console-orb { display: flex; flex-direction: column; align-items: center; gap: 13px; flex-shrink: 0; }
+      .console-orb .orb-wrap { margin-bottom: 0; }
+      .console-orb-label { font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--n500); transition: color 0.2s; }
+      .console.stage-listening .console-orb-label { color: var(--primary); }
+      .console.stage-analyzing .console-orb-label { color: #B45309; }
+      .console.stage-researching .console-orb-label { color: #047857; }
+      .console.stage-speaking .console-orb-label { color: var(--navy-deep); }
+
+      .console-live { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+      .cl-stage { display: flex; align-items: center; gap: 13px; }
+      .cl-stage-ic { width: 42px; height: 42px; border-radius: 12px; display: grid; place-items: center; flex-shrink: 0; background: var(--n100); color: var(--n500); transition: background 0.2s, color 0.2s; }
+      .console.stage-listening .cl-stage-ic { background: var(--quote); color: var(--primary); }
+      .console.stage-analyzing .cl-stage-ic { background: #FFFBEB; color: #B45309; }
+      .console.stage-researching .cl-stage-ic { background: #ECFDF5; color: #047857; }
+      .console.stage-speaking .cl-stage-ic { background: rgba(49,209,255,0.16); color: var(--navy-deep); }
+      .cl-stage-titles { min-width: 0; }
+      .cl-stage-label { font-size: 16.5px; font-weight: 700; color: var(--navy-deep); letter-spacing: -0.01em; line-height: 1.25; }
+      .cl-stage-sub { font-size: 12px; color: var(--n500); line-height: 1.3; margin-top: 1px; }
+      .cl-stats { margin-left: auto; flex-shrink: 0; font-size: 11.5px; font-weight: 700; color: var(--n600); background: var(--n100); padding: 5px 13px; border-radius: 999px; white-space: nowrap; }
+      .cl-stats.busy { color: var(--primary); background: var(--quote); }
+
+      .cl-transcript { margin-top: 0; width: 100%; text-align: center; font-size: 22px; font-weight: 500; line-height: 1.45; color: var(--navy-deep); letter-spacing: -0.01em; min-height: 60px; max-height: 168px; overflow-y: auto; overflow-x: hidden; text-wrap: pretty; overflow-wrap: break-word; word-break: break-word; }
+      .cl-transcript.cl-tr-muted { font-size: 15px; font-weight: 500; color: var(--n400); }
+      .cl-transcript .interim-caret { font-size: 0.7em; }
+      .console.stage-analyzing .cl-transcript, .console.stage-researching .cl-transcript { font-size: 18px; }
+      /* Teleprompter format for live voice-to-text: text flows top-to-bottom and
+         wraps within the column (never sideways), with a taller window and a
+         smaller font so more of a long transcript stays on screen at once. The
+         newest words are kept in view by auto-scrolling (see patchLiveTranscript). */
+      .cl-transcript.ac-live { text-align: left; font-size: 17px; line-height: 1.5; max-height: 320px; scroll-behavior: smooth; }
+      .cl-prompt { margin: 14px 0 0; font-size: 14.5px; line-height: 1.6; color: var(--gray); max-width: 56ch; text-wrap: pretty; }
+      .cl-desktop { margin-top: 10px; font-size: 11px; font-weight: 600; color: var(--n500); display: inline-flex; align-items: center; gap: 6px; }
+      .cl-desktop.on { color: var(--primary); }
+      .cl-foot { margin-top: 12px; }
+      .cl-foot .ls-nearmiss { max-width: 100%; }
+
       /* ===== Responsive ===== */
       @media (max-width: 1023px) {
+        /* Narrow screens: stack the split back to top (mic) / bottom (results). */
+        .split-row { flex-direction: column; }
+        .top-stage { border-right: none; border-bottom: 1px solid var(--divider); box-shadow: 0 6px 22px rgba(22,31,91,0.05); }
+        /* Anchor the stack to the top (not centered) so the title + transcript
+           stay in view even when the console is short; tighten it to fit. */
+        .console { padding: 14px 14px; align-items: flex-start; }
+        .console-inner { gap: 12px; }
+        .cl-status { font-size: 17px; }
+        .console-orb .orb-wrap { width: 84px; height: 84px; }
+        .console-orb .voice-orb { width: 68px; height: 68px; }
+        .console-orb-label { display: none; }
+        .cl-transcript { font-size: 18px; min-height: 36px; }
+        .console.stage-analyzing .cl-transcript, .console.stage-researching .cl-transcript { font-size: 15.5px; }
+        .cl-transcript.ac-live { font-size: 15.5px; max-height: 200px; }
+        .cl-stage-label { font-size: 14.5px; }
         .sidebar { position: fixed; inset: 0 auto 0 0; z-index: 60; transform: translateX(-100%); transition: transform 0.22s var(--ease); box-shadow: var(--shadow-hover); width: min(320px, 86vw); }
         .sidebar.open { transform: translateX(0); }
         .sidebar-scrim { display: block; position: fixed; inset: 0; z-index: 55; background: rgba(22,31,91,0.45); opacity: 0; pointer-events: none; transition: opacity 0.2s; }
@@ -384,6 +502,8 @@
       @media (prefers-reduced-motion: reduce) {
         .orb-wrap .orb-ring, .sound-wave-bar, .typing-dot, .vp .vp-dot, .chat-avatar .status-dot, .interim-caret, .voice-toast, .vp-spin { animation: none !important; }
         .orb-wrap .orb-ring { display: none; }
+        .ac-scrim, .ac-modal { animation: none !important; }
+        .ac-seg-thumb { transition: none !important; }
       }
 
     </style>
@@ -438,7 +558,19 @@
         INTERIM_FRESH_MS: 1500,   // interim words newer than this mean speech is still flowing
         INTERIM_RECHECK_MS: 700,  // re-check cadence while waiting for a sentence to finish
         SEARCH_MAX_USES: 2,       // web searches per answer (latency budget)
-        HISTORY_PAIRS: 2          // prior assist Q&A pairs sent as context
+        HISTORY_PAIRS: 2,         // prior assist Q&A pairs sent as context
+        // Reliability ceilings — the #1 guarantee of this tool. A question
+        // Randy hears must ALWAYS reach an answer; a hung network call must
+        // never leave the pipeline frozen on "Analyzing"/"Researching" (the
+        // classic "Randy heard it but never answered"). Every stage is bounded
+        // so it always settles, and a self-healing watchdog un-sticks anything
+        // that slips through. Wedge limits sit ABOVE the matching timeout so the
+        // in-call timeout fires first and the watchdog is only ever a backstop.
+        CLASSIFY_TIMEOUT_MS: 15000,  // hard ceiling on the classifier round-trip
+        ANSWER_TIMEOUT_MS: 45000,    // hard ceiling on one research+answer call
+        WATCHDOG_MS: 4000,           // how often the self-healing watchdog checks
+        PENDING_WEDGE_MS: 22000,     // pending longer than this ⇒ classifier wedged
+        ANSWER_WEDGE_MS: 105000      // loading longer than this ⇒ answer wedged
       };
 
       /* ================================================================
@@ -492,28 +624,22 @@
         '- This outranks product positioning. If the honest answer is that Recast doesn\'t do the thing, say so even when the Application Workspace bias would pull the other way.'
       ].join('\n');
 
-      // Appended for typed chat replies.
-      const CHAT_STYLE = [
-        '# Response Format',
-        '- Start the very first sentence with the answer itself. No preamble, no compliments about the question, no jokes or false starts before the real answer.',
-        '- Plain text only: short paragraphs separated by blank lines. No markdown, no bullet points, no headers.',
-        '- Use plain language; define necessary technical terms in the same breath.',
-        '- Keep answers focused — 2-4 short paragraphs unless the question genuinely requires more.',
-        '- When a question is ambiguous enough that the right answer depends on their setup (Intune-only vs. hybrid, on-prem vs. cloud), ask one targeted clarifying question before going deep.'
-      ].join('\n');
-
-      // Appended for auto-answered technical-assist questions.
+      // Shared answer format for every Randy reply — typed chat and overheard
+      // voice questions both use this so the output format and sources match
+      // exactly: a "Bottom line:" summary, bullets, then a ===SPOKEN=== summary
+      // for Read aloud. Randy answers the most likely interpretation rather than
+      // asking clarifying questions, the same on a typed message as on a call.
       const ASSIST_STYLE = [
         '# Context',
         'You are listening in on a live sales/technical call. A technical question was just asked. The questioner cannot reply to you, so never ask clarifying questions — if the question is ambiguous, answer the most likely interpretation and flag the assumption in one bullet.',
         '',
         '# Response Format — follow exactly',
-        '1. The very first characters of your reply must be **Bottom line:** followed by a one-sentence direct answer. Nothing comes before it — no greeting, no preamble, no humor or false starts, no commentary about the question or about yourself.',
+        '1. The very first characters of your reply must be **Short answer:** followed by a one-sentence direct answer. Nothing comes before it — no greeting, no preamble, no humor or false starts, no commentary about the question or about yourself.',
         '2. Then 3-7 bullet points, each starting with "- ". One concrete fact, step, or trade-off per bullet. Bold key terms with **double asterisks**. Keep each bullet to one or two short sentences.',
         '3. If steps are needed, use a numbered list ("1.", "2.", ...) instead of bullets for that part.',
         '4. After the bullets, output a line containing exactly: ===SPOKEN===',
         '5. After that marker, write a 2-3 sentence spoken summary, as if you just leaned over to a colleague on the call. Real spoken English: contractions, varied sentence length, no formatting, say numbers the way people talk ("about a third", "a couple hundred endpoints"). A brief natural lead-in is fine ("Short answer — yes.", "So the way that works is..."), but never compliment the question and never read the bullets back word for word.',
-        '- If the honest answer is that the capability isn\'t available out of the box, say so plainly in the Bottom line, then use the bullets to give the most likely underlying goal and the path to it, flagged as an assumption. Do not ask a clarifying question — the questioner can\'t respond.',
+        '- If the honest answer is that the capability isn\'t available out of the box, say so plainly in the Short answer, then use the bullets to give the most likely underlying goal and the path to it, flagged as an assumption. Do not ask a clarifying question — the questioner can\'t respond.',
         '',
         'Total length before the marker: under 180 words. Never mention searching, docs, or sources anywhere. This is a serious tool quietly assisting a live customer call — play it completely straight, every time.'
       ].join('\n');
@@ -686,6 +812,18 @@
           // question he overhears in the chat — no wake word. Always starts
           // off; turning it on needs a click (the mic permission requires one).
           listenOn: false,
+          // How Randy captures audio when switched on. Chosen from the
+          // "How should Randy listen?" slider each time he's turned on; the
+          // last choice is remembered.
+          //   'two-way' — microphone + the computer's own audio. The
+          //               screen/tab-share picker pops out so the call is
+          //               captured digitally, and the mic runs with echo
+          //               cancellation OFF so it overhears the speakers too.
+          //   'one-way' — microphone only, with echo cancellation / noise
+          //               suppression / auto-gain ON so Randy picks up the
+          //               user's own voice and NOT the call audio coming
+          //               from the speakers. No picker pops out.
+          audioMode: 'two-way',
           voiceName: 'Randy',
           voicePersonality: DEFAULT_VOICE_PERSONALITY,
           isListening: false,
@@ -715,6 +853,8 @@
         sessionHistory: [],
         composerExpanded: false,
         cardMenuOpen: false,
+        // The "How should Randy listen?" chooser shown when turning Randy on.
+        audioChooserOpen: false,
         settingsUnlocked: false,
         slots: [makeSlot()]
       };
@@ -758,19 +898,40 @@
         srRunning: false,         // recognizer actually running (onstart..onend)
         watchdogId: null,         // background-tab restart watchdog interval
         lastSrEventAt: 0,         // last recognizer activity (wedge detection)
-        micStream: null           // held open while listening — see startListening()
+        micStream: null,          // held open (echo cancellation OFF) so the
+                                  // mic hears the computer's speakers — see
+                                  // startListening()
+        // Push-to-talk dictation in the pop-out composer. A SEPARATE
+        // recognizer from the passive one above: the Web Speech API only
+        // runs one recognizer at a time, so while dictation is live the
+        // passive recognizer is paused (dictationPaused) and resumed when
+        // dictation ends — see startDictation()/stopDictation().
+        dictation: null,          // dedicated dictation SpeechRecognition
+        dictating: false,         // dictation actively capturing the mic
+        dictationPaused: false,   // passive recognizer paused for dictation
+        dictationBase: ''         // finalized dictation text staged in the input
       };
 
-      // Listening runtime state. Randy listens through the microphone only —
-      // the mic naturally hears the user's voice AND the call playing on the
-      // speakers. (Browsers never allow capturing screen/tab audio without a
-      // picker dialog, so mic listening is what makes one-tap possible.)
+      // Listening runtime state. Randy hears on two channels: (1) the
+      // microphone via the Web Speech recognizer — which also overhears the
+      // call on the speakers, but only with echo cancellation / noise
+      // suppression / auto-gain disabled (see startListening), and only when
+      // the user isn't on headphones; and (2) the computer's audio captured
+      // digitally through the share picker and transcribed locally by an
+      // in-browser Whisper model (see DESKTOP / startDesktopCapture), which
+      // works on headphones too. Both channels feed the same pipeline below.
       const TECH = {
         lastErrorToastAt: 0,      // throttle pipeline-failure toasts
         buffer: '',               // join buffer for ASR fragments
         bufferTimerId: null,
         deferrals: 0,
         pending: false,           // classifier call in flight
+        pendingSince: 0,          // when the classifier gate started (wedge detection)
+        answerSince: 0,           // when the current overheard answer started (wedge detection)
+        classifyController: null, // aborts a wedged classifier round-trip
+        classifyGen: 0,           // epoch — a stale classify resolution is ignored
+        watchdogId: null,         // self-healing pipeline watchdog interval
+        activeText: '',           // utterance currently being analyzed/answered (for the live band)
         questionQueue: [],        // FIFO of questions overheard while Randy was busy
         context: [],              // recent utterances for the classifier
         lastSubmitted: '',
@@ -783,6 +944,55 @@
 
       function listeningOn() { return STATE.slots[0].listenOn; }
 
+      // Desktop/computer-audio capture + fully in-browser transcription.
+      //
+      // The mic path above can only hear computer sound acoustically (the mic
+      // overhearing the speakers), which fails the moment the user wears
+      // headphones. This path taps the computer's audio DIGITALLY via the
+      // screen/tab-share picker (getDisplayMedia) and transcribes it with a
+      // Whisper model that runs locally in the browser (WebGPU, WASM
+      // fallback) — no audio ever leaves the machine, no API key, and it
+      // works identically on speakers or headphones. Its transcripts feed the
+      // exact same answer pipeline the microphone uses (handleVoiceTranscript
+      // / updateInterim). Optional: if the user dismisses the picker, Randy
+      // falls back to mic-only just like before.
+      const DESKTOP = {
+        supported: !!(navigator.mediaDevices && navigator.mediaDevices.getDisplayMedia &&
+                      typeof Worker !== 'undefined' && typeof AudioContext !== 'undefined'),
+        on: false,                // is digital computer-audio capture running?
+        stream: null,             // getDisplayMedia stream (audio + a stopped video track)
+        audioCtx: null,           // 16 kHz context that feeds the transcriber
+        sourceNode: null,
+        procNode: null,           // ScriptProcessor pulling raw PCM
+        worker: null,             // Whisper inference worker (Blob module)
+        workerReady: false,
+        modelLoading: false,
+        device: '',               // 'webgpu' | 'wasm' once known
+        statusText: '',           // shown in the live strip
+        // Voice-activity segmentation over the incoming PCM.
+        seg: [],                  // Float32 chunks of the current utterance
+        segLen: 0,                // samples buffered in seg
+        speaking: false,
+        silenceRun: 0,            // consecutive silent samples
+        voicedRun: 0,             // consecutive voiced samples in the open segment
+        reqId: 0,                 // monotonic id for inference requests
+        inFlight: 0,              // outstanding worker jobs (single-flight gate)
+        lastInterimAt: 0          // throttle for live partial transcriptions
+      };
+
+      // Whisper sample rate, plus VAD/segmentation tuning. Chosen so a normal
+      // spoken question finalizes ~0.7 s after the speaker stops, while a long
+      // monologue still flushes periodically instead of growing unbounded.
+      const ASR = {
+        SAMPLE_RATE: 16000,
+        SILENCE_RMS: 0.006,       // below this is "silence"
+        SILENCE_MS: 700,          // trailing silence that ends an utterance
+        MIN_VOICED_MS: 250,       // ignore blips shorter than this
+        MAX_SEG_MS: 18000,        // hard flush so long talk still transcribes live
+        INTERIM_MS: 1400,         // how often to refresh the live partial
+        MAX_TAIL_S: 24            // cap the audio sent per inference (seconds)
+      };
+
       /* ================================================================
        * SETTINGS PERSISTENCE
        * ================================================================ */
@@ -794,6 +1004,7 @@
           voiceName: s.voiceName,
           voicePersonality: s.voicePersonality,
           speakAnswers: !!s.speakAnswers,
+          audioMode: s.audioMode === 'one-way' ? 'one-way' : 'two-way',
           allowedDomains: s.allowedDomains
         }));
         try { localStorage.setItem(SETTINGS_KEY, JSON.stringify(data)); } catch {}
@@ -829,6 +1040,7 @@
             s.voicePersonality = d.voicePersonality || DEFAULT_VOICE_PERSONALITY;
             // speakAnswers (migrating the older speakResponses key)
             s.speakAnswers = !!(d.speakAnswers !== undefined ? d.speakAnswers : d.speakResponses);
+            if (d.audioMode === 'one-way' || d.audioMode === 'two-way') s.audioMode = d.audioMode;
             if (Array.isArray(d.allowedDomains)) {
               s.allowedDomains = d.allowedDomains.filter(x => typeof x === 'string' && x.trim()).map(x => x.trim());
             }
@@ -872,7 +1084,7 @@
             .replace(/^(?:here'?s|now for) the (?:real|actual|serious) answer[.!:]*\s*/i, '')
             .trim();
         } while (t !== prev);
-        const m = t.match(/\*\*\s*bottom\s+line\s*:?\s*\*\*/i);
+        const m = t.match(/\*\*\s*short\s+answer\s*:?\s*\*\*/i);
         if (m && m.index > 0 && m.index < 200) t = t.slice(m.index).trim();
         return t || String(text || '').trim();
       }
@@ -1508,7 +1720,9 @@
       }
 
       /* ================================================================
-       * SPEECH RECOGNITION — one engine, two sources (mic | desktop track)
+       * SPEECH RECOGNITION — one engine, default microphone only
+       * (the recognizer can't accept a custom stream; computer/desktop
+       *  sound reaches it acoustically via the un-processed mic capture)
        * ================================================================ */
 
       function recognitionWanted() { return listeningOn(); }
@@ -1565,12 +1779,12 @@
         r.onend = () => {
           VOICE.srRunning = false;
           VOICE.lastSrEventAt = Date.now();
-          if (VOICE.ttsPaused) return;
+          if (VOICE.ttsPaused || VOICE.dictationPaused) return;
           if (!VOICE.wantRunning || !recognitionWanted()) return;
           // start() can throw InvalidStateError while the previous session is
           // still shutting down — retry with backoff.
           const tryStart = (attempt) => {
-            if (!VOICE.wantRunning || !recognitionWanted() || VOICE.ttsPaused) return;
+            if (!VOICE.wantRunning || !recognitionWanted() || VOICE.ttsPaused || VOICE.dictationPaused) return;
             try { startRecognitionNow(); }
             catch (err) {
               if (attempt < 4) setTimeout(() => tryStart(attempt + 1), 250 * (attempt + 1));
@@ -1615,7 +1829,7 @@
       function startRecognitionWatchdog() {
         if (VOICE.watchdogId) return;
         VOICE.watchdogId = setInterval(() => {
-          if (!VOICE.wantRunning || !recognitionWanted() || VOICE.ttsPaused) return;
+          if (!VOICE.wantRunning || !recognitionWanted() || VOICE.ttsPaused || VOICE.dictationPaused) return;
           if (!VOICE.srRunning) {
             try { startRecognitionNow(); } catch {}
             return;
@@ -1635,13 +1849,17 @@
       // recognizer that died while the tab was throttled in the background.
       document.addEventListener('visibilitychange', () => {
         if (document.hidden) return;
-        if (VOICE.wantRunning && recognitionWanted() && !VOICE.ttsPaused && !VOICE.srRunning) {
+        if (VOICE.wantRunning && recognitionWanted() && !VOICE.ttsPaused && !VOICE.dictationPaused && !VOICE.srRunning) {
           try { startRecognitionNow(); } catch {}
         }
+        // Also a free chance to un-stick a pipeline that wedged while the tab
+        // was throttled in the background, so a heard question isn't left
+        // frozen on "Analyzing"/"Researching" after the user returns.
+        if (listeningOn()) { try { assistWatchdogTick(); } catch {} }
       });
 
-      // Restart the recognizer so a source change (mic ↔ desktop track) takes
-      // effect. abort() triggers onend, which restarts with the new source.
+      // Force a clean recognizer restart. abort() triggers onend, which
+      // restarts a fresh recognition session.
       function restartRecognition() {
         VOICE.wantRunning = true;
         const r = ensureRecognition();
@@ -1649,7 +1867,7 @@
         try { r.abort(); } catch {}
         // If onend doesn't fire (recognizer was idle), kick it directly.
         setTimeout(() => {
-          if (VOICE.wantRunning && recognitionWanted() && !VOICE.ttsPaused) {
+          if (VOICE.wantRunning && recognitionWanted() && !VOICE.ttsPaused && !VOICE.dictationPaused) {
             try { startRecognitionNow(); } catch {}
           }
         }, 150);
@@ -1666,6 +1884,177 @@
         VOICE.interimSlot = null;
         VOICE.recentTtsText = '';
         STATE.slots.forEach(s => { s.isListening = false; });
+      }
+
+      /* ================================================================
+       * DICTATION — push-to-talk voice typing in the pop-out composer
+       *
+       * A SECOND, independent recognizer. The Web Speech API only runs one
+       * recognizer at a time, so while dictation captures the mic Randy's
+       * passive listener is paused (VOICE.dictationPaused) and resumed the
+       * moment dictation stops. Dictation never auto-sends — it streams the
+       * transcript into #pip-input — and it never cuts the user off: Chrome
+       * silently ends a recognition session after a pause, so onend restarts
+       * it for as long as the user keeps dictating.
+       * ================================================================ */
+
+      // Write the staged dictation text (+ optional live interim) into the
+      // pop-out input. Never throws — the window can vanish mid-write.
+      function syncDictationInput(interim) {
+        const w = PIP.window;
+        if (!w || w.closed) return;
+        let input;
+        try { input = w.document.getElementById('pip-input'); } catch { return; }
+        if (!input) return;
+        const base = VOICE.dictationBase || '';
+        const it = (interim || '').trim();
+        const val = it ? (base ? base.replace(/\s+$/, '') + ' ' + it : it) : base;
+        try {
+          input.value = val;
+          input.selectionStart = input.selectionEnd = val.length;
+          input.scrollLeft = input.scrollWidth;
+        } catch {}
+      }
+
+      // Fold a finalized chunk into the staged dictation text with sane spacing.
+      function appendDictationFinal(chunk) {
+        const add = (chunk || '').trim();
+        if (!add) return;
+        const base = VOICE.dictationBase || '';
+        VOICE.dictationBase = base ? base.replace(/\s+$/, '') + ' ' + add : add;
+      }
+
+      function ensureDictationRecognition() {
+        if (!VOICE.srSupported) return null;
+        if (VOICE.dictation) return VOICE.dictation;
+        const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+        const r = new SR();
+        r.continuous = true;
+        r.interimResults = true;
+        r.lang = 'en-US';
+        r.onresult = (e) => {
+          let interim = '';
+          let finalChunk = '';
+          for (let i = e.resultIndex; i < e.results.length; i++) {
+            const res = e.results[i];
+            const t = res[0] && res[0].transcript ? res[0].transcript : '';
+            if (res.isFinal) finalChunk += t + ' ';
+            else interim += t;
+          }
+          if (finalChunk) appendDictationFinal(finalChunk);
+          syncDictationInput(interim);
+        };
+        r.onerror = (e) => {
+          if (e.error === 'not-allowed' || e.error === 'service-not-allowed') {
+            showToast('Randy needs microphone access — allow the mic and try again');
+            stopDictation();
+            return;
+          }
+          if (e.error === 'audio-capture') {
+            showToast("Randy couldn't use the microphone — check that one is plugged in");
+            stopDictation();
+            return;
+          }
+          // Transient errors (no-speech, aborted, network) fall through to
+          // onend, which restarts while the user is still dictating.
+        };
+        r.onend = () => {
+          if (VOICE.dictating) {
+            // Chrome ended the session after a pause but the user hasn't
+            // stopped — restart so a long answer is never cut off. start()
+            // can throw while the old session tears down; retry with backoff.
+            const tryStart = (attempt) => {
+              if (!VOICE.dictating) return;
+              try { r.start(); }
+              catch (err) {
+                if (attempt < 4) setTimeout(() => tryStart(attempt + 1), 250 * (attempt + 1));
+              }
+            };
+            tryStart(0);
+            return;
+          }
+          // Dictation finished — settle the input to the finalized text
+          // (drop any dangling interim) and bring Randy's listener back.
+          syncDictationInput('');
+          resumePassiveAfterDictation();
+        };
+        VOICE.dictation = r;
+        return r;
+      }
+
+      // Bring Randy's passive listener back after dictation, if it was on.
+      function resumePassiveAfterDictation() {
+        if (!VOICE.dictationPaused) return;
+        VOICE.dictationPaused = false;
+        if (!VOICE.wantRunning || !recognitionWanted()) return;
+        const tryStart = (attempt) => {
+          if (!VOICE.wantRunning || !recognitionWanted() || VOICE.dictationPaused) return;
+          try { startRecognitionNow(); }
+          catch (err) {
+            if (attempt < 4) setTimeout(() => tryStart(attempt + 1), 250 * (attempt + 1));
+          }
+        };
+        tryStart(0);
+      }
+
+      function toggleDictation() {
+        if (!VOICE.srSupported) { showToast('Voice typing needs Chrome or Edge'); return; }
+        if (VOICE.dictating) stopDictation();
+        else startDictation();
+      }
+
+      function startDictation() {
+        if (!VOICE.srSupported || VOICE.dictating) return;
+        const r = ensureDictationRecognition();
+        if (!r) return;
+        VOICE.dictating = true;
+
+        // Seed the staged text from whatever the user already typed, so
+        // dictation appends rather than overwrites.
+        const w = PIP.window;
+        let existing = '';
+        try { existing = (w && !w.closed && w.document.getElementById('pip-input').value) || ''; } catch {}
+        VOICE.dictationBase = existing.trim();
+
+        // Pause Randy's passive listener so the two recognizers don't fight
+        // over the mic. Keep VOICE.wantRunning intact so resume knows to
+        // restart it. abort() releases the mic fastest; its onend bails out
+        // immediately because dictationPaused is set.
+        if (VOICE.wantRunning && recognitionWanted()) {
+          VOICE.dictationPaused = true;
+          try { VOICE.recognition && VOICE.recognition.abort(); } catch {}
+        }
+
+        // Start the dictation recognizer. The passive recognizer may still be
+        // releasing the mic, so retry with backoff on InvalidStateError.
+        const tryStart = (attempt) => {
+          if (!VOICE.dictating) return;
+          try { r.start(); }
+          catch (err) {
+            if (attempt < 6) setTimeout(() => tryStart(attempt + 1), 200 * (attempt + 1));
+          }
+        };
+        tryStart(0);
+
+        try { if (w && !w.closed) w.document.getElementById('pip-input').focus(); } catch {}
+        render();
+      }
+
+      function stopDictation() {
+        if (!VOICE.dictating) {
+          // Already stopped, but make sure the listener isn't stuck paused.
+          resumePassiveAfterDictation();
+          return;
+        }
+        VOICE.dictating = false;       // onend won't restart now
+        if (VOICE.dictation) {
+          try { VOICE.dictation.stop(); } catch {}
+        } else {
+          // No recognizer to fire onend — resume the listener directly.
+          syncDictationInput('');
+          resumePassiveAfterDictation();
+        }
+        render();
       }
 
       /* ================================================================
@@ -1696,7 +2085,36 @@
         if (!text) return;
         // Drop re-transcriptions of Randy's own voice.
         if (isLikelyEcho(text)) return;
+        // Two transcribers can hear the same words — the mic (Web Speech) and
+        // the digital computer-audio tap (Whisper). On speakers especially,
+        // the mic also overhears the call, so the same utterance can arrive
+        // from both. Collapse those so a question isn't answered twice.
+        if (isDuplicateUtterance(text)) return;
         if (listeningOn()) assistIngest(text);
+      }
+
+      // Cross-source de-dupe for finalized utterances. Holds a short rolling
+      // window of recent finals (from either transcriber) and rejects a new
+      // one that repeats it — exact match, containment, or high token overlap
+      // (ASR wording varies slightly between the two engines).
+      const RECENT_FINALS = [];
+      function isDuplicateUtterance(text) {
+        const norm = String(text).toLowerCase().replace(/[^a-z0-9 ]/g, ' ').replace(/\s+/g, ' ').trim();
+        if (!norm) return false;
+        const now = Date.now();
+        while (RECENT_FINALS.length && now - RECENT_FINALS[0].at > 8000) RECENT_FINALS.shift();
+        const tokens = new Set(norm.split(' '));
+        for (const e of RECENT_FINALS) {
+          if (e.norm === norm) { e.at = now; return true; }
+          const shorter = e.norm.length <= norm.length ? e.norm : norm;
+          const longer  = e.norm.length <= norm.length ? norm : e.norm;
+          if (shorter.length >= 12 && longer.indexOf(shorter) !== -1) { e.at = now; return true; }
+          let inter = 0; e.tokens.forEach(w => { if (tokens.has(w)) inter++; });
+          const uni = new Set([...e.tokens, ...tokens]).size;
+          if (uni > 0 && inter / uni >= 0.8 && Math.min(e.tokens.size, tokens.size) >= 3) { e.at = now; return true; }
+        }
+        RECENT_FINALS.push({ norm, tokens, at: now });
+        return false;
       }
 
       /* ================================================================
@@ -1716,6 +2134,9 @@
         if (!wrap || !span) return false;
         span.textContent = text;
         wrap.classList.toggle('hearing', !!text);
+        // Teleprompter: as the transcript grows, keep the latest words in view
+        // by pinning the scroll position to the bottom of the column.
+        wrap.scrollTop = wrap.scrollHeight;
         return true;
       }
 
@@ -1764,24 +2185,92 @@
 
 
       /* ================================================================
-       * LISTENING — one switch, microphone only (no pickers, no pop-ups)
+       * LISTENING — one switch: mic + optional digital computer-audio tap
        * ================================================================ */
 
-      // The big mic button. ON: ask for the microphone once and start
-      // listening. The mic hears the user's voice AND the call playing on
-      // the speakers — no screen sharing, nothing to choose. OFF: stop.
+      // The big mic button. OFF→ON: open the "How should Randy listen?"
+      // chooser; the chosen mode then drives startListening — one-way
+      // (microphone only) or two-way (microphone + the computer's audio via
+      // the share picker, exactly as before). ON→OFF: stop.
       async function toggleListening() {
         const slot = STATE.slots[0];
         if (!VOICE.srSupported) { showToast('Randy needs Chrome or Edge to listen'); return; }
         if (slot.listenOn) { stopListening(); return; }
-        await startListening();
+        // Turning Randy on: first ask HOW he should listen (one-way mic-only
+        // vs. two-way mic + computer audio). The capture itself starts from
+        // the chooser's confirm button, whose click supplies the fresh user
+        // activation that getDisplayMedia / getUserMedia require.
+        openAudioChooser();
       }
 
-      async function startListening() {
+      // render() rebuilds #app wholesale, so focus has to be reapplied once the
+      // new DOM exists (mirrors the composer-focus pattern elsewhere).
+      function focusAfterRender(sel) {
+        setTimeout(() => { try { document.querySelector(sel)?.focus(); } catch {} }, 40);
+      }
+
+      // One polite live region kept OUTSIDE #app (so render() never wipes it)
+      // lets screen readers hear the selected mode and its description as the
+      // slider moves — the full-rebuild render can't announce in place.
+      function announceLive(msg) {
+        let el = document.getElementById('randy-live');
+        if (!el) {
+          el = document.createElement('div');
+          el.id = 'randy-live';
+          el.className = 'sr-only';
+          el.setAttribute('aria-live', 'polite');
+          el.setAttribute('aria-atomic', 'true');
+          document.body.appendChild(el);
+        }
+        // Clear first so re-selecting the same value still re-announces.
+        el.textContent = '';
+        setTimeout(() => { el.textContent = msg; }, 30);
+      }
+
+      // Open the "How should Randy listen?" slider. Pre-selects the last mode
+      // and moves focus into the dialog for keyboard / screen-reader users.
+      function openAudioChooser() {
+        const slot = STATE.slots[0];
+        if (!VOICE.srSupported) { showToast('Randy needs Chrome or Edge to listen'); return; }
+        if (slot.listenOn) return;
+        if (slot.audioMode !== 'one-way' && slot.audioMode !== 'two-way') slot.audioMode = 'two-way';
+        STATE.audioChooserOpen = true;
+        render();
+        focusAfterRender('.ac-modal');
+      }
+
+      // Close the chooser without starting (X / backdrop / Escape) and return
+      // focus to the voice control that opened it.
+      function closeAudioChooser() {
+        if (!STATE.audioChooserOpen) return;
+        STATE.audioChooserOpen = false;
+        render();
+        focusAfterRender('.vp');
+      }
+
+      async function startListening(mode) {
         const slot = STATE.slots[0];
         if (slot.listenOn) return;
         const r = ensureRecognition();
         if (!r) { showToast('Randy needs Chrome or Edge to listen'); return; }
+
+        // Resolve the capture mode chosen in the "How should Randy listen?"
+        // slider, falling back to the remembered preference, then two-way.
+        const audioMode = (mode === 'one-way' || mode === 'two-way') ? mode
+          : (slot.audioMode === 'one-way' ? 'one-way' : 'two-way');
+        slot.audioMode = audioMode;
+        saveSettings();
+        const twoWay = audioMode === 'two-way';
+
+        // TWO-WAY ONLY: offer the digital computer-audio tap FIRST, while the
+        // click's transient activation is still fresh — getDisplayMedia
+        // requires it, and the mic getUserMedia await below would otherwise
+        // consume it. This resolves whether or not the user actually shares
+        // audio; if they dismiss the picker we continue mic-only.
+        // One-way mode never taps the computer's audio at all.
+        if (twoWay && DESKTOP.supported) {
+          try { await startDesktopCapture(); } catch {}
+        }
 
         // Ask for the mic up front so a denial fails loudly here, with a
         // clear message, instead of dying quietly inside the recognizer.
@@ -1789,11 +2278,43 @@
         // an active capture exempts the tab from Chrome's intensive timer
         // throttling, which is what keeps the restart watchdog alive while
         // the user works beside the docked pop-out with this tab hidden.
-        // (The recognizer captures on its own; this stream is the cheap
-        // keep-alive that covers the gaps between recognition sessions.)
+        //
+        // Mic capture. Chrome opens the default device once and shares that
+        // capture session with the Web Speech recognizer, so the constraints
+        // requested here govern what the recognizer transcribes too — which is
+        // exactly how each mode is enforced.
+        //
+        //   TWO-WAY — audio processing is turned OFF on purpose. Randy must
+        //     transcribe BOTH the user's voice and the call playing on the
+        //     speakers, and the only source the recognizer can use is the
+        //     system default microphone, so the computer's sound reaches it
+        //     acoustically: the mic physically hears the speakers.
+        //       echoCancellation subtracts your own speaker output from the
+        //         mic — but that output IS the call audio we want — so it's
+        //         OFF. Its aggressiveness varies by machine/OS/driver, which is
+        //         why acoustic capture worked on one computer (weak AEC) but
+        //         not another (strong AEC stripped the computer sound).
+        //       noiseSuppression treats the steady call audio as background and
+        //         attenuates it — OFF.
+        //       autoGainControl rides toward the loudest source (the local
+        //         speaker), ducking everything else — OFF.
+        //     All three off so desktop/call sound survives to the recognizer
+        //     the same way on every machine. (TTS self-echo is handled in
+        //     software via VOICE.recentTtsText matching.)
+        //
+        //   ONE-WAY — the exact opposite. The user asked Randy to pick up ONLY
+        //     their own voice and NOT what anyone else is saying, so the
+        //     standard processing is turned ON: echo cancellation removes the
+        //     call audio leaking from the speakers, while noise suppression and
+        //     auto-gain keep the focus on the person at the mic. Combined with
+        //     never starting the computer-audio tap above, this keeps the
+        //     "only what you're saying" promise honest.
+        const micAudio = twoWay
+          ? { echoCancellation: false, noiseSuppression: false, autoGainControl: false }
+          : { echoCancellation: true, noiseSuppression: true, autoGainControl: true };
         if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
           try {
-            VOICE.micStream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true } });
+            VOICE.micStream = await navigator.mediaDevices.getUserMedia({ audio: micAudio });
             VOICE.micStream.getTracks().forEach(t => {
               t.onended = () => { VOICE.micStream = null; };
             });
@@ -1809,13 +2330,14 @@
         TECH.answered = 0;
         TECH.decisions = [];
         startRecognition();
+        startAssistWatchdog();
         // Warn right away if the answer service is unreachable, so "hears
         // but never answers" can't happen silently.
         loadRemoteConfig().then(() => {
           if (!PROXY.ready) showToast('⚠ Randy cannot reach his answer service — open Settings');
           else if (!PROXY.hasKey) showToast('⚠ The answer service has no API key — open Settings');
         });
-        showToast('Randy is listening');
+        showToast(twoWay ? 'Randy is listening — your mic and computer audio' : 'Randy is listening to your microphone');
         render();
       }
 
@@ -1828,11 +2350,350 @@
           VOICE.micStream = null;
         }
         clearAssistBuffer();
+        stopAssistWatchdog();
+        // Cancel any in-flight classifier round-trip and bump the epoch so a
+        // late resolution after teardown is ignored.
+        TECH.classifyGen++;
+        if (TECH.classifyController) { try { TECH.classifyController.abort(); } catch {} TECH.classifyController = null; }
         TECH.pending = false;
+        TECH.pendingSince = 0;
+        TECH.answerSince = 0;
         abortActiveReply();   // aborts in-flight replies and any TTS
         stopRecognition();
+        stopDesktopCapture();
         if (!silent && wasOn) showToast('Randy stopped listening');
         render();
+      }
+
+      /* ================================================================
+       * DESKTOP / COMPUTER AUDIO — digital tap + in-browser Whisper
+       *
+       * getDisplayMedia (the tab/screen-share picker, "share audio" ticked)
+       * gives us the call's real audio, even on headphones. We can't hand
+       * that stream to the Web Speech recognizer, so we transcribe it locally
+       * with a Whisper model running in a Web Worker (WebGPU, WASM fallback).
+       * Nothing is uploaded; the audio never leaves the browser. Finalized
+       * utterances go to handleVoiceTranscript() — the same pipeline the mic
+       * feeds — so answers happen the same way regardless of source.
+       * ================================================================ */
+
+      // PCM tap that runs OFF the main thread. The old ScriptProcessorNode
+      // fired its callback on the main thread, so every audio block competed
+      // with rendering and made the page lag while computer-audio capture was
+      // running. This AudioWorklet does the same job on the audio thread and
+      // batches samples into 4096-frame blocks so the main-thread VAD math in
+      // processDesktopBlock() stays identical. Loaded from a Blob URL to keep
+      // the app single-file. NOTE: keep this free of ${...} — it's a template.
+      const PCM_WORKLET_SRC = `
+        class RandyPCM extends AudioWorkletProcessor {
+          constructor() { super(); this._buf = new Float32Array(4096); this._n = 0; }
+          process(inputs) {
+            const ch = inputs[0] && inputs[0][0];
+            if (ch) {
+              for (let i = 0; i < ch.length; i++) {
+                this._buf[this._n++] = ch[i];
+                if (this._n === this._buf.length) {
+                  this.port.postMessage(this._buf.slice(0));
+                  this._n = 0;
+                }
+              }
+            }
+            return true;
+          }
+        }
+        registerProcessor('randy-pcm', RandyPCM);
+      `;
+
+      // The transcription worker. Loaded from a Blob URL so it stays inside
+      // this single-file app; it pulls Transformers.js from a CDN and keeps
+      // WASM single-threaded so no cross-origin isolation (SharedArrayBuffer)
+      // is required. NOTE: keep this free of ${...} — it lives in a template.
+      const WHISPER_WORKER_SRC = `
+        import { pipeline, env } from 'https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.7.5';
+        env.allowLocalModels = false;
+        try { env.backends.onnx.wasm.numThreads = 1; } catch (e) {}
+        const MODEL = 'onnx-community/whisper-base.en';
+        let asr = null;
+        let device = '';
+        async function build(dev) {
+          return await pipeline('automatic-speech-recognition', MODEL, {
+            device: dev,
+            dtype: dev === 'webgpu' ? 'fp32' : 'q8'
+          });
+        }
+        async function init() {
+          try { asr = await build('webgpu'); device = 'webgpu'; }
+          catch (e) {
+            try { asr = await build('wasm'); device = 'wasm'; }
+            catch (e2) { self.postMessage({ type: 'error', error: String((e2 && e2.message) || e2) }); return; }
+          }
+          self.postMessage({ type: 'ready', device: device });
+        }
+        self.onmessage = async (ev) => {
+          const d = ev.data || {};
+          if (d.type === 'init') { await init(); return; }
+          if (d.type === 'transcribe') {
+            if (!asr) { self.postMessage({ type: 'result', id: d.id, final: d.final, text: '' }); return; }
+            try {
+              const out = await asr(d.audio, { language: 'en', task: 'transcribe', chunk_length_s: 30, stride_length_s: 5, return_timestamps: false });
+              const text = ((out && out.text) || '').trim();
+              self.postMessage({ type: 'result', id: d.id, final: d.final, text: text });
+            } catch (err) {
+              self.postMessage({ type: 'result', id: d.id, final: d.final, text: '', error: String((err && err.message) || err) });
+            }
+          }
+        };
+      `;
+
+      // Reflect capture state in the live strip without a full re-render.
+      function setDesktopStatus(text) {
+        DESKTOP.statusText = text || '';
+        const el = document.getElementById('desktop-status');
+        if (el) { el.textContent = DESKTOP.statusText; el.classList.toggle('on', !!DESKTOP.statusText); }
+      }
+
+      async function startDesktopCapture() {
+        if (DESKTOP.on || !DESKTOP.supported) return;
+        let stream;
+        try {
+          // We only ever want the AUDIO from this share — the video track is
+          // stopped immediately below. Requesting a full-res/full-framerate
+          // screen capture just to discard it is what makes the UI freeze the
+          // moment you pick a surface in the picker, so constrain the video to
+          // a tiny 1 fps stream: the capture pipeline becomes nearly free while
+          // the picker still offers the same "share tab/system audio" choices.
+          // The picker hints keep surface-switching available and stop the
+          // captured audio from being echoed back out of the local speakers.
+          stream = await navigator.mediaDevices.getDisplayMedia({
+            video: { frameRate: { ideal: 1, max: 1 }, width: { max: 640 }, height: { max: 360 } },
+            audio: true,
+            selfBrowserSurface: 'include',
+            surfaceSwitching: 'include',
+            systemAudio: 'include',
+            suppressLocalAudioPlayback: false
+          });
+        } catch (err) {
+          // Picker dismissed or permission denied — continue mic-only.
+          return;
+        }
+        const audioTracks = stream.getAudioTracks();
+        if (!audioTracks.length) {
+          // Shared a window/screen but didn't tick "share audio". The video is
+          // useless to us, so drop the whole share and stay on the mic.
+          try { stream.getTracks().forEach(t => t.stop()); } catch {}
+          showToast('No computer audio shared — re-share and tick “Share tab/system audio”. Using mic only.');
+          return;
+        }
+        // Audio only — stop the video track so we aren't grabbing the screen.
+        stream.getVideoTracks().forEach(t => { try { t.stop(); } catch {} });
+
+        DESKTOP.stream = stream;
+        DESKTOP.on = true;
+        // If the user clicks Chrome's "Stop sharing", tear this path down.
+        audioTracks[0].addEventListener('ended', () => { stopDesktopCapture(); render(); });
+
+        try {
+          const Ctx = window.AudioContext || window.webkitAudioContext;
+          DESKTOP.audioCtx = new Ctx({ sampleRate: ASR.SAMPLE_RATE });
+          if (DESKTOP.audioCtx.state === 'suspended') { try { await DESKTOP.audioCtx.resume(); } catch {} }
+          DESKTOP.sourceNode = DESKTOP.audioCtx.createMediaStreamSource(new MediaStream([audioTracks[0]]));
+
+          // A silent gain → destination "pulls" the graph so the tap keeps
+          // running without echoing the captured audio back to the speakers.
+          const sink = DESKTOP.audioCtx.createGain();
+          sink.gain.value = 0;
+          sink.connect(DESKTOP.audioCtx.destination);
+
+          // Prefer the AudioWorklet (off the main thread → no UI lag). Fall
+          // back to the deprecated ScriptProcessor only where it's missing.
+          let usingWorklet = false;
+          if (DESKTOP.audioCtx.audioWorklet) {
+            try {
+              if (!DESKTOP.workletUrl) {
+                DESKTOP.workletUrl = URL.createObjectURL(new Blob([PCM_WORKLET_SRC], { type: 'text/javascript' }));
+              }
+              await DESKTOP.audioCtx.audioWorklet.addModule(DESKTOP.workletUrl);
+              const node = new AudioWorkletNode(DESKTOP.audioCtx, 'randy-pcm');
+              node.port.onmessage = (e) => processDesktopBlock(e.data);
+              DESKTOP.sourceNode.connect(node);
+              node.connect(sink);
+              DESKTOP.procNode = node;
+              usingWorklet = true;
+            } catch (e) {
+              console.warn('AudioWorklet unavailable — using ScriptProcessor fallback:', (e && e.message) || e);
+            }
+          }
+          if (!usingWorklet) {
+            const proc = DESKTOP.audioCtx.createScriptProcessor(4096, 1, 1);
+            proc.onaudioprocess = (e) => { processDesktopBlock(e.inputBuffer.getChannelData(0)); };
+            DESKTOP.sourceNode.connect(proc);
+            proc.connect(sink);
+            DESKTOP.procNode = proc;
+          }
+        } catch (err) {
+          showToast('Randy could not set up computer-audio capture — using mic only.');
+          stopDesktopCapture();
+          return;
+        }
+
+        startWhisperWorker();
+        setDesktopStatus('Computer audio: loading transcriber…');
+        showToast('Randy is capturing computer audio');
+      }
+
+      function startWhisperWorker() {
+        if (DESKTOP.worker) return;
+        try {
+          const blob = new Blob([WHISPER_WORKER_SRC], { type: 'text/javascript' });
+          DESKTOP.workerUrl = URL.createObjectURL(blob);
+          DESKTOP.worker = new Worker(DESKTOP.workerUrl, { type: 'module' });
+          DESKTOP.modelLoading = true;
+          DESKTOP.worker.onmessage = onWhisperMessage;
+          DESKTOP.worker.onerror = (e) => {
+            // Same graceful, silent fallback as the worker 'error' message:
+            // the mic path still works, so don't show an alarming banner/toast.
+            console.warn('desktop transcriber failed to load — using mic only:', (e && e.message) || '');
+            setDesktopStatus('');
+          };
+          DESKTOP.worker.postMessage({ type: 'init' });
+        } catch (err) {
+          // Browser can't spin up the module worker — Randy stays on the mic.
+          // Silent fallback, no confusing notification.
+          console.warn('in-page transcriber unavailable — using mic only:', (err && err.message) || err);
+          setDesktopStatus('');
+        }
+      }
+
+      function onWhisperMessage(ev) {
+        const d = ev.data || {};
+        if (d.type === 'ready') {
+          DESKTOP.workerReady = true;
+          DESKTOP.modelLoading = false;
+          DESKTOP.device = d.device || '';
+          setDesktopStatus('Computer audio: on' + (d.device === 'wasm' ? ' (CPU)' : ''));
+          return;
+        }
+        if (d.type === 'error') {
+          DESKTOP.modelLoading = false;
+          // The in-browser transcriber couldn't start (WebGPU/WASM/model load).
+          // Randy keeps working on the microphone, so this is not something the
+          // user needs to see or act on — surfacing "transcriber unavailable"
+          // only confuses people. Fall back to mic-only silently; the detail is
+          // left in the console for debugging.
+          console.warn('desktop transcriber unavailable — using mic only:', d.error || '');
+          setDesktopStatus('');
+          return;
+        }
+        if (d.type === 'result') {
+          DESKTOP.inFlight = Math.max(0, DESKTOP.inFlight - 1);
+          const text = (d.text || '').trim();
+          if (!text) return;
+          if (d.final) handleVoiceTranscript(text);
+          else updateInterim(text);
+        }
+      }
+
+      // Energy-based voice-activity segmentation over the 16 kHz PCM. Builds up
+      // one utterance, finalizes it after a trailing pause (or a hard length
+      // cap), and refreshes a live partial in between.
+      function processDesktopBlock(frame) {
+        if (!DESKTOP.on) return;
+        const n = frame.length;
+        const blockMs = (n / ASR.SAMPLE_RATE) * 1000;
+        let sum = 0;
+        for (let i = 0; i < n; i++) { const s = frame[i]; sum += s * s; }
+        const rms = Math.sqrt(sum / n);
+
+        if (rms >= ASR.SILENCE_RMS) {
+          DESKTOP.speaking = true;
+          DESKTOP.silenceRun = 0;
+          DESKTOP.voicedRun += blockMs;
+          appendSeg(frame);
+        } else if (DESKTOP.speaking) {
+          appendSeg(frame); // keep a little trailing silence for a clean cutoff
+          DESKTOP.silenceRun += blockMs;
+          if (DESKTOP.silenceRun >= ASR.SILENCE_MS) { flushSegment(); return; }
+        }
+
+        if (DESKTOP.speaking && (DESKTOP.segLen / ASR.SAMPLE_RATE) * 1000 >= ASR.MAX_SEG_MS) {
+          flushSegment();
+          return;
+        }
+        maybeInterim();
+      }
+
+      function appendSeg(frame) {
+        DESKTOP.seg.push(new Float32Array(frame)); // ScriptProcessor reuses its buffer — copy
+        DESKTOP.segLen += frame.length;
+        const cap = ASR.MAX_TAIL_S * ASR.SAMPLE_RATE;
+        while (DESKTOP.segLen > cap && DESKTOP.seg.length > 1) {
+          DESKTOP.segLen -= DESKTOP.seg.shift().length;
+        }
+      }
+
+      function concatSeg() {
+        const out = new Float32Array(DESKTOP.segLen);
+        let off = 0;
+        for (const c of DESKTOP.seg) { out.set(c, off); off += c.length; }
+        return out;
+      }
+
+      function flushSegment() {
+        const voiced = DESKTOP.voicedRun;
+        const audio = DESKTOP.segLen ? concatSeg() : null;
+        DESKTOP.seg = [];
+        DESKTOP.segLen = 0;
+        DESKTOP.speaking = false;
+        DESKTOP.silenceRun = 0;
+        DESKTOP.voicedRun = 0;
+        if (!audio || voiced < ASR.MIN_VOICED_MS) return; // too short — likely a noise blip
+        if (!DESKTOP.workerReady || !DESKTOP.worker) return;
+        DESKTOP.reqId++;
+        DESKTOP.inFlight++;
+        DESKTOP.worker.postMessage({ type: 'transcribe', id: DESKTOP.reqId, final: true, audio }, [audio.buffer]);
+      }
+
+      // Throttled live partial: transcribe the open segment so the strip shows
+      // words as they're spoken. Single-flight so inference can't pile up.
+      function maybeInterim() {
+        if (!DESKTOP.workerReady || !DESKTOP.worker || !DESKTOP.speaking) return;
+        if (DESKTOP.inFlight > 0) return;
+        if (DESKTOP.voicedRun < 400) return;
+        const now = Date.now();
+        if (now - DESKTOP.lastInterimAt < ASR.INTERIM_MS) return;
+        DESKTOP.lastInterimAt = now;
+        const audio = concatSeg();
+        DESKTOP.reqId++;
+        DESKTOP.inFlight++;
+        DESKTOP.worker.postMessage({ type: 'transcribe', id: DESKTOP.reqId, final: false, audio }, [audio.buffer]);
+      }
+
+      function stopDesktopCapture() {
+        if (DESKTOP.procNode) {
+          try {
+            DESKTOP.procNode.disconnect();
+            if (DESKTOP.procNode.port) DESKTOP.procNode.port.onmessage = null; // AudioWorkletNode
+            DESKTOP.procNode.onaudioprocess = null;                            // ScriptProcessorNode
+          } catch {}
+          DESKTOP.procNode = null;
+        }
+        if (DESKTOP.sourceNode) { try { DESKTOP.sourceNode.disconnect(); } catch {} DESKTOP.sourceNode = null; }
+        if (DESKTOP.audioCtx) { try { DESKTOP.audioCtx.close(); } catch {} DESKTOP.audioCtx = null; }
+        if (DESKTOP.stream) { try { DESKTOP.stream.getTracks().forEach(t => t.stop()); } catch {} DESKTOP.stream = null; }
+        if (DESKTOP.worker) { try { DESKTOP.worker.terminate(); } catch {} DESKTOP.worker = null; }
+        if (DESKTOP.workerUrl) { try { URL.revokeObjectURL(DESKTOP.workerUrl); } catch {} DESKTOP.workerUrl = null; }
+        if (DESKTOP.workletUrl) { try { URL.revokeObjectURL(DESKTOP.workletUrl); } catch {} DESKTOP.workletUrl = null; }
+        DESKTOP.on = false;
+        DESKTOP.workerReady = false;
+        DESKTOP.modelLoading = false;
+        DESKTOP.seg = [];
+        DESKTOP.segLen = 0;
+        DESKTOP.speaking = false;
+        DESKTOP.silenceRun = 0;
+        DESKTOP.voicedRun = 0;
+        DESKTOP.inFlight = 0;
+        DESKTOP.device = '';
+        setDesktopStatus('');
       }
 
       /* ---------- utterance buffering + classification ---------- */
@@ -1917,6 +2778,62 @@
         processAssistCandidate(next);
       }
 
+      // Self-healing watchdog — the backstop behind the per-call timeouts, and
+      // the reason a heard question can NEVER leave Randy frozen on "Analyzing"
+      // or "Researching." It mirrors the recognizer's startRecognitionWatchdog:
+      // every few seconds it looks for a stage that has been busy far longer
+      // than its own timeout should ever allow and un-sticks it. The mic stream
+      // held by startListening keeps this interval firing even in a background
+      // tab. In normal operation it never acts — the per-call timeouts settle
+      // everything first; this only earns its keep if something slips past them.
+      function startAssistWatchdog() {
+        if (TECH.watchdogId) return;
+        TECH.watchdogId = setInterval(assistWatchdogTick, ASSIST.WATCHDOG_MS);
+      }
+
+      function stopAssistWatchdog() {
+        if (TECH.watchdogId) { clearInterval(TECH.watchdogId); TECH.watchdogId = null; }
+      }
+
+      function assistWatchdogTick() {
+        const slot = STATE.slots[0];
+        if (!slot || !slot.listenOn) return;
+        const now = Date.now();
+
+        // Classifier wedged: the gate has shown "Analyzing" far longer than the
+        // classify timeout permits. Bump the epoch so the original promise
+        // can't double-fire if it ever wakes, abort the round-trip, and recover
+        // through the shared fallback so an obvious question still gets answered.
+        if (TECH.pending && TECH.pendingSince && now - TECH.pendingSince > ASSIST.PENDING_WEDGE_MS) {
+          console.warn('assist watchdog: classifier wedged — recovering');
+          TECH.classifyGen++;
+          if (TECH.classifyController) { try { TECH.classifyController.abort(); } catch {} }
+          TECH.classifyController = null;
+          TECH.pending = false;
+          TECH.pendingSince = 0;
+          const stuck = TECH.activeText || '';
+          if (stuck && !slot.loading) assistFallbackDecision(stuck);
+          else { renderAssistStatus(); drainQuestionQueue(); }
+          return;
+        }
+
+        // Answer wedged: "Researching" has been up longer than even a retrying
+        // answer could take. Abort the in-flight fetch — runAssistAnswer's own
+        // catch then frees the slot and drains the queue. If the controller is
+        // somehow gone, free the slot directly so the queue can never stall.
+        if (slot.loading && TECH.answerSince && now - TECH.answerSince > ASSIST.ANSWER_WEDGE_MS) {
+          console.warn('assist watchdog: answer wedged — recovering');
+          if (slot.abortController) {
+            try { slot.abortController.abort(); } catch {}
+          } else {
+            slot.loading = false;
+            TECH.answerSince = 0;
+            render();
+            drainQuestionQueue();
+          }
+        }
+      }
+
       // Classify (or fast-path) a finalized candidate and answer it when it
       // clears the gate. Non-answering paths drain the next queued question so
       // a skip never strands the rest of the queue.
@@ -1957,10 +2874,27 @@
         }
 
         TECH.pending = true;
+        TECH.pendingSince = Date.now();
+        TECH.activeText = corrected;   // surfaced in the live "Analyzing question" band
+        // New classify cycle. The epoch lets a late resolution be ignored if
+        // the watchdog already gave up on this one and recovered the pipeline,
+        // so a question can never be answered twice. The controller lets the
+        // watchdog abort a wedged round-trip.
+        const gen = ++TECH.classifyGen;
+        const classifyCtl = new AbortController();
+        TECH.classifyController = classifyCtl;
         renderAssistStatus();
-        classifyUtterance(corrected, TECH.context.slice(0, -1))
+        classifyUtterance(corrected, TECH.context.slice(0, -1), classifyCtl.signal)
           .then(decision => {
+            if (gen !== TECH.classifyGen) return;   // superseded by the watchdog — ignore
             TECH.pending = false;
+            TECH.pendingSince = 0;
+            TECH.classifyController = null;
+            // The reply came back but we couldn't read a verdict from it (proxy
+            // didn't forward structured output, or returned prose/empty). Don't
+            // drop an obvious technical question over a format glitch — fall
+            // back to answering, the same net the network-error path uses.
+            if (decision.parsed === false) { assistFallbackDecision(corrected); return; }
             const conf = typeof decision.confidence === 'number' ? decision.confidence : 0;
             const accepted =
               decision.needs_answer === true &&
@@ -1983,22 +2917,35 @@
             runAssistAnswer(0, toAnswer);
           })
           .catch(err => {
+            if (gen !== TECH.classifyGen) return;   // superseded by the watchdog — ignore
             TECH.pending = false;
+            TECH.pendingSince = 0;
+            TECH.classifyController = null;
             console.error('classifier failed:', err);
             toastPipelineError("Randy couldn't check a question", err);
-            // Keep the SE alive: obvious technical questions are answered
-            // even when the classifier service is down.
-            if (looksLikeTechQuestion(corrected)) {
-              recordAssistDecision(corrected, true, 0.7, 'fallback match');
-              TECH.lastSubmitted = corrected;
-              TECH.lastSubmittedAt = Date.now();
-              runAssistAnswer(0, corrected);
-            } else {
-              recordAssistDecision(corrected, false, 0, 'check failed');
-              renderAssistStatus();
-              drainQuestionQueue();
-            }
+            // Keep the SE alive: obvious technical questions are answered even
+            // when the classifier times out or its service is unreachable.
+            assistFallbackDecision(corrected);
           });
+      }
+
+      // Classifier unusable — it timed out, its service is down, or the reply
+      // couldn't be read as a verdict. Keep the SE alive instead of dropping
+      // the utterance: an obvious technical question still gets answered, and
+      // anything else is logged so the queue moves on. Shared by the
+      // parse-failure, network-error, and watchdog paths so a dead or garbled
+      // gate can never strand a question Randy already heard.
+      function assistFallbackDecision(text) {
+        if (looksLikeTechQuestion(text)) {
+          recordAssistDecision(text, true, 0.7, 'fallback match');
+          TECH.lastSubmitted = text;
+          TECH.lastSubmittedAt = Date.now();
+          runAssistAnswer(0, text);
+        } else {
+          recordAssistDecision(text, false, 0, 'check unavailable');
+          renderAssistStatus();
+          drainQuestionQueue();
+        }
       }
 
       function pushAssistContext(text) {
@@ -2032,8 +2979,8 @@
         if (!isComposerFocused()) render();
       }
 
-      async function classifyUtterance(text, contextArr) {
-        if (!GSHEET_WEBHOOK) return { needs_answer: false, confidence: 0 };
+      async function classifyUtterance(text, contextArr, signal) {
+        if (!GSHEET_WEBHOOK) return { needs_answer: false, confidence: 0, parsed: true };
         const ctxLines = (contextArr || []).map((u, i) => (i + 1) + '. ' + u).join('\n');
         const userContent =
           (ctxLines ? 'Recent context (older first):\n' + ctxLines + '\n\n' : '') +
@@ -2045,7 +2992,7 @@
           messages: [{ role: 'user', content: userContent }],
           output_config: { format: { type: 'json_schema', schema: CLASSIFIER_SCHEMA } },
           save: false // keep classifier churn out of the history sheet
-        });
+        }, signal, ASSIST.CLASSIFY_TIMEOUT_MS);
         return parseClassifierReply(String(data.reply || ''));
       }
 
@@ -2053,9 +3000,13 @@
       // (older proxy deployments may not forward output_config). Stays
       // backward-compatible with the old schema: a reply that only carries the
       // legacy is_question field still produces a usable needs_answer verdict.
+      // parsed:false flags a reply we could not read as a verdict (no JSON, or
+      // JSON that didn't parse) — distinct from a genuine needs_answer:false.
+      // The caller uses it to fall back to answering an obvious technical
+      // question instead of silently dropping it over a format glitch.
       function parseClassifierReply(reply) {
         const m = reply.match(/\{[\s\S]*\}/);
-        if (!m) return { needs_answer: false, confidence: 0 };
+        if (!m) return { needs_answer: false, confidence: 0, parsed: false };
         try {
           const j = JSON.parse(m[0]);
           const needs = typeof j.needs_answer === 'boolean' ? j.needs_answer : !!j.is_question;
@@ -2066,10 +3017,11 @@
             normalized_question: typeof j.normalized_question === 'string' ? j.normalized_question.trim() : '',
             confidence: typeof j.confidence === 'number' ? j.confidence : 0,
             topic: j.topic || '',
-            reason: j.reason || ''
+            reason: j.reason || '',
+            parsed: true
           };
         } catch {
-          return { needs_answer: false, confidence: 0 };
+          return { needs_answer: false, confidence: 0, parsed: false };
         }
       }
 
@@ -2079,23 +3031,50 @@
 
       // One POST to the Apps Script proxy. text/plain avoids the CORS
       // preflight Apps Script can't answer.
-      async function postChat(body, signal) {
+      //
+      // Every call is bounded by a hard timeout. A fetch with no timeout can
+      // hang indefinitely — a slow Apps Script cold-start, a connection that
+      // stalls without ever erroring, the tab being backgrounded mid-request.
+      // Left unbounded, a hung classifier call would freeze the whole assist
+      // pipeline forever (its promise never settles, so TECH.pending never
+      // clears and no further question is ever answered). The timeout aborts
+      // the request so the promise ALWAYS settles; it composes with any
+      // caller-supplied signal so user-initiated cancel still works. A timeout
+      // surfaces as a TimeoutError (not AbortError), so callers treat it as a
+      // real failure to retry/fall back rather than a silent user cancel.
+      async function postChat(body, signal, timeoutMs) {
         if (!GSHEET_WEBHOOK) {
           throw new Error('Answer service is not configured.');
         }
         const payload = Object.assign({ action: 'chat', session_id: SESSION_ID }, body);
-        const resp = await fetch(GSHEET_WEBHOOK, {
-          method: 'POST',
-          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-          body: JSON.stringify(payload),
-          signal
-        });
-        if (!resp.ok) throw new Error('Proxy HTTP ' + resp.status);
-        const data = await resp.json();
-        if (!data || data.ok === false) {
-          throw new Error((data && data.error) || 'Proxy returned an error');
+        const timer = new AbortController();
+        const ms = timeoutMs || ASSIST.ANSWER_TIMEOUT_MS;
+        const timeoutId = setTimeout(
+          () => { try { timer.abort(new DOMException('Request timed out', 'TimeoutError')); } catch { timer.abort(); } },
+          ms
+        );
+        const onAbort = () => { try { timer.abort(signal.reason); } catch { timer.abort(); } };
+        if (signal) {
+          if (signal.aborted) onAbort();
+          else signal.addEventListener('abort', onAbort, { once: true });
         }
-        return data;
+        try {
+          const resp = await fetch(GSHEET_WEBHOOK, {
+            method: 'POST',
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+            body: JSON.stringify(payload),
+            signal: timer.signal
+          });
+          if (!resp.ok) throw new Error('Proxy HTTP ' + resp.status);
+          const data = await resp.json();
+          if (!data || data.ok === false) {
+            throw new Error((data && data.error) || 'Proxy returned an error');
+          }
+          return data;
+        } finally {
+          clearTimeout(timeoutId);
+          if (signal) signal.removeEventListener('abort', onAbort);
+        }
       }
 
       // Fire-and-forget Q&A save (the proxy's legacy save action). Chat calls
@@ -2159,51 +3138,67 @@
         scrollChat();
 
         try {
-          const systemPrompt = slot.prompt + '\n\n' + CHAT_STYLE;
-
-          // The empty assistant placeholder is already excluded by the
-          // content filter inside conversationPayloadMessages.
+          // Typed chat answers use the exact same recipe as the overheard
+          // voice path (ASSIST_STYLE, same effort, same search config, same
+          // reply parsing) so the format and sources are identical no matter
+          // how the question arrived. The only difference is that typed chat
+          // keeps the full multi-turn thread for follow-ups.
           const sessionIdAtSend = SESSION_ID;
-          const body = {
-            model: MODELS.chat,
-            max_tokens: 1500,
-            system: systemBlocks(systemPrompt),
-            messages: conversationPayloadMessages(slot, 20),
-            // Skip the proxy's synchronous sheet append; saved from the
-            // client below, off the answer's critical path.
-            save: false
-          };
+
           // Strictly source only from the approved doc URLs. Without this,
           // chat web_search ran against the open web and could surface facts
           // from unvetted sites — the cause of inaccurate answers. Mirror the
           // technical-assist path: restrict to the allow-list, and fall back to
           // the default research domains so a wiped Settings box can never
           // silently re-open the whole web.
-          {
-            const domains = (slot.allowedDomains || []).filter(Boolean);
-            const allowed = domains.length ? domains : DEFAULT_RESEARCH_DOMAINS.slice();
-            body.tools = [{
-              type: SEARCH_TOOL,
-              name: 'web_search',
-              max_uses: 3,
-              allowed_domains: allowed
-            }];
+          const domains = (slot.allowedDomains || []).filter(Boolean);
+          const allowed = domains.length ? domains : DEFAULT_RESEARCH_DOMAINS.slice();
+          const tool = { type: SEARCH_TOOL, name: 'web_search', max_uses: ASSIST.SEARCH_MAX_USES, allowed_domains: allowed };
+
+          // The empty assistant placeholder is already excluded by the
+          // content filter inside conversationPayloadMessages.
+          const baseBody = {
+            model: MODELS.chat,
+            max_tokens: 1100,
+            // Match the voice path's reasoning effort so identical questions
+            // get identical answers. (Older proxy deployments drop this
+            // field harmlessly.)
+            output_config: { effort: 'medium' },
+            system: systemBlocks(slot.prompt + '\n\n' + ASSIST_STYLE),
+            messages: conversationPayloadMessages(slot, 20),
+            // Skip the proxy's synchronous sheet append; saved from the
+            // client below, off the answer's critical path.
+            save: false
+          };
+          let data;
+          try {
+            data = await postChat(Object.assign({ tools: [tool] }, baseBody), controller.signal);
+          } catch (err) {
+            if (err && err.name === 'AbortError') throw err;
+            // Web search failed (tool rejected, timeout, transient error) —
+            // answer from knowledge rather than staying silent. Same fallback
+            // the voice path uses.
+            console.error('search-enabled answer failed, retrying without tools:', err);
+            data = await postChat(baseBody, controller.signal);
           }
 
-          const data = await postChat(body, controller.signal);
-          const reply = String(data.reply || '');
-          slot.messages[assistantMsgIdx].content = reply || 'No response.';
+          // Parse exactly like the voice path: strip any false-start preamble,
+          // split off the spoken summary so Read aloud speaks the short version.
+          const { main, spoken } = splitSpoken(String(data.reply || ''));
+          const msg = slot.messages[assistantMsgIdx];
+          msg.content = sanitizeAssistAnswer(main) || 'No response.';
+          msg.spoken = spoken;
           if (Array.isArray(data.sources) && data.sources.length) {
-            slot.messages[assistantMsgIdx].sources = data.sources.slice(0, 6);
+            msg.sources = data.sources.slice(0, 6);
           }
           notePipAnswerArrived();
 
           // Background save (the proxy only saved non-empty replies; mirror that).
           postSaveToSheet({
             question: text,
-            answer: reply,
+            answer: String(data.reply || ''),
             sources: data.sources,
-            model: body.model,
+            model: MODELS.chat,
             sessionId: sessionIdAtSend
           });
         } catch (err) {
@@ -2233,8 +3228,13 @@
 
       async function runAssistAnswer(idx, question) {
         const slot = STATE.slots[idx];
-        if (slot.loading) return;
+        // Busy with another answer — don't drop this question on the floor.
+        // Re-queue it so it's answered the moment the slot frees (drainQueue
+        // pulls it then). A bare `return` here used to strand both this
+        // question and the queue behind it.
+        if (slot.loading) { enqueueQuestion(question); return; }
         slot.loading = true;
+        TECH.answerSince = Date.now();
 
         // Every auto-answered question starts a visually fresh chat: the
         // previous Q&A slides into Saved Conversations so the panel always
@@ -2345,6 +3345,7 @@
         if (slot.abortController === controller) {
           slot.loading = false;
           slot.abortController = null;
+          TECH.answerSince = 0;
         }
         render();
         scrollChat();
@@ -2358,7 +3359,7 @@
           if (el) el.scrollTop = el.scrollHeight;
           for (let i = 0; i < STATE.slots.length; i++) {
             const h = document.getElementById('home-scroll-' + i);
-            if (h) h.scrollTop = h.scrollHeight;
+            if (h) h.scrollTop = 0;
           }
         }, 50);
       }
@@ -2398,7 +3399,7 @@
         for (const id in state) {
           const el = document.getElementById(id);
           if (!el) continue;
-          el.scrollTop = state[id].atBottom
+          el.scrollTop = (state[id].atBottom && id !== 'home-scroll-0')
             ? el.scrollHeight
             : Math.min(state[id].top, el.scrollHeight);
         }
@@ -2415,6 +3416,7 @@
               ${STATE.activeTab === 'home' ? renderMain() : renderSettingsShell()}
             </main>
           </div>
+          ${renderAudioChooser()}
           ${renderToast()}
         `;
         if (window.lucide?.createIcons) try { window.lucide.createIcons(); } catch {}
@@ -2497,6 +3499,7 @@
       function renderSidebar() {
         const history = STATE.sessionHistory;
         const filtered = filterHistory(history, STATE.historyQuery);
+        const slot = STATE.slots[0];
         return `
           <aside class="sidebar ${STATE.historyOpen ? 'open' : ''}" data-screen-label="Sidebar">
             <div class="sb-brand">
@@ -2509,6 +3512,25 @@
             <button class="sb-new" data-action="new-chat" title="Start a new chat — the current one is saved below">
               <i data-lucide="square-pen" class="w-4 h-4"></i>New chat
             </button>
+            <div class="sb-controls">
+              <div class="sb-label">Options</div>
+              <button class="sb-ctl" data-action="toggle-speak-answers" title="${slot.speakAnswers ? 'Randy reads each answer out loud' : 'Answers show in the chat only'}">
+                <i data-lucide="${slot.speakAnswers ? 'volume-2' : 'volume-x'}" class="w-4 h-4"></i>
+                <span class="sb-ctl-label">Read answers aloud</span>
+                <span class="sb-switch ${slot.speakAnswers ? 'on' : ''}" role="switch" aria-checked="${!!slot.speakAnswers}" tabindex="0" data-action="toggle-speak-answers" aria-label="Read answers aloud"></span>
+              </button>
+              ${PIP.supported ? `
+                <button class="sb-ctl ${PIP.window ? 'active' : ''}" data-action="pop-out-chat" data-idx="0" title="${PIP.window ? 'Close the pop-out chat window' : 'Pop out chat — floats on top while you use other apps'}">
+                  <i data-lucide="picture-in-picture-2" class="w-4 h-4"></i>
+                  <span class="sb-ctl-label">${PIP.window ? 'Close pop-out window' : 'Pop out window'}</span>
+                </button>
+              ` : ''}
+              <button class="sb-ctl danger" data-action="clear-chat" data-idx="0" ${slot.messages.length === 0 ? 'disabled' : ''} title="Clear the current chat">
+                <i data-lucide="trash-2" class="w-4 h-4"></i>
+                <span class="sb-ctl-label">Clear chat</span>
+              </button>
+            </div>
+            <div class="sb-divider"></div>
             ${history.length > 0 ? `
               <div class="sb-search">
                 <i data-lucide="search" class="sb-search-ic w-3.5 h-3.5"></i>
@@ -2575,37 +3597,6 @@
               <div class="conv-title">${escHtml(slot.label)}</div>
               <div class="conv-sub">${sub}</div>
             </div>
-            <div class="head-actions">
-              ${renderVoicePill(vm, idx)}
-              ${PIP.supported ? `
-                <button class="icon-btn ${PIP.window ? 'active' : ''}" title="${PIP.window ? 'Close the pop-out chat window' : 'Pop out chat — floats on top while you use other apps'}" aria-label="${PIP.window ? 'Close pop-out chat' : 'Pop out chat'}" data-action="pop-out-chat" data-idx="${idx}">
-                  <i data-lucide="picture-in-picture-2" class="w-5 h-5"></i>
-                </button>
-              ` : ''}
-              <button class="icon-btn" title="More actions" aria-label="More actions" aria-haspopup="true" aria-expanded="${STATE.cardMenuOpen ? 'true' : 'false'}" data-action="toggle-card-menu" data-idx="${idx}">
-                <i data-lucide="more-vertical" class="w-5 h-5"></i>
-              </button>
-            </div>
-            ${STATE.cardMenuOpen ? `
-              <div class="overflow-menu" data-menu="card">
-                <button data-action="new-chat">
-                  <i data-lucide="square-pen" class="w-4 h-4"></i> New chat
-                </button>
-                <button data-action="toggle-speak-answers">
-                  <i data-lucide="${slot.speakAnswers ? 'volume-2' : 'volume-x'}" class="w-4 h-4"></i> Read answers aloud
-                  <span class="menu-toggle-state ${slot.speakAnswers ? 'on' : ''}">${slot.speakAnswers ? 'ON' : 'OFF'}</span>
-                </button>
-                ${on ? `
-                  <button data-action="toggle-listen">
-                    <i data-lucide="power" class="w-4 h-4"></i> Turn Randy off
-                  </button>
-                ` : ''}
-                <hr>
-                <button class="danger" data-action="clear-chat" data-idx="${idx}" ${slot.messages.length === 0 ? 'disabled' : ''}>
-                  <i data-lucide="trash-2" class="w-4 h-4"></i> Clear chat
-                </button>
-              </div>
-            ` : ''}
           </header>`;
       }
 
@@ -2630,6 +3621,7 @@
                 <span class="ls-title">Listening for tech questions</span>
                 <span class="ls-stats ${TECH.pending ? 'busy' : ''}">${escHtml(stats)}</span>
               </div>
+              ${DESKTOP.on ? `<div class="ls-desktop ${DESKTOP.statusText ? 'on' : ''}" id="desktop-status">${escHtml(DESKTOP.statusText)}</div>` : ''}
               <div class="ls-live ac-live ${VOICE.interimText ? 'hearing' : ''}" id="live-transcript">
                 <span class="ls-live-text"><span id="live-transcript-text">${escHtml(VOICE.interimText || '')}</span><span class="interim-caret">▊</span></span>
               </div>
@@ -2655,48 +3647,100 @@
           </div>`;
       }
 
-      function renderHero(slot, idx, vm) {
+      // What is Randy doing right now? One model drives the console's orb label,
+      // stage badge, and the big live text — mirrors pipLiveModel so the main
+      // stage and the pop-out never disagree.
+      function consoleModel(slot, vm) {
+        if (!VOICE.srSupported) return { stageKey: 'off', orbLabel: 'Unavailable', icon: 'mic-off', label: 'Voice needs Chrome or Edge', sub: 'You can still type your questions below', mode: 'prompt', text: 'Randy listens through the browser\u2019s speech engine, which runs in Chrome or Edge. Type to him here anytime.' };
+        if (slot.isSpeaking) return { stageKey: 'speaking', orbLabel: 'Talking', icon: 'volume-2', label: 'Randy is talking', sub: 'Reading the answer aloud — tap the orb to stop', mode: 'prompt', text: '' };
+        if (slot.loading) {
+          const lastUser = slot.messages.slice().reverse().find(m => m.role === 'user');
+          const researching = lastUser && lastUser.kind === 'assist-q';
+          return { stageKey: 'researching', orbLabel: researching ? 'Researching' : 'Answering', icon: 'search', label: researching ? 'Researching the support docs' : 'Writing the answer', sub: researching ? 'Checking Recast & Microsoft documentation' : 'Putting the answer together', mode: 'question', text: lastUser ? lastUser.content : '' };
+        }
+        if (TECH.pending) return { stageKey: 'analyzing', orbLabel: 'Analyzing', icon: 'scan-search', label: 'Analyzing the question', sub: 'Deciding whether this needs an answer', mode: 'question', text: TECH.activeText || VOICE.interimText || '' };
+        if (slot.listenOn) return { stageKey: 'listening', orbLabel: 'Listening', icon: 'ear', label: 'Listening for questions', sub: 'Randy is on the call — speak naturally', mode: 'transcript', text: VOICE.interimText || '' };
+        return { stageKey: 'off', orbLabel: 'Off', icon: 'mic', label: 'Randy is off', sub: 'Tap the mic to start listening', mode: 'prompt', text: 'Turn Randy on and he listens to your call, spots the technical questions, and answers them right here — or just type below anytime.' };
+      }
+
+      // The main stage: status title, the mic (on/off), and live voice-to-text.
+      function renderConsole(slot, idx, vm) {
+        const cm = consoleModel(slot, vm);
+
+        // The live transcript node carries the patchable id ONLY while Randy is
+        // actively hearing the call (listening / speaking), so the in-place
+        // interim patch never clobbers the settled question shown mid-analysis.
+        const liveNode = slot.listenOn && (cm.stageKey === 'listening' || cm.stageKey === 'speaking');
+        let body;
+        if (liveNode) {
+          const caret = cm.stageKey === 'listening' ? '<span class="interim-caret">▊</span>' : '';
+          body = `<div class="cl-transcript ac-live ${VOICE.interimText ? 'hearing' : ''}" id="live-transcript"><span id="live-transcript-text">${escHtml(VOICE.interimText || '')}</span>${caret}</div>`;
+        } else if (cm.mode === 'question') {
+          body = cm.text ? `<div class="cl-transcript">${escHtml(cm.text)}</div>` : `<div class="cl-transcript cl-tr-muted">Working on it…</div>`;
+        } else {
+          body = `<div class="cl-transcript cl-tr-muted">Tap the mic to start listening</div>`;
+        }
+
         return `
-          <div class="hero">
-            <div class="orb-wrap ${vm.live ? 'live' : ''}">
-              <span class="orb-ring"></span>
-              <span class="orb-ring d"></span>
-              <button class="voice-orb ${vm.orbClass}" title="${escAttr(vm.title)}" aria-label="${escAttr(vm.title)}" data-action="${vm.action}" data-idx="${idx}" ${vm.disabled ? 'disabled' : ''}>
-                ${vm.orbInner}
-              </button>
+          <div class="console stage-${cm.stageKey}">
+            <div class="console-inner">
+              <div class="cl-status">${escHtml(cm.label)}</div>
+              <div class="console-orb">
+                <div class="orb-wrap ${vm.live ? 'live' : ''}">
+                  <span class="orb-ring"></span>
+                  <span class="orb-ring d"></span>
+                  <button class="voice-orb ${vm.orbClass}" title="${escAttr(vm.title)}" aria-label="${escAttr(vm.title)}" data-action="${vm.action}" data-idx="${idx}" ${vm.disabled ? 'disabled' : ''}>
+                    ${vm.orbInner}
+                  </button>
+                </div>
+              </div>
+              ${body}
+              ${DESKTOP.on ? `<div class="cl-desktop ${DESKTOP.statusText ? 'on' : ''}" id="desktop-status">${escHtml(DESKTOP.statusText)}</div>` : ''}
             </div>
-            <div class="hero-name">${escHtml(slot.voiceName || slot.label)}</div>
-            <div class="hero-sub">Your Recast product expert. Turn him on and he listens to the call, spots technical questions, and answers them here — or just type below.</div>
-            <div class="hero-status ${vm.statusClass}"><span class="st-dot"></span>${vm.statusText}</div>
+          </div>`;
+      }
+
+      function renderHomeEmpty(slot) {
+        return `
+          <div style="max-width:520px;margin:0 auto;text-align:center;padding:7vh 20px 24px;display:flex;flex-direction:column;align-items:center;gap:14px">
+            <div style="font-size:11px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--n400)">Recast · SE Assistant</div>
+            <h2 style="font-size:26px;font-weight:700;letter-spacing:-0.02em;color:var(--navy-deep);margin:0">Hey, I&rsquo;m ${escHtml(slot.voiceName || slot.label)}.</h2>
+            <p style="font-size:14.5px;line-height:1.65;color:var(--gray);margin:0;text-wrap:pretty">Your Recast product expert. Use the mic below and I&rsquo;ll listen to your call, catch the technical questions, and answer them right here &mdash; or just type to me anytime.</p>
           </div>`;
       }
 
       function renderChat(slot, idx) {
         const vm = voiceModel(slot, idx);
+        const hasMsgs = slot.messages.length > 0;
         return `
           ${renderChatHeader(slot, idx, vm)}
-          ${slot.listenOn && VOICE.srSupported ? renderLiveStrip(slot, idx) : ''}
-          <div id="home-scroll-${idx}" class="msg-scroll">
-            <div class="msg-col">
-              ${slot.messages.length === 0 ? renderHero(slot, idx, vm) : slot.messages.map((m, mi) => `
-                <div class="msg-row ${m.role === 'user' ? 'me' : ''}">
-                  ${m.role === 'user' ? renderUserMessage(m) : renderBotMessage(slot, m, mi, idx)}
-                </div>
-              `).join('')}
-              ${slot.loading ? `
-                <div class="msg-row">
-                  <div class="msg-av">${escHtml(slot.label.charAt(0))}</div>
-                  <div class="chat-bubble chat-bot typing"><span class="typing-dot"></span><span class="typing-dot"></span><span class="typing-dot"></span></div>
-                </div>
-              ` : ''}
+          <div class="split-row">
+            <div class="top-stage">
+              ${renderConsole(slot, idx, vm)}
             </div>
-          </div>
-          <div class="composer-zone">
-            <div class="composer">
-              <textarea id="home-input-${idx}" class="composer-input" rows="1" placeholder="Message ${escAttr(slot.label)}…" ${slot.loading ? 'disabled' : ''}>${escHtml(slot.inputText || '')}</textarea>
-              <button class="comp-send" data-action="send-home" data-idx="${idx}" title="Send message" aria-label="Send message" ${(slot.loading || !(slot.inputText || '').trim()) ? 'disabled' : ''}>
-                <i data-lucide="arrow-up" class="w-5 h-5"></i>
-              </button>
+            <div class="right-col">
+              <div id="home-scroll-${idx}" class="msg-scroll">
+                <div class="msg-col">
+                  ${hasMsgs ? slot.messages.map((m, mi) => `
+                    <div class="msg-row ${m.role === 'user' ? 'me' : ''}">
+                      ${m.role === 'user' ? renderUserMessage(m) : renderBotMessage(slot, m, mi, idx)}
+                    </div>
+                  `).join('') + (slot.loading ? `
+                    <div class="msg-row">
+                      <div class="msg-av">${escHtml(slot.label.charAt(0))}</div>
+                      <div class="chat-bubble chat-bot typing"><span class="typing-dot"></span><span class="typing-dot"></span><span class="typing-dot"></span></div>
+                    </div>
+                  ` : '') : renderHomeEmpty(slot)}
+                </div>
+              </div>
+              <div class="composer-zone">
+                <div class="composer">
+                  <textarea id="home-input-${idx}" class="composer-input" rows="1" placeholder="Message ${escAttr(slot.label)}…" ${slot.loading ? 'disabled' : ''}>${escHtml(slot.inputText || '')}</textarea>
+                  <button class="comp-send" data-action="send-home" data-idx="${idx}" title="Send message" aria-label="Send message" ${(slot.loading || !(slot.inputText || '').trim()) ? 'disabled' : ''}>
+                    <i data-lucide="arrow-up" class="w-5 h-5"></i>
+                  </button>
+                </div>
+              </div>
             </div>
           </div>`;
       }
@@ -2705,19 +3749,22 @@
 
       function renderBotMessage(slot, m, mi, slotIdx) {
         const av = `<div class="msg-av">${escHtml(slot.label.charAt(0))}</div>`;
-        if (m.kind === 'assist') {
-          const srcs = Array.isArray(m.sources) ? m.sources : [];
-          return `${av}
-            <div class="msg-wrap"><div class="chat-bubble chat-bot chat-md" style="padding-right:38px;white-space:normal">
-              <div class="assist-badge"><i data-lucide="ear" class="w-3 h-3"></i>Technical assist</div>
-              ${mdToHtml(m.content)}
-              ${srcs.length ? `<div class="src-chips">${srcs.map(u => `
-                <a href="${escAttr(u)}" target="_blank" rel="noopener noreferrer" title="${escAttr(u)}">
-                  <i data-lucide="link" class="w-3 h-3"></i>${escHtml(hostnameOf(u))}
-                </a>`).join('')}</div>` : ''}
-            </div>${copyBtnHtml(slotIdx, mi)}${speakerBtnHtml(slotIdx, mi)}</div>`;
-        }
-        return `${av}<div class="msg-wrap"><div class="chat-bubble chat-bot" style="padding-right:38px">${escHtml(m.content).replace(/\n/g, '<br>')}</div>${copyBtnHtml(slotIdx, mi)}${speakerBtnHtml(slotIdx, mi)}</div>`;
+        // One render path for every Randy answer — typed or overheard — so the
+        // format and sources are identical. The "Technical assist" badge is the
+        // only thing unique to overheard questions.
+        const srcs = Array.isArray(m.sources) ? m.sources : [];
+        const badge = m.kind === 'assist'
+          ? `<div class="assist-badge"><i data-lucide="ear" class="w-3 h-3"></i>Technical assist</div>`
+          : '';
+        return `${av}
+          <div class="msg-wrap"><div class="chat-bubble chat-bot chat-md" style="padding-right:38px;white-space:normal">
+            ${badge}
+            ${mdToHtml(m.content)}
+            ${srcs.length ? `<div class="src-chips">${srcs.map(u => `
+              <a href="${escAttr(u)}" target="_blank" rel="noopener noreferrer" title="${escAttr(u)}">
+                <i data-lucide="link" class="w-3 h-3"></i>${escHtml(hostnameOf(u))}
+              </a>`).join('')}</div>` : ''}
+          </div>${copyBtnHtml(slotIdx, mi)}${speakerBtnHtml(slotIdx, mi)}</div>`;
       }
 
       function renderUserMessage(m) {
@@ -2810,6 +3857,47 @@
           </header>
           <div class="settings-scroll">
             <div class="settings-col">${renderSettings()}</div>
+          </div>`;
+      }
+
+      // Single source of truth for the chooser's per-mode copy, reused by the
+      // rendered card and the screen-reader announcement so they never drift.
+      function audioModeInfo(mode) {
+        return mode === 'one-way'
+          ? { label: 'One-way audio', icon: 'mic', sub: 'Microphone only', line: "This will only pick up what you're saying and not what anyone else is saying." }
+          : { label: 'Two-way audio', icon: 'volume-2', sub: 'Microphone + computer audio', line: 'This will pick up your audio and whatever audio is on your computer.' };
+      }
+
+      // "How should Randy listen?" — shown after the user asks to turn Randy
+      // on (see toggleListening → openAudioChooser). The slider picks the
+      // capture mode; the confirm button's click is the user gesture that
+      // startListening() needs for the mic / screen-share prompts.
+      function renderAudioChooser() {
+        if (!STATE.audioChooserOpen) return '';
+        const oneWay = STATE.slots[0].audioMode === 'one-way';
+        const desc = audioModeInfo(oneWay ? 'one-way' : 'two-way');
+        return `
+          <div class="ac-scrim" data-action="close-audio-chooser-bg">
+            <div class="ac-modal" role="dialog" aria-modal="true" aria-label="How should Randy listen?" aria-describedby="ac-desc-text" tabindex="-1">
+              <button class="ac-x" data-action="close-audio-chooser" title="Cancel" aria-label="Cancel"><i data-lucide="x" class="w-4 h-4"></i></button>
+              <div class="ac-title">How should Randy listen?</div>
+              <p class="ac-sub">Choose how Randy captures audio while he's on.</p>
+              <div class="ac-seg ${oneWay ? 'left' : 'right'}" role="tablist" aria-label="Audio mode">
+                <span class="ac-seg-thumb" aria-hidden="true"></span>
+                <button class="ac-seg-opt ${oneWay ? 'on' : ''}" role="tab" aria-selected="${oneWay}" data-action="set-audio-mode" data-mode="one-way">One-way audio</button>
+                <button class="ac-seg-opt ${oneWay ? '' : 'on'}" role="tab" aria-selected="${!oneWay}" data-action="set-audio-mode" data-mode="two-way">Two-way audio</button>
+              </div>
+              <div class="ac-desc">
+                <div class="ac-desc-ic"><i data-lucide="${desc.icon}" class="w-5 h-5"></i></div>
+                <div class="ac-desc-body" id="ac-desc-text">
+                  <div class="ac-desc-sub">${desc.sub}</div>
+                  <p class="ac-desc-line">${desc.line}</p>
+                </div>
+              </div>
+              <button class="ac-go" data-action="confirm-audio-mode">
+                <i data-lucide="mic" class="w-4 h-4"></i>Turn on Randy
+              </button>
+            </div>
           </div>`;
       }
 
@@ -2958,7 +4046,7 @@
            listening, white dots while answering, badge + glow when an
            answer is waiting. */
         .pip-mini { display: none; position: relative; flex-direction: column; align-items: center; justify-content: center; gap: 9px; width: 100%; height: 100%; padding: 0; border: none; background: transparent; cursor: pointer; font-family: inherit; }
-        body.pip-collapsed .pip-head, body.pip-collapsed .pip-live, body.pip-collapsed .pip-msgs, body.pip-collapsed .pip-toolbar, body.pip-collapsed .pip-inputrow { display: none; }
+        body.pip-collapsed .pip-head, body.pip-collapsed .pip-live, body.pip-collapsed .pip-msgs, body.pip-collapsed .pip-toolbar, body.pip-collapsed .pip-newchat-row, body.pip-collapsed .pip-inputrow { display: none; }
         body.pip-collapsed .pip-mini { display: flex; }
         .pip-mini-stage { position: relative; width: 72px; height: 72px; }
         .pip-mini-ring { position: absolute; inset: 0; border-radius: 50%; border: 2px solid var(--cyan); opacity: 0; pointer-events: none; }
@@ -2999,12 +4087,26 @@
         .pip-live-dots i { width: 6px; height: 6px; border-radius: 50%; background: var(--primary); animation: pipDot 1.4s infinite ease-in-out both; }
         .pip-live-dots i:nth-child(1) { animation-delay: -0.32s; }
         .pip-live-dots i:nth-child(2) { animation-delay: -0.16s; }
-        .pip-live.busy .pip-live-wave { display: none; }
-        .pip-live.busy .pip-live-dots { display: inline-flex; }
+        /* Stage swap: a sound-wave while listening, bouncing dots while Randy
+           analyzes the question and researches the support site. */
+        .pip-live.stage-analyzing .pip-live-wave,
+        .pip-live.stage-researching .pip-live-wave { display: none; }
+        .pip-live.stage-analyzing .pip-live-dots,
+        .pip-live.stage-researching .pip-live-dots { display: inline-flex; }
         .pip-live-body { min-width: 0; flex: 1; }
-        .pip-live-label { font-size: 10px; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; color: var(--primary); line-height: 1.4; }
+        .pip-live-label { font-size: 10px; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; color: var(--primary); line-height: 1.4; transition: color 0.2s; }
         .pip-live-text { font-size: 12.5px; line-height: 1.45; color: var(--dark); margin-top: 2px; overflow-wrap: break-word; }
         .pip-live-text:empty { display: none; }
+        /* Per-stage accent — colour the band, indicator and label together so
+           each step reads at a glance. Analyzing = amber, Researching = green. */
+        .pip-live.stage-analyzing { background: #FFFBEB; border-bottom-color: #FDE68A; }
+        .pip-live.stage-analyzing .pip-live-label { color: #B45309; }
+        .pip-live.stage-analyzing .pip-live-dots i { background: #D97706; }
+        .pip-live.stage-analyzing .pip-live-text { color: #92400E; }
+        .pip-live.stage-researching { background: #ECFDF5; border-bottom-color: #A7F3D0; }
+        .pip-live.stage-researching .pip-live-label { color: #047857; }
+        .pip-live.stage-researching .pip-live-dots i { background: #059669; }
+        .pip-live.stage-researching .pip-live-text { color: #065F46; }
         .pip-live-caret { display: inline-block; margin-left: 1px; color: var(--primary); font-weight: 700; animation: pipCaret 1s steps(1) infinite; }
         @keyframes pipCaret { 50% { opacity: 0; } }
         .pip-row { display: flex; justify-content: flex-start; }
@@ -3052,13 +4154,27 @@
         .pip-switch.on { background: var(--primary); }
         .pip-switch::after { content: ''; position: absolute; top: 2px; left: 2px; width: 17px; height: 17px; border-radius: 50%; background: #fff; transition: left 0.2s; box-shadow: 0 1px 3px rgba(22,31,91,0.25); }
         .pip-switch.on::after { left: 19px; }
+        .pip-newchat-row { display: flex; padding: 0 12px 9px; background: #fff; flex-shrink: 0; }
+        .pip-newchat { display: inline-flex; align-items: center; justify-content: center; gap: 7px; width: 100%; padding: 8px 12px; font-size: 12px; font-weight: 600; color: var(--navy); background: #fff; border: 1.5px solid var(--divider); border-radius: 9px; cursor: pointer; font-family: inherit; transition: border-color 0.15s, color 0.15s, background 0.15s; }
+        .pip-newchat:hover { border-color: var(--primary); color: var(--primary); background: #F5F9FF; }
+        .pip-newchat svg { width: 15px; height: 15px; flex-shrink: 0; }
         .pip-inputrow { display: flex; gap: 8px; align-items: center; padding: 10px; border-top: 1px solid var(--divider); background: #fff; flex-shrink: 0; }
         .pip-inputrow input { flex: 1; min-width: 0; border: 1.5px solid var(--divider); border-radius: 9999px; padding: 9px 14px; font-size: 13px; outline: none; color: var(--navy); font-family: inherit; }
         .pip-inputrow input:focus { border-color: var(--cyan); box-shadow: 0 0 0 3px rgba(0,191,255,0.16); }
         .pip-send { width: 38px; height: 38px; border-radius: 50%; background: var(--primary); color: #fff; border: none; display: grid; place-items: center; cursor: pointer; flex-shrink: 0; transition: background 0.15s; }
         .pip-send:hover { background: var(--primary-hover); }
         .pip-send:disabled { background: #cbd5e1; cursor: not-allowed; }
-        @media (prefers-reduced-motion: reduce) { .pip-dot.live, .pip-mini-dot.live, .pip-mini.is-live .pip-mini-ring, .pip-mini.has-unseen .pip-mini-orb, .pip-mini-dots i, .pip-new, .pip-tdot, .pip-live-wave i, .pip-live-dots i, .pip-live-caret { animation: none; } }
+        .pip-mic { width: 38px; height: 38px; border-radius: 50%; background: #fff; color: var(--primary); border: 1.5px solid var(--divider); display: grid; place-items: center; cursor: pointer; flex-shrink: 0; transition: background 0.15s, color 0.15s, border-color 0.15s; }
+        .pip-mic:hover { border-color: var(--primary); background: #F5F9FF; }
+        .pip-mic svg { width: 17px; height: 17px; }
+        .pip-mic .pip-mic-live { display: none; }
+        .pip-mic:disabled { opacity: 0.45; cursor: not-allowed; }
+        .pip-mic.recording { background: #EF4444; border-color: #EF4444; color: #fff; animation: pipMicPulse 1.5s ease-in-out infinite; }
+        .pip-mic.recording:hover { background: #DC2626; border-color: #DC2626; }
+        .pip-mic.recording .pip-mic-idle { display: none; }
+        .pip-mic.recording .pip-mic-live { display: block; }
+        @keyframes pipMicPulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(239,68,68,0.45); } 50% { box-shadow: 0 0 0 6px rgba(239,68,68,0); } }
+        @media (prefers-reduced-motion: reduce) { .pip-dot.live, .pip-mini-dot.live, .pip-mini.is-live .pip-mini-ring, .pip-mini.has-unseen .pip-mini-orb, .pip-mini-dots i, .pip-new, .pip-tdot, .pip-live-wave i, .pip-live-dots i, .pip-live-caret, .pip-mic.recording { animation: none; } }
       `;
 
       // Toggle the floating window. Must run from a real user click —
@@ -3135,7 +4251,7 @@
               <span class="pip-live-dots"><i></i><i></i><i></i></span>
             </span>
             <div class="pip-live-body">
-              <div class="pip-live-label" id="pip-live-label">Listening for tech questions</div>
+              <div class="pip-live-label" id="pip-live-label">Listening for technical questions</div>
               <div class="pip-live-text" id="pip-live-text"></div>
             </div>
           </div>
@@ -3148,10 +4264,20 @@
             </label>
             <span class="pip-switch" id="pip-switch" role="switch" aria-checked="false" aria-label="Read answers aloud" tabindex="0" data-action="pip-toggle-speak"></span>
           </div>
+          <div class="pip-newchat-row">
+            <button class="pip-newchat" id="pip-newchat" data-action="pip-new-chat" title="Start a new chat — the current one is saved in History">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+              <span>New chat</span>
+            </button>
+          </div>
           <div class="pip-inputrow">
             <input type="text" id="pip-input" placeholder="Message ${escAttr(label)}…" autocomplete="off" />
             <button class="pip-send" id="pip-send" data-action="pip-send" title="Send message" aria-label="Send message">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
+            </button>
+            <button class="pip-mic" id="pip-mic" data-action="pip-dictate" title="Dictate your message — voice to text" aria-label="Dictate your message" aria-pressed="false"${VOICE.srSupported ? '' : ' disabled'}>
+              <svg class="pip-mic-idle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="22"/></svg>
+              <svg class="pip-mic-live" viewBox="0 0 24 24" fill="currentColor" stroke="none"><rect x="6" y="6" width="12" height="12" rx="2.5"/></svg>
             </button>
           </div>
           <button class="pip-mini" id="pip-mini" data-action="pip-expand" title="Randy is listening — click to open the chat" aria-label="Open the chat">
@@ -3172,9 +4298,11 @@
         doc.addEventListener('click', e => {
           if (!e.target.closest) return;
           if (e.target.closest('[data-action="pip-send"]')) { sendFromPip(); return; }
+          if (e.target.closest('[data-action="pip-dictate"]')) { toggleDictation(); return; }
           if (e.target.closest('[data-action="pip-minimize"]')) { collapsePip(); return; }
           if (e.target.closest('[data-action="pip-expand"]')) { expandPip(); return; }
           if (e.target.closest('[data-action="pip-toggle-speak"]')) { toggleSpeakFromPip(); return; }
+          if (e.target.closest('[data-action="pip-new-chat"]')) { newChat(); return; }
           const cp = e.target.closest('[data-action="pip-copy"]');
           if (cp) copyFromPip(cp);
         });
@@ -3191,6 +4319,7 @@
         });
         w.addEventListener('pagehide', () => {
           if (PIP.swapping) return; // window replaced by a swap, not closed
+          if (VOICE.dictating) stopDictation(); // free the mic, resume Randy
           if (PIP.window === w) {
             PIP.window = null;
             PIP.slotIdx = null;
@@ -3230,6 +4359,9 @@
         if (!slot || !input) return;
         const text = input.value.trim();
         if (!text || slot.loading) return;
+        // Sending ends dictation — clear the staged text first so the
+        // recognizer's trailing onend can't repaint the just-cleared input.
+        if (VOICE.dictating) { VOICE.dictationBase = ''; stopDictation(); }
         slot.inputText = text;
         input.value = '';
         sendMessage(PIP.slotIdx); // its render() syncs the pop-out too
@@ -3302,6 +4434,7 @@
       async function collapsePip() {
         const w = PIP.window;
         if (!w || w.closed || PIP.collapsed || PIP.swapping) return;
+        if (VOICE.dictating) stopDictation(); // the input is hidden while collapsed
         PIP.collapsed = true;
         PIP.unseen = 0;
         PIP.flashNext = false;
@@ -3418,27 +4551,33 @@
       // busy "Processing/Researching" state the moment a question is being
       // checked or answered. Hidden whenever Randy isn't actively listening,
       // so typed-only use of the pop-out is unaffected.
+      // The live band walks the question through three stages so the user can
+      // watch Randy work: (1) listening — the voice-to-text streams in;
+      // (2) analyzing — the classifier is deciding if it's a tech question;
+      // (3) researching — the support-site web search is running for the answer.
       function pipLiveModel(slot) {
         if (!slot || !slot.listenOn) return { show: false };
-        // Answering — the web search runs here. An overheard question is a
-        // technical-assist answer ("Researching"); a spoken one is a chat
-        // reply ("Thinking").
+        // Stage 3 — answering. The web search runs here. An overheard question
+        // is a technical-assist answer ("Researching support site"); a spoken
+        // one is an ordinary chat reply ("Thinking").
         if (slot.loading) {
           let lastUser = null;
           for (let i = slot.messages.length - 1; i >= 0; i--) {
             if (slot.messages[i].role === 'user') { lastUser = slot.messages[i]; break; }
           }
           const researching = lastUser && lastUser.kind === 'assist-q';
-          return { show: true, busy: true, label: researching ? 'Researching the question…' : 'Thinking…', text: '' };
+          if (researching) {
+            return { show: true, stage: 'researching', label: 'Researching support site', text: lastUser ? lastUser.content : '' };
+          }
+          return { show: true, stage: 'researching', label: 'Thinking…', text: '' };
         }
-        // Classifier deciding whether the latest utterance is a question.
-        if (TECH.pending) return { show: true, busy: true, label: 'Processing question…', text: '' };
-        // Live transcription as it streams in.
-        if (VOICE.interimText) {
-          return { show: true, busy: false, label: 'Hearing…', text: VOICE.interimText };
+        // Stage 2 — the classifier is deciding whether the utterance is a
+        // technical question worth answering.
+        if (TECH.pending) {
+          return { show: true, stage: 'analyzing', label: 'Analyzing question', text: TECH.activeText || VOICE.interimText || '' };
         }
-        // Listening, nothing heard yet.
-        return { show: true, busy: false, label: 'Listening for tech questions', text: '' };
+        // Stage 1 — live transcription as Randy hears the call.
+        return { show: true, stage: 'listening', label: 'Listening for technical questions', text: VOICE.interimText || '' };
       }
 
       // Push the live-band state into the pop-out document. Called from
@@ -3454,13 +4593,18 @@
           if (!band) return;
           const m = pipLiveModel(slot || STATE.slots[PIP.slotIdx]);
           band.classList.toggle('show', !!m.show);
-          band.classList.toggle('busy', !!(m.show && m.busy));
+          band.classList.toggle('stage-listening', m.stage === 'listening');
+          band.classList.toggle('stage-analyzing', m.stage === 'analyzing');
+          band.classList.toggle('stage-researching', m.stage === 'researching');
           if (!m.show) return;
           const lbl = doc.getElementById('pip-live-label');
           if (lbl && lbl.textContent !== m.label) lbl.textContent = m.label;
           const txt = doc.getElementById('pip-live-text');
           if (txt) {
-            const html = m.text ? escHtml(m.text) + '<span class="pip-live-caret">▊</span>' : '';
+            // Only the live-transcription stage gets the blinking caret; the
+            // analyzing/researching text is the settled question, shown plainly.
+            const caret = m.stage === 'listening' ? '<span class="pip-live-caret">▊</span>' : '';
+            const html = m.text ? escHtml(m.text) + caret : '';
             if (txt.innerHTML !== html) txt.innerHTML = html;
           }
         } catch (err) {
@@ -3474,7 +4618,7 @@
         const on = !!slot.listenOn;
         if (slot.isSpeaking) return { text: 'Talking…', live: true };
         if (slot.loading) return { text: 'Thinking…', live: on };
-        if (on) return { text: 'Listening for tech questions', live: true };
+        if (on) return { text: 'Listening for technical questions', live: true };
         return { text: 'Online', live: false };
       }
 
@@ -3492,20 +4636,20 @@
             return '<div class="pip-row user"><div class="pip-bubble pip-user">' + badge + escHtml(m.content) + '</div></div>';
           }
           if (!m.content) return ''; // in-flight placeholder — the typing dots cover it
-          if (m.kind === 'assist') {
-            const srcs = Array.isArray(m.sources) ? m.sources : [];
-            return '<div class="pip-row"><div class="pip-bubble pip-bot pip-md">' +
-              '<button class="pip-copy" data-action="pip-copy" data-msg="' + mi + '" title="Copy answer" aria-label="Copy answer">' +
-                '<svg class="ic-copy" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>' +
-                '<svg class="ic-check" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>' +
-              '</button>' +
-              '<span class="pip-badge assist">Technical assist</span>' +
-              mdToHtml(m.content) +
-              (srcs.length ? '<div class="pip-src">' + srcs.map(u =>
-                '<a href="' + escAttr(u) + '" target="_blank" rel="noopener noreferrer" title="' + escAttr(u) + '">' + escHtml(hostnameOf(u)) + '</a>').join('') + '</div>' : '') +
-              '</div></div>';
-          }
-          return '<div class="pip-row"><div class="pip-bubble pip-bot">' + escHtml(m.content).replace(/\n/g, '<br>') + '</div></div>';
+          // Same single render path as the main chat: every answer gets markdown
+          // + source chips; the "Technical assist" badge marks overheard ones.
+          const srcs = Array.isArray(m.sources) ? m.sources : [];
+          const badge = m.kind === 'assist' ? '<span class="pip-badge assist">Technical assist</span>' : '';
+          return '<div class="pip-row"><div class="pip-bubble pip-bot pip-md">' +
+            '<button class="pip-copy" data-action="pip-copy" data-msg="' + mi + '" title="Copy answer" aria-label="Copy answer">' +
+              '<svg class="ic-copy" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>' +
+              '<svg class="ic-check" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>' +
+            '</button>' +
+            badge +
+            mdToHtml(m.content) +
+            (srcs.length ? '<div class="pip-src">' + srcs.map(u =>
+              '<a href="' + escAttr(u) + '" target="_blank" rel="noopener noreferrer" title="' + escAttr(u) + '">' + escHtml(hostnameOf(u)) + '</a>').join('') + '</div>' : '') +
+            '</div></div>';
         });
         if (slot.loading) {
           out.push('<div class="pip-row"><div class="pip-bubble pip-bot pip-typing"><span class="pip-tdot"></span><span class="pip-tdot"></span><span class="pip-tdot"></span></div></div>');
@@ -3599,6 +4743,16 @@
 
           const sendBtn = doc.getElementById('pip-send');
           if (sendBtn && sendBtn.disabled !== !!slot.loading) sendBtn.disabled = !!slot.loading;
+
+          // Dictation mic — reflect the live recording state.
+          const micBtn = doc.getElementById('pip-mic');
+          if (micBtn) {
+            micBtn.classList.toggle('recording', !!VOICE.dictating);
+            micBtn.setAttribute('aria-pressed', VOICE.dictating ? 'true' : 'false');
+            if (micBtn.disabled !== !VOICE.srSupported) micBtn.disabled = !VOICE.srSupported;
+            const t = VOICE.dictating ? 'Stop dictation' : 'Dictate your message — voice to text';
+            if (micBtn.title !== t) micBtn.title = t;
+          }
         } catch (err) {
           console.warn('renderPip failed:', err);
         }
@@ -3692,6 +4846,34 @@
               break;
             }
             case 'toggle-listen': toggleListening(); break;
+            case 'set-audio-mode': {
+              const m = act.dataset.mode === 'one-way' ? 'one-way' : 'two-way';
+              STATE.slots[0].audioMode = m;
+              render();
+              // Keep keyboard focus on the slider, and announce the new choice.
+              focusAfterRender('.ac-seg-opt[data-mode="' + m + '"]');
+              const info = audioModeInfo(m);
+              announceLive(info.label + '. ' + info.sub + '. ' + info.line);
+              break;
+            }
+            case 'confirm-audio-mode': {
+              STATE.audioChooserOpen = false;
+              const m = STATE.slots[0].audioMode === 'one-way' ? 'one-way' : 'two-way';
+              // Start capture synchronously inside this click so the mic /
+              // screen-share prompts keep the user activation they require,
+              // then re-render to dismiss the chooser.
+              startListening(m);
+              render();
+              break;
+            }
+            case 'close-audio-chooser':
+            case 'close-audio-chooser-bg': {
+              // Background only closes on a direct click (mirrors the history
+              // popout): a click on the modal's own content has no data-action.
+              if (action === 'close-audio-chooser-bg' && !e.target.hasAttribute('data-action')) break;
+              closeAudioChooser();
+              break;
+            }
             case 'new-chat': HISTORY_VIEW.open = null; STATE.activeTab = 'home'; newChat(); break;
             case 'toggle-speak-answers': {
               const s = STATE.slots[0];
@@ -3727,9 +4909,10 @@
               if (sl.isSpeaking) stopSpeaking();
               const msg = sl.messages[mi];
               if (!msg || msg.role !== 'assistant') break;
-              const speech = msg.kind === 'assist'
-                ? (msg.spoken || extractSummary(stripMarkdown(msg.content)))
-                : extractSummary(stripMarkdown(msg.content));
+              // Every answer now carries a spoken summary (voice and typed
+              // alike); fall back to a generated summary only for older
+              // messages that predate it.
+              const speech = msg.spoken || extractSummary(stripMarkdown(msg.content));
               speakText(speech, si, mi);
               break;
             }
@@ -3887,6 +5070,10 @@
               e.target.getAttribute('role') === 'button' && e.target.dataset && e.target.dataset.action) {
             e.preventDefault();
             e.target.click();
+            return;
+          }
+          if (e.key === 'Escape' && STATE.audioChooserOpen) {
+            closeAudioChooser();
             return;
           }
           if (e.key === 'Escape' && e.target.id === 'history-search') {
